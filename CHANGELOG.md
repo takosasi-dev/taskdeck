@@ -14,6 +14,6 @@
 - カレンダー（月・週。祝日と天気）、振り返り、フォーカスモード
 - JSON・CSV・Markdown の入出力、起動時のバックアップ（5世代）
 - タスクトレイへの常駐、グローバルホットキー、ログオン時の自動起動、初回起動の案内
-- 更新の確認（GitHub Releases。1日1回まで）
+- 更新の確認（GitHub Releases の正式版を1日1回。設定の「TaskDeck について」に出すだけ）
 
 [0.1.0]: https://github.com/takosasi-dev/taskdeck/releases/tag/v0.1.0
