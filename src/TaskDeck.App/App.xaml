@@ -1,0 +1,31 @@
+<Application x:Class="TaskDeck.App.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             ShutdownMode="OnExplicitShutdown">
+    <!--
+        辞書の並び（全員触らない）: WPF-UI のテーマと既定スタイル → 自前のトークン（ThemeService が Light/Dark を差し替える）
+        → 寸法・書体・時間 → アイコン → 担当ごとのスタイル。後に並ぶものほど優先される。
+    -->
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ui:ThemesDictionary Theme="Light" />
+                <ui:ControlsDictionary />
+                <ResourceDictionary Source="/Resources/Themes/Light.xaml" />
+                <ResourceDictionary Source="/Resources/Common/Metrics.xaml" />
+                <ResourceDictionary Source="/Resources/Common/Typography.xaml" />
+                <ResourceDictionary Source="/Resources/Common/Durations.xaml" />
+                <ResourceDictionary Source="/Resources/Icons.xaml" />
+                <ResourceDictionary Source="/Resources/Brand/AppIcon.xaml" />
+                <ResourceDictionary Source="/Resources/Styles/Buttons.xaml" />
+                <ResourceDictionary Source="/Resources/Styles/CheckBoxes.xaml" />
+                <ResourceDictionary Source="/Resources/Styles/Inputs.xaml" />
+                <ResourceDictionary Source="/Resources/Styles/Popups.xaml" />
+                <ResourceDictionary Source="/Resources/Styles/Chips.xaml" />
+                <ResourceDictionary Source="/Resources/Styles/NavigationItem.xaml" />
+                <ResourceDictionary Source="/Resources/Styles/TaskRow.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

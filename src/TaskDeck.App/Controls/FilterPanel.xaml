@@ -1,0 +1,235 @@
+<UserControl x:Class="TaskDeck.App.Controls.FilterPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:controls="clr-namespace:TaskDeck.App.Controls"
+             xmlns:input="clr-namespace:TaskDeck.App.Input"
+             mc:Ignorable="d"
+             KeyDown="OnKeyDown">
+    <!--
+        複合絞り込み（F-059・F-05A）。一覧の見出しの「絞り込み」から Popup（StaysOpen=False・AllowsTransparency=True）で開く。
+        影の余白（PopupShadowStyle の Margin）ごとこの部品に入っているので、ホストは Popup に置くだけでよい。
+        中身の DataContext は FilterPanelModel（UserControl 自身の DataContext はホストのものを使えるよう触らない）。
+    -->
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="VisibleWhenTrue" />
+
+        <!-- 選択肢のチップ（状態・タグは複数、優先度・期限は RadioButton で1つ） -->
+        <Style x:Key="ChipToggleStyle" TargetType="ToggleButton">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
+            <Setter Property="FontSize" Value="{StaticResource TypeCaptionSize}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+            <Setter Property="Background" Value="{DynamicResource SurfaceContentBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource StrokeControlBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Height" Value="{StaticResource ChipHeight}" />
+            <Setter Property="Padding" Value="8,0" />
+            <Setter Property="Margin" Value="0,0,4,4" />
+            <Setter Property="Cursor" Value="Hand" />
+            <!-- フォーカス枠はキーボード操作のときだけ（開いた直後にフォーカスを取っても、選択と同じ見た目にしない） -->
+            <Setter Property="FocusVisualStyle" Value="{StaticResource AppFocusVisualStyle}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="Chip"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{StaticResource RadiusChip}"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Chip" Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Chip" Property="Background" Value="{DynamicResource SurfaceSelectedBrush}" />
+                                <Setter TargetName="Chip" Property="BorderBrush" Value="{DynamicResource AccentDefaultBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SectionLabelStyle" TargetType="TextBlock" BasedOn="{StaticResource TextLabelStyle}">
+            <Setter Property="Margin" Value="0,8,0,4" />
+        </Style>
+
+        <!-- プロジェクト・タグの欄は2行ぶん（チップ 24＋余白 4）。多いときは中でスクロールする -->
+        <Style x:Key="ChoiceListStyle" TargetType="ItemsControl">
+            <Setter Property="MaxHeight" Value="56" />
+            <Setter Property="Focusable" Value="False" />
+        </Style>
+
+        <ItemsPanelTemplate x:Key="WrapItemsPanel">
+            <WrapPanel />
+        </ItemsPanelTemplate>
+
+        <!-- プロジェクト・タグは多くても数十件なので WrapPanel で並べ、多いときだけ中でスクロールする（ScrollViewer は ItemsControl の中に置く） -->
+        <ControlTemplate x:Key="ScrollingItemsTemplate" TargetType="ItemsControl">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+                <ItemsPresenter />
+            </ScrollViewer>
+        </ControlTemplate>
+    </UserControl.Resources>
+
+    <Border Style="{StaticResource PopupShadowStyle}">
+        <Border Style="{StaticResource PopupSurfaceStyle}" Width="{StaticResource PopupWidth}" Padding="0">
+            <Grid x:Name="Root" d:DataContext="{d:DesignInstance controls:FilterPanelModel}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- 見出し -->
+                <Border BorderBrush="{DynamicResource StrokeSubtleBrush}" BorderThickness="0,0,0,1" Padding="14,8,8,8">
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right"
+                                Style="{StaticResource TextButtonStyle}"
+                                MinHeight="26" Padding="10,0"
+                                Content="クリア"
+                                ToolTip="絞り込みの条件をビューの既定に戻します（適用するまで一覧は変わりません）"
+                                Click="OnClear" />
+                        <TextBlock Style="{StaticResource TextBodySmallStyle}" FontWeight="SemiBold" VerticalAlignment="Center" Text="絞り込み" />
+                    </DockPanel>
+                </Border>
+
+                <!-- 条件 -->
+                <StackPanel Grid.Row="1" Margin="14,0,8,8">
+                    <TextBlock Style="{StaticResource SectionLabelStyle}" Text="状態" />
+                    <ItemsControl x:Name="StatusList" ItemsSource="{Binding Statuses}" ItemsPanel="{StaticResource WrapItemsPanel}" Focusable="False">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <ToggleButton Style="{StaticResource ChipToggleStyle}" Content="{Binding Label}" IsChecked="{Binding IsSelected}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <TextBlock Style="{StaticResource SectionLabelStyle}" Text="優先度（選んだもの以上）" />
+                    <ItemsControl ItemsSource="{Binding Priorities}" ItemsPanel="{StaticResource WrapItemsPanel}" Focusable="False">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <RadioButton Style="{StaticResource ChipToggleStyle}" GroupName="FilterPriority" Content="{Binding Label}" IsChecked="{Binding IsSelected}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <TextBlock Style="{StaticResource SectionLabelStyle}" Text="期限" />
+                    <ItemsControl ItemsSource="{Binding DueOptions}" ItemsPanel="{StaticResource WrapItemsPanel}" Focusable="False">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <RadioButton Style="{StaticResource ChipToggleStyle}" GroupName="FilterDue" Content="{Binding Label}" IsChecked="{Binding IsSelected}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Grid Margin="0,0,6,4" Visibility="{Binding RangeOption.IsSelected, Converter={StaticResource VisibleWhenTrue}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <!-- カレンダーは入れ子の Popup。開いている間だけホストの Popup を閉じないようにする（コードビハインド） -->
+                        <DatePicker SelectedDate="{Binding RangeStart}"
+                                    SelectedDateFormat="Short"
+                                    AutomationProperties.Name="期間の開始日"
+                                    ToolTip="開始日（この日を含む）"
+                                    CalendarOpened="OnCalendarOpened"
+                                    CalendarClosed="OnCalendarClosed" />
+                        <TextBlock Grid.Column="1" Style="{StaticResource TextCaptionStyle}" Margin="4,0" VerticalAlignment="Center" Text="〜" />
+                        <DatePicker Grid.Column="2"
+                                    SelectedDate="{Binding RangeEnd}"
+                                    SelectedDateFormat="Short"
+                                    AutomationProperties.Name="期間の終了日"
+                                    ToolTip="終了日（この日を含む）"
+                                    CalendarOpened="OnCalendarOpened"
+                                    CalendarClosed="OnCalendarClosed" />
+                    </Grid>
+
+                    <TextBlock Style="{StaticResource SectionLabelStyle}" Text="プロジェクト" />
+                    <ItemsControl ItemsSource="{Binding Projects}"
+                                  ItemsPanel="{StaticResource WrapItemsPanel}"
+                                  Template="{StaticResource ScrollingItemsTemplate}"
+                                  Style="{StaticResource ChoiceListStyle}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <RadioButton Style="{StaticResource ChipToggleStyle}"
+                                             GroupName="FilterProject"
+                                             IsChecked="{Binding IsSelected}"
+                                             AutomationProperties.Name="{Binding Label}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Ellipse Width="8" Height="8" Margin="0,0,6,0" VerticalAlignment="Center" Fill="{Binding Value.ColorHex}">
+                                            <Ellipse.Style>
+                                                <Style TargetType="Ellipse">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Value.ColorHex}" Value="{x:Null}">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Ellipse.Style>
+                                        </Ellipse>
+                                        <TextBlock VerticalAlignment="Center" Text="{Binding Label}" />
+                                    </StackPanel>
+                                </RadioButton>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <TextBlock Style="{StaticResource SectionLabelStyle}" Text="タグ（選んだものをすべて持つ）" />
+                    <ItemsControl ItemsSource="{Binding Tags}"
+                                  ItemsPanel="{StaticResource WrapItemsPanel}"
+                                  Template="{StaticResource ScrollingItemsTemplate}"
+                                  Style="{StaticResource ChoiceListStyle}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <ToggleButton Style="{StaticResource ChipToggleStyle}" Content="{Binding Label}" IsChecked="{Binding IsSelected}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Text="タグはまだありません">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource TextCaptionStyle}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Tags.Count}" Value="0">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
+
+                <!-- この条件を保存（F-05A。サイドバーに出る） -->
+                <Border Grid.Row="2" BorderBrush="{DynamicResource StrokeSubtleBrush}" BorderThickness="0,1,0,0" Padding="14,8,14,8">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource TextLabelStyle}" Margin="0,0,0,4" Text="この条件を保存（サイドバーに出ます）" />
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right" Style="{StaticResource StandardButtonStyle}" Margin="6,0,0,0" Content="保存" Click="OnSave" />
+                            <TextBox x:Name="SavedFilterName"
+                                     Style="{StaticResource InputTextBoxStyle}"
+                                     input:ImeGuard.IsEnabled="True"
+                                     AutomationProperties.Name="保存する名前"
+                                     PreviewKeyDown="OnSavedFilterNameKeyDown" />
+                        </DockPanel>
+                        <TextBlock x:Name="SaveMessage" Style="{StaticResource TextCaptionStyle}" Margin="0,6,0,0" TextWrapping="Wrap" Visibility="Collapsed" />
+                    </StackPanel>
+                </Border>
+
+                <!-- 操作 -->
+                <Border Grid.Row="3" BorderBrush="{DynamicResource StrokeSubtleBrush}" BorderThickness="0,1,0,0" Padding="14,8,14,8">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Style="{StaticResource StandardButtonStyle}" Margin="0,0,8,0" Content="キャンセル" ToolTip="Esc" Click="OnCancel" />
+                        <Button x:Name="ApplyButton" Style="{StaticResource PrimaryButtonStyle}" MinWidth="72" Content="適用" Click="OnApply" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+    </Border>
+</UserControl>

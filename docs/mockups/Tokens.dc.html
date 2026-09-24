@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>TaskDeck デザイントークンとコンポーネント</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body { margin: 0; font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; background: #ffffff; }
+input[type="checkbox"] { accent-color: #0067c0; }
+</style>
+</helmet>
+<div style="width: 1080px; height: 1420px; box-sizing: border-box; padding: 40px 44px; background: #ffffff; color: #1a1a1a; font-size: 13px; display: flex; flex-direction: column; gap: 30px; overflow: hidden;">
+
+  <div>
+    <h1 style="margin: 0 0 4px 0; font-size: 26px; font-weight: 600; letter-spacing: -0.01em;">TaskDeck デザイントークン</h1>
+    <p style="margin: 0; font-size: 13px; color: #5d5d5d;">Windows 11 Fluent Design 準拠。XAML の <span style="font-family: Consolas, monospace;">ResourceDictionary</span> キー名を併記する。</p>
+  </div>
+
+  <div>
+    <h2 style="margin: 0 0 12px 0; font-size: 15px; font-weight: 600;">サーフェスとテキスト</h2>
+    <div style="display: grid; grid-template-columns: 200px 1fr 1fr; gap: 0; border: 1px solid #e5e5e5; border-radius: 6px; overflow: hidden;">
+      <div style="padding: 8px 12px; background: #f6f6f6; font-size: 11px; font-weight: 600; color: #5d5d5d; border-bottom: 1px solid #e5e5e5;">キー</div>
+      <div style="padding: 8px 12px; background: #f6f6f6; font-size: 11px; font-weight: 600; color: #5d5d5d; border-bottom: 1px solid #e5e5e5; border-left: 1px solid #e5e5e5;">ライト</div>
+      <div style="padding: 8px 12px; background: #f6f6f6; font-size: 11px; font-weight: 600; color: #5d5d5d; border-bottom: 1px solid #e5e5e5; border-left: 1px solid #e5e5e5;">ダーク</div>
+
+      <div style="padding: 7px 12px; font-family: Consolas, monospace; font-size: 12px; border-bottom: 1px solid #f0f0f0;">Surface.Window</div>
+      <div style="padding: 7px 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f0f0f0; border-left: 1px solid #e5e5e5;"><span style="width: 18px; height: 18px; border-radius: 3px; background: #f3f3f3; border: 1px solid #d6d6d6;"></span><span style="font-family: Consolas, monospace; font-size: 12px;">#F3F3F3</span></div>
+      <div style="padding: 7px 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f0f0f0; border-left: 1px solid #e5e5e5;"><span style="width: 18px; height: 18px; border-radius: 3px; background: #202020;"></span><span style="font-family: Consolas, monospace; font-size: 12px;">#202020</span></div>
+
+      <div style="padding: 7px 12px; font-family: Consolas, monospace; font-size: 12px; border-bottom: 1px solid #f0f0f0;">Surface.Content</div>
+      <div style="padding: 7px 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f0f0f0; border-left: 1px solid #e5e5e5;"><span style="width: 18px; height: 18px; border-radius: 3px; background: #ffffff; border: 1px solid #d6d6d6;"></span><span style="font-family: Consolas, monospace; font-size: 12px;">#FFFFFF</span></div>
+      <div style="padding: 7px 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f0f0f0; border-left: 1px solid #e5e5e5;"><span style="width: 18px; height: 18px; border-radius: 3px; background: #272727;"></span><span style="font-family: Consolas, monospace; font-size: 12px;">#272727</span></div>
+
+      <div style="padding: 7px 12px; font-family: Consolas, monospace; font-size: 12px; border-bottom: 1px solid #f0f0f0;">Surface.Subtle</div>
+      <div style="padding: 7px 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f0f0f0; border-left: 1px solid #e5e5e5;"><span style="width: 18px; height: 18px; border-radius: 3px; background: #f6f6f6; border: 1px solid #d6d6d6;"></span><span style="font-family: Consolas, monospace; font-size: 12px;">#F6F6F6</span></div>
+      <div style="padding: 7px 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f0f0f0; border-left: 1px solid #e5e5e5;"><span style="width: 18px; height: 18px; border-radius: 3px; background: #2d2d2d;"></span><span style="font-family: Consolas, monospace; font-size: 12px;">#2D2D2D</span></div>
+
+      <div style="padding: 7px 12px; font-family: Consolas, monospace; font-size: 12px; border-bottom: 1px solid #f0f0f0;">Surface.Selected</div>
+      <div style="padding: 7px 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f0f0f0; border-left: 1px solid #e5e5e5;"><span style="width: 18px; height: 18px; border-radius: 3px; background: #eff6fc; border: 1px solid #cfe4f7;"></span><span style="font-family: Consolas, monospace; font-size: 12px;">#EFF6FC</span></div>
+      <div style="padding: 7px 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f0f0f0; border-left: 1px solid #e5e5e5;"><span style="width: 18px; height: 18px; border-radius: 3px; background: #313131;"></span><span style="font-family: Consolas, monospace; font-size: 12px;">#313131</span></div>
+
+      <div style="padding: 7px 12px; font-family: Consolas, monospace; font-size: 12px; border-bottom: 1px solid #f0f0f0;">Stroke.Divider</div>
+      <div style="padding: 7px 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f0f0f0; border-left: 1px solid #e5e5e5;"><span style="width: 18px; height: 18px; border-radius: 3px; background: #e5e5e5;"></span><span style="font-family: Consolas, monospace; font-size: 12px;">#E5E5E5</span></div>
+      <div style="padding: 7px 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f0f0f0; border-left: 1px solid #e5e5e5;"><span style="width: 18px; height: 18px; border-radius: 3px; background: #333333;"></span><span style="font-family: Consolas, monospace; font-size: 12px;">#333333</span></div>
+
+      <div style="padding: 7px 12px; font-family: Consolas, monospace; font-size: 12px; border-bottom: 1px solid #f0f0f0;">Text.Primary</div>
+      <div style="padding: 7px 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f0f0f0; border-left: 1px solid #e5e5e5;"><span style="width: 18px; height: 18px; border-radius: 3px; background: #1a1a1a;"></span><span style="font-family: Consolas, monospace; font-size: 12px;">#1A1A1A</span></div>
+      <div style="padding: 7px 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f0f0f0; border-left: 1px solid #e5e5e5;"><span style="width: 18px; height: 18px; border-radius: 3px; background: #ffffff; border: 1px solid #d6d6d6;"></span><span style="font-family: Consolas, monospace; font-size: 12px;">#FFFFFF</span></div>
+
+      <div style="padding: 7px 12px; font-family: Consolas, monospace; font-size: 12px; border-bottom: 1px solid #f0f0f0;">Text.Secondary</div>
+      <div style="padding: 7px 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f0f0f0; border-left: 1px solid #e5e5e5;"><span style="width: 18px; height: 18px; border-radius: 3px; background: #5d5d5d;"></span><span style="font-family: Consolas, monospace; font-size: 12px;">#5D5D5D</span></div>
+      <div style="padding: 7px 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f0f0f0; border-left: 1px solid #e5e5e5;"><span style="width: 18px; height: 18px; border-radius: 3px; background: #c8c8c8;"></span><span style="font-family: Consolas, monospace; font-size: 12px;">#C8C8C8</span></div>
+
+      <div style="padding: 7px 12px; font-family: Consolas, monospace; font-size: 12px;">Text.Tertiary</div>
+      <div style="padding: 7px 12px; display: flex; align-items: center; gap: 8px; border-left: 1px solid #e5e5e5;"><span style="width: 18px; height: 18px; border-radius: 3px; background: #6e6e6e;"></span><span style="font-family: Consolas, monospace; font-size: 12px;">#6E6E6E</span></div>
+      <div style="padding: 7px 12px; display: flex; align-items: center; gap: 8px; border-left: 1px solid #e5e5e5;"><span style="width: 18px; height: 18px; border-radius: 3px; background: #9b9b9b;"></span><span style="font-family: Consolas, monospace; font-size: 12px;">#9B9B9B</span></div>
+    </div>
+    <p style="margin: 8px 0 0 0; font-size: 11px; color: #6e6e6e;">Text.Tertiary はキャプション用の最も薄い灰。これ以上薄くするとコントラスト比 4.5:1 を割るため、下限として固定する。</p>
+  </div>
+
+  <div>
+    <h2 style="margin: 0 0 12px 0; font-size: 15px; font-weight: 600;">アクセントと優先度</h2>
+    <div style="display: flex; gap: 10px; margin-bottom: 14px;">
+      <div style="flex-grow: 1; border: 1px solid #e5e5e5; border-radius: 6px; padding: 12px;">
+        <div style="font-size: 11px; font-weight: 600; color: #5d5d5d; margin-bottom: 10px;">アクセント（ライト / ダーク）</div>
+        <div style="display: flex; gap: 8px;">
+          <div style="flex-grow: 1;"><div style="height: 38px; border-radius: 5px; background: #0067c0;"></div><div style="margin-top: 5px; font-family: Consolas, monospace; font-size: 11px;">#0067C0</div><div style="font-size: 10px; color: #6e6e6e;">Accent.Default</div></div>
+          <div style="flex-grow: 1;"><div style="height: 38px; border-radius: 5px; background: #4cc2ff;"></div><div style="margin-top: 5px; font-family: Consolas, monospace; font-size: 11px;">#4CC2FF</div><div style="font-size: 10px; color: #6e6e6e;">Accent.Default（dark）</div></div>
+        </div>
+      </div>
+      <div style="flex-grow: 1; border: 1px solid #e5e5e5; border-radius: 6px; padding: 12px;">
+        <div style="font-size: 11px; font-weight: 600; color: #5d5d5d; margin-bottom: 10px;">プロジェクト色 — この順で固定割り当て（色覚検証済み）</div>
+        <div style="display: flex; gap: 6px;">
+          <div style="flex-grow: 1;"><div style="height: 38px; border-radius: 5px; background: #0067c0;"></div><div style="margin-top: 4px; font-size: 9px; font-family: Consolas, monospace;">0067C0</div></div>
+          <div style="flex-grow: 1;"><div style="height: 38px; border-radius: 5px; background: #ca5010;"></div><div style="margin-top: 4px; font-size: 9px; font-family: Consolas, monospace;">CA5010</div></div>
+          <div style="flex-grow: 1;"><div style="height: 38px; border-radius: 5px; background: #8764b8;"></div><div style="margin-top: 4px; font-size: 9px; font-family: Consolas, monospace;">8764B8</div></div>
+          <div style="flex-grow: 1;"><div style="height: 38px; border-radius: 5px; background: #0e7c5a;"></div><div style="margin-top: 4px; font-size: 9px; font-family: Consolas, monospace;">0E7C5A</div></div>
+          <div style="flex-grow: 1;"><div style="height: 38px; border-radius: 5px; background: #c2417a;"></div><div style="margin-top: 4px; font-size: 9px; font-family: Consolas, monospace;">C2417A</div></div>
+          <div style="flex-grow: 1;"><div style="height: 38px; border-radius: 5px; background: #8a6d00;"></div><div style="margin-top: 4px; font-size: 9px; font-family: Consolas, monospace;">8A6D00</div></div>
+        </div>
+        <div style="margin-top: 8px; font-size: 10px; color: #6e6e6e; line-height: 1.6;">隣り合う 2 色の色覚差（OKLab ΔE）を検証済み。循環させず、7 件目以降は「その他」に畳む。</div>
+      </div>
+    </div>
+
+    <div style="border: 1px solid #e5e5e5; border-radius: 6px; padding: 12px;">
+      <div style="font-size: 11px; font-weight: 600; color: #5d5d5d; margin-bottom: 10px;">優先度 — 色と記号の併用（色だけに意味を持たせない）</div>
+      <div style="display: flex; gap: 10px;">
+        <div style="flex-grow: 1; display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 5px; background: #f8f8f8;">
+          <span style="font-size: 12px; font-weight: 700; color: #c42b1c;">!!!!</span>
+          <div><div style="font-size: 12px; font-weight: 600;">緊急</div><div style="font-family: Consolas, monospace; font-size: 10px; color: #6e6e6e;">#C42B1C / #FF6B5E</div></div>
+        </div>
+        <div style="flex-grow: 1; display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 5px; background: #f8f8f8;">
+          <span style="font-size: 12px; font-weight: 700; color: #f7630c;">!!!</span>
+          <div><div style="font-size: 12px; font-weight: 600;">高</div><div style="font-family: Consolas, monospace; font-size: 10px; color: #6e6e6e;">#F7630C / #FF8C42</div></div>
+        </div>
+        <div style="flex-grow: 1; display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 5px; background: #f8f8f8;">
+          <span style="font-size: 12px; font-weight: 700; color: #b57c00;">!!</span>
+          <div><div style="font-size: 12px; font-weight: 600;">中</div><div style="font-family: Consolas, monospace; font-size: 10px; color: #6e6e6e;">#B57C00 / #FFC83D</div></div>
+        </div>
+        <div style="flex-grow: 1; display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 5px; background: #f8f8f8;">
+          <span style="font-size: 12px; font-weight: 700; color: #0067c0;">!</span>
+          <div><div style="font-size: 12px; font-weight: 600;">低</div><div style="font-family: Consolas, monospace; font-size: 10px; color: #6e6e6e;">#0067C0 / #4CC2FF</div></div>
+        </div>
+        <div style="flex-grow: 1; display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 5px; background: #f8f8f8;">
+          <span style="font-size: 12px; color: #a8a8a8;">—</span>
+          <div><div style="font-size: 12px; font-weight: 600;">なし</div><div style="font-family: Consolas, monospace; font-size: 10px; color: #6e6e6e;">表示しない</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 20px;">
+    <div style="width: 520px; flex-shrink: 0;">
+      <h2 style="margin: 0 0 12px 0; font-size: 15px; font-weight: 600;">タイポグラフィ</h2>
+      <div style="border: 1px solid #e5e5e5; border-radius: 6px; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; align-items: baseline; gap: 14px;"><span style="width: 92px; font-family: Consolas, monospace; font-size: 10px; color: #6e6e6e; flex-shrink: 0;">Title / 22 SB</span><span style="font-size: 22px; font-weight: 600; letter-spacing: -0.01em;">今日</span></div>
+        <div style="display: flex; align-items: baseline; gap: 14px;"><span style="width: 92px; font-family: Consolas, monospace; font-size: 10px; color: #6e6e6e; flex-shrink: 0;">Subtitle / 17 SB</span><span style="font-size: 17px; font-weight: 600;">会議資料まとめる</span></div>
+        <div style="display: flex; align-items: baseline; gap: 14px;"><span style="width: 92px; font-family: Consolas, monospace; font-size: 10px; color: #6e6e6e; flex-shrink: 0;">Body / 14 R</span><span style="font-size: 14px;">タスクのタイトルはこの大きさ</span></div>
+        <div style="display: flex; align-items: baseline; gap: 14px;"><span style="width: 92px; font-family: Consolas, monospace; font-size: 10px; color: #6e6e6e; flex-shrink: 0;">BodySm / 13 R</span><span style="font-size: 13px;">サブタスク・詳細ペインの値</span></div>
+        <div style="display: flex; align-items: baseline; gap: 14px;"><span style="width: 92px; font-family: Consolas, monospace; font-size: 10px; color: #6e6e6e; flex-shrink: 0;">Caption / 12 R</span><span style="font-size: 12px; color: #5d5d5d;">期限・件数・タグ</span></div>
+        <div style="display: flex; align-items: baseline; gap: 14px;"><span style="width: 92px; font-family: Consolas, monospace; font-size: 10px; color: #6e6e6e; flex-shrink: 0;">Label / 11 SB</span><span style="font-size: 11px; font-weight: 600; color: #6e6e6e; letter-spacing: 0.03em;">プロジェクト</span></div>
+        <div style="height: 1px; background: #f0f0f0;"></div>
+        <div style="font-size: 11px; color: #6e6e6e; line-height: 1.7;">書体は <span style="font-family: Consolas, monospace;">Segoe UI Variable Text</span>（フォールバック <span style="font-family: Consolas, monospace;">Segoe UI</span>）。数字を含む欄は <span style="font-family: Consolas, monospace;">FontVariantNumeric=Tabular</span> 相当で桁を揃える。</div>
+      </div>
+    </div>
+
+    <div style="flex-grow: 1;">
+      <h2 style="margin: 0 0 12px 0; font-size: 15px; font-weight: 600;">スペーシングと角丸</h2>
+      <div style="border: 1px solid #e5e5e5; border-radius: 6px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="font-size: 11px; color: #6e6e6e;">4px グリッド。使う値を 6 つに限定する。</div>
+        <div style="display: flex; align-items: flex-end; gap: 10px;">
+          <div style="text-align: center;"><div style="width: 4px; height: 26px; background: #0067c0; border-radius: 1px;"></div><div style="margin-top: 4px; font-size: 10px; font-family: Consolas, monospace;">4</div></div>
+          <div style="text-align: center;"><div style="width: 8px; height: 26px; background: #0067c0; border-radius: 1px;"></div><div style="margin-top: 4px; font-size: 10px; font-family: Consolas, monospace;">8</div></div>
+          <div style="text-align: center;"><div style="width: 12px; height: 26px; background: #0067c0; border-radius: 1px;"></div><div style="margin-top: 4px; font-size: 10px; font-family: Consolas, monospace;">12</div></div>
+          <div style="text-align: center;"><div style="width: 16px; height: 26px; background: #0067c0; border-radius: 1px;"></div><div style="margin-top: 4px; font-size: 10px; font-family: Consolas, monospace;">16</div></div>
+          <div style="text-align: center;"><div style="width: 20px; height: 26px; background: #0067c0; border-radius: 1px;"></div><div style="margin-top: 4px; font-size: 10px; font-family: Consolas, monospace;">20</div></div>
+          <div style="text-align: center;"><div style="width: 32px; height: 26px; background: #0067c0; border-radius: 1px;"></div><div style="margin-top: 4px; font-size: 10px; font-family: Consolas, monospace;">32</div></div>
+        </div>
+        <div style="height: 1px; background: #f0f0f0; margin: 4px 0;"></div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="text-align: center;"><div style="width: 44px; height: 30px; background: #f0f0f0; border: 1px solid #d6d6d6; border-radius: 4px;"></div><div style="margin-top: 4px; font-size: 10px; font-family: Consolas, monospace;">4 ボタン</div></div>
+          <div style="text-align: center;"><div style="width: 44px; height: 30px; background: #f0f0f0; border: 1px solid #d6d6d6; border-radius: 5px;"></div><div style="margin-top: 4px; font-size: 10px; font-family: Consolas, monospace;">5 行・入力</div></div>
+          <div style="text-align: center;"><div style="width: 44px; height: 30px; background: #f0f0f0; border: 1px solid #d6d6d6; border-radius: 8px;"></div><div style="margin-top: 4px; font-size: 10px; font-family: Consolas, monospace;">8 ウィンドウ</div></div>
+          <div style="text-align: center;"><div style="width: 44px; height: 30px; background: #f0f0f0; border: 1px solid #d6d6d6; border-radius: 15px;"></div><div style="margin-top: 4px; font-size: 10px; font-family: Consolas, monospace;">全丸 チップ</div></div>
+        </div>
+        <div style="height: 1px; background: #f0f0f0; margin: 4px 0;"></div>
+        <div style="font-size: 11px; color: #6e6e6e; line-height: 1.7;">行の高さ：タスク行 42px ／ サブタスク行 34px ／ サイドバー項目 36px。クリック対象は最小 32×32px を確保する。</div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <h2 style="margin: 0 0 12px 0; font-size: 15px; font-weight: 600;">タスク行の状態</h2>
+    <div style="border: 1px solid #e5e5e5; border-radius: 6px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px;">
+
+      <div style="display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 8px; border-radius: 5px;">
+        <input type="checkbox" aria-label="通常状態の例" style="width: 17px; height: 17px; margin: 0;">
+        <span style="font-size: 12px; font-weight: 700; color: #0067c0; width: 22px;">!</span>
+        <span style="flex-grow: 1;">通常</span>
+        <span style="font-size: 11px; color: #6e6e6e; font-family: Consolas, monospace;">背景なし</span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 8px; border-radius: 5px; background: #f5f5f5;">
+        <input type="checkbox" aria-label="ホバー状態の例" style="width: 17px; height: 17px; margin: 0;">
+        <span style="font-size: 12px; font-weight: 700; color: #0067c0; width: 22px;">!</span>
+        <span style="flex-grow: 1;">ホバー</span>
+        <span style="font-size: 11px; color: #6e6e6e; font-family: Consolas, monospace;">#F5F5F5</span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 8px; border-radius: 5px; background: #eff6fc; outline: 1px solid #cfe4f7; outline-offset: -1px;">
+        <input type="checkbox" aria-label="選択状態の例" style="width: 17px; height: 17px; margin: 0;">
+        <span style="font-size: 12px; font-weight: 700; color: #0067c0; width: 22px;">!</span>
+        <span style="flex-grow: 1; font-weight: 500;">選択中</span>
+        <span style="font-size: 11px; color: #6e6e6e; font-family: Consolas, monospace;">#EFF6FC + 枠</span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 8px; border-radius: 5px;">
+        <input type="checkbox" aria-label="期限切れの例" style="width: 17px; height: 17px; margin: 0;">
+        <span style="font-size: 12px; font-weight: 700; color: #c42b1c; width: 22px;">!!!!</span>
+        <span style="flex-grow: 1;">期限切れ</span>
+        <span style="font-size: 12px; color: #c42b1c; font-weight: 600;">3日超過</span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 8px; border-radius: 5px;">
+        <input type="checkbox" checked aria-label="完了の例" style="width: 17px; height: 17px; margin: 0;">
+        <span style="width: 22px;"></span>
+        <span style="flex-grow: 1; color: #6e6e6e; text-decoration: line-through;">完了</span>
+        <span style="font-size: 11px; color: #6e6e6e; font-family: Consolas, monospace;">取り消し線 + Tertiary</span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 8px; border-radius: 5px; opacity: 0.55;">
+        <input type="checkbox" disabled aria-label="ゴミ箱内の例" style="width: 17px; height: 17px; margin: 0;">
+        <span style="width: 22px;"></span>
+        <span style="flex-grow: 1;">ゴミ箱の中</span>
+        <span style="font-size: 11px; color: #6e6e6e; font-family: Consolas, monospace;">不透明度 55%</span>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <h2 style="margin: 0 0 12px 0; font-size: 15px; font-weight: 600;">コンポーネントとアイコン</h2>
+    <div style="display: flex; gap: 10px;">
+      <div style="flex-grow: 1; border: 1px solid #e5e5e5; border-radius: 6px; padding: 14px;">
+        <div style="font-size: 11px; font-weight: 600; color: #5d5d5d; margin-bottom: 12px;">ボタン</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+          <button type="button" style="height: 32px; padding: 0 16px; font-size: 13px; font-family: inherit; color: #ffffff; background: #0067c0; border: 1px solid #0058a8; border-radius: 4px; cursor: pointer;">主ボタン</button>
+          <button type="button" style="height: 32px; padding: 0 16px; font-size: 13px; font-family: inherit; color: #1a1a1a; background: #fbfbfb; border: 1px solid #d6d6d6; border-bottom-color: #a8a8a8; border-radius: 4px; cursor: pointer;">標準</button>
+          <button type="button" style="height: 32px; padding: 0 16px; font-size: 13px; font-family: inherit; color: #1a1a1a; background: transparent; border: none; border-radius: 4px; cursor: pointer;">文字のみ</button>
+          <button type="button" style="height: 32px; padding: 0 16px; font-size: 13px; font-family: inherit; color: #ffffff; background: #c42b1c; border: 1px solid #a8241a; border-radius: 4px; cursor: pointer;">破壊的</button>
+        </div>
+      </div>
+      <div style="flex-grow: 1; border: 1px solid #e5e5e5; border-radius: 6px; padding: 14px;">
+        <div style="font-size: 11px; font-weight: 600; color: #5d5d5d; margin-bottom: 12px;">チップとバッジ</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+          <span style="display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 10px; border-radius: 12px; background: #f2f2f2; font-size: 12px;"><span style="width: 8px; height: 8px; border-radius: 50%; background: #0067c0;"></span>業務改善</span>
+          <span style="display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 10px; border-radius: 12px; background: #f2f2f2; font-size: 12px;"><span style="color: #6e6e6e;">#</span>仕事</span>
+          <span style="display: inline-flex; align-items: center; height: 20px; min-width: 20px; padding: 0 6px; border-radius: 10px; background: #0067c0; color: #ffffff; font-size: 11px; font-weight: 600; justify-content: center;">12</span>
+          <span style="display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 10px; border-radius: 12px; background: #fdeeec; color: #a8241a; font-size: 12px; font-weight: 600;">期限切れ 2</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 10px; border: 1px solid #e5e5e5; border-radius: 6px; padding: 14px;">
+      <div style="font-size: 11px; font-weight: 600; color: #5d5d5d; margin-bottom: 12px;">アイコン — 16px、線幅 1.5、角は丸。Segoe Fluent Icons から選ぶか同等の自作 SVG</div>
+      <div style="display: flex; gap: 26px; flex-wrap: wrap;">
+        <div style="text-align: center; width: 54px;"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"><path d="M8 4.5V8l2.2 1.4"/><circle cx="8" cy="8" r="6"/></svg><div style="font-size: 10px; color: #6e6e6e; margin-top: 4px;">今日</div></div>
+        <div style="text-align: center; width: 54px;"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M2 6.5h12M5.5 1.6v2.4M10.5 1.6v2.4"/></svg><div style="font-size: 10px; color: #6e6e6e; margin-top: 4px;">予定</div></div>
+        <div style="text-align: center; width: 54px;"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"><path d="M5.5 4h8M5.5 8h8M5.5 12h8M2.5 4h.01M2.5 8h.01M2.5 12h.01"/></svg><div style="font-size: 10px; color: #6e6e6e; margin-top: 4px;">すべて</div></div>
+        <div style="text-align: center; width: 54px;"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 7a5.5 5.5 0 0 0-9.9-3.3M2.5 9a5.5 5.5 0 0 0 9.9 3.3"/><path d="M13.5 2.8V6H10.4M2.5 13.2V10h3.1"/></svg><div style="font-size: 10px; color: #6e6e6e; margin-top: 4px;">繰り返し</div></div>
+        <div style="text-align: center; width: 54px;"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg><div style="font-size: 10px; color: #6e6e6e; margin-top: 4px;">検索</div></div>
+        <div style="text-align: center; width: 54px;"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.6 4.2h10.8M6.4 4.2V2.8h3.2v1.4M4 4.2l.7 9.1h6.6l.7-9.1"/></svg><div style="font-size: 10px; color: #6e6e6e; margin-top: 4px;">削除</div></div>
+        <div style="text-align: center; width: 54px;"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5 6.2 11.5 13 4.8"/></svg><div style="font-size: 10px; color: #6e6e6e; margin-top: 4px;">完了</div></div>
+        <div style="text-align: center; width: 54px;"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg><div style="font-size: 10px; color: #6e6e6e; margin-top: 4px;">追加</div></div>
+        <div style="text-align: center; width: 54px;"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="5.6"/><path d="M8 5.2V8l1.9 1.2"/></svg><div style="font-size: 10px; color: #6e6e6e; margin-top: 4px;">通知</div></div>
+        <div style="text-align: center; width: 54px;"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="#1a1a1a" stroke-width="1.5"><circle cx="8" cy="8" r="2.2"/><path d="M8 1.6v1.6M8 12.8v1.6M14.4 8h-1.6M3.2 8H1.6M12.5 3.5l-1.1 1.1M4.6 11.4l-1.1 1.1M12.5 12.5l-1.1-1.1M4.6 4.6 3.5 3.5" stroke-linecap="round"/></svg><div style="font-size: 10px; color: #6e6e6e; margin-top: 4px;">設定</div></div>
+        <div style="text-align: center; width: 54px;"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="#c42b1c" stroke-width="1.5" stroke-linecap="round"><path d="M8 2.2 14.6 13.4H1.4L8 2.2Z"/><path d="M8 6.4v3M8 11.4h.01"/></svg><div style="font-size: 10px; color: #6e6e6e; margin-top: 4px;">期限切れ</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1080,"height":1420}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

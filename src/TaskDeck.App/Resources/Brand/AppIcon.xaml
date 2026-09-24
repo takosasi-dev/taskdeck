@@ -1,0 +1,176 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=System.Runtime">
+    <!--
+        アプリのアイコン（UI 設計書 23.1・23.2）。形の正本はモックアップ docs/mockups/Brand.dc.html の SVG（viewBox 256）。
+        角丸のカードが3枚重なり、最前面に白いチェック。#0067C0 の単色で、背面ほど薄い（グラデーションは使わない）。
+        カードは SVG と同じく角丸四角を丸ごと背面から順に重ねる。最前面は不透明なので下のカードの下半分は隠れ、
+        3枚目と2枚目の重なりは2枚目の薄さ越しに透けて見える（モックアップの見た目のまま）。
+        AppIconImage と部品のキーは 256px の座標。小さく出すときは同じ絵を縮めず、大きさごとの絵（AppIcon128Image など。
+        その大きさの画素の座標で、カードの縦横の辺を画素の境目に、チェックの脚を45°にそろえてある）を使う。
+        .ico と PNG の書き出しは tools/IconGen（このプロジェクトを dotnet run で動かす）。形を直したら書き出し直す。
+        起動画面（S-16）は暗い地なので、部品のキーを使って色を変えて描く（担当 L）。
+        担当: 波4-M。キーは変えない（形の値は直してよい）。
+    -->
+
+    <!-- 最前面のカード（206×158、角丸46。余白は左右・下とも25） -->
+    <RectangleGeometry x:Key="AppIconFrontCardGeometry" Rect="25,72,206,158" RadiusX="46" RadiusY="46" />
+
+    <!-- 2枚目（濃度55%）: 最前面の上に24px 出る。下の部分は最前面に隠れる -->
+    <RectangleGeometry x:Key="AppIconMiddleCardGeometry" Rect="41,48,174,42" RadiusX="19" RadiusY="19" />
+
+    <!-- 3枚目（濃度30%）: 2枚目の上に22px 出る。下の部分は2枚目越しに透ける -->
+    <RectangleGeometry x:Key="AppIconBackCardGeometry" Rect="56,26,144,42" RadiusX="17" RadiusY="17" />
+
+    <!-- チェック（線幅24、端と角は丸。線で描くので起動画面では StrokeDashOffset で描き足せる。長さは約147.2） -->
+    <PathGeometry x:Key="AppIconCheckGeometry" Figures="M78,152 L110,184 L178,108" />
+    <sys:Double x:Key="AppIconCheckThickness">24</sys:Double>
+
+    <Color x:Key="AppIconColor">#0067C0</Color>
+    <SolidColorBrush x:Key="AppIconFrontBrush" Color="#0067C0" />
+    <SolidColorBrush x:Key="AppIconMiddleBrush" Color="#0067C0" Opacity="0.55" />
+    <SolidColorBrush x:Key="AppIconBackBrush" Color="#0067C0" Opacity="0.30" />
+    <SolidColorBrush x:Key="AppIconCheckBrush" Color="#FFFFFF" />
+
+    <!-- 動かさない所で使う完成形（Image.Source に入れる。256×256 の枠ごと縮む） -->
+    <DrawingImage x:Key="AppIconImage">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <GeometryDrawing Brush="Transparent">
+                    <GeometryDrawing.Geometry>
+                        <RectangleGeometry Rect="0,0,256,256" />
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+                <GeometryDrawing Brush="{StaticResource AppIconBackBrush}" Geometry="{StaticResource AppIconBackCardGeometry}" />
+                <GeometryDrawing Brush="{StaticResource AppIconMiddleBrush}" Geometry="{StaticResource AppIconMiddleCardGeometry}" />
+                <GeometryDrawing Brush="{StaticResource AppIconFrontBrush}" Geometry="{StaticResource AppIconFrontCardGeometry}" />
+                <GeometryDrawing Geometry="{StaticResource AppIconCheckGeometry}">
+                    <GeometryDrawing.Pen>
+                        <Pen Brush="{StaticResource AppIconCheckBrush}" Thickness="{StaticResource AppIconCheckThickness}" StartLineCap="Round" EndLineCap="Round" LineJoin="Round" />
+                    </GeometryDrawing.Pen>
+                </GeometryDrawing>
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+
+    <!--
+        大きさごとの絵（UI 設計書 23.2・モックアップの「アイコンのサイズ展開」）。座標はその大きさの画素。
+        128: 256 と同じ3層・線幅24（256 換算）。256 の半分だと2枚目と最前面の左右の辺が半画素に乗るので、幅を1画素ずつ広げた
+    -->
+    <DrawingImage x:Key="AppIcon128Image">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <GeometryDrawing Brush="Transparent">
+                    <GeometryDrawing.Geometry>
+                        <RectangleGeometry Rect="0,0,128,128" />
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+                <GeometryDrawing Brush="{StaticResource AppIconBackBrush}">
+                    <GeometryDrawing.Geometry>
+                        <RectangleGeometry Rect="28,13,72,21" RadiusX="8.5" RadiusY="8.5" />
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+                <GeometryDrawing Brush="{StaticResource AppIconMiddleBrush}">
+                    <GeometryDrawing.Geometry>
+                        <RectangleGeometry Rect="20,24,88,21" RadiusX="9.5" RadiusY="9.5" />
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+                <GeometryDrawing Brush="{StaticResource AppIconFrontBrush}">
+                    <GeometryDrawing.Geometry>
+                        <RectangleGeometry Rect="12,36,104,79" RadiusX="23" RadiusY="23" />
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+                <GeometryDrawing Geometry="M39,76 L55,92 L89,54">
+                    <GeometryDrawing.Pen>
+                        <Pen Brush="{StaticResource AppIconCheckBrush}" Thickness="12" StartLineCap="Round" EndLineCap="Round" LineJoin="Round" />
+                    </GeometryDrawing.Pen>
+                </GeometryDrawing>
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+
+    <!-- 48: 2層に減らす（背面は濃度45%）。線幅26（256 換算） -->
+    <DrawingImage x:Key="AppIcon48Image">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <GeometryDrawing Brush="Transparent">
+                    <GeometryDrawing.Geometry>
+                        <RectangleGeometry Rect="0,0,48,48" />
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+                <GeometryDrawing>
+                    <GeometryDrawing.Brush>
+                        <SolidColorBrush Color="#0067C0" Opacity="0.45" />
+                    </GeometryDrawing.Brush>
+                    <GeometryDrawing.Geometry>
+                        <RectangleGeometry Rect="9,7,30,8" RadiusX="3.5" RadiusY="3.5" />
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+                <GeometryDrawing Brush="{StaticResource AppIconFrontBrush}">
+                    <GeometryDrawing.Geometry>
+                        <RectangleGeometry Rect="5,12,38,31" RadiusX="9" RadiusY="9" />
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+                <GeometryDrawing Geometry="M14.25,28.25 L20.5,34.5 L33.75,19.75">
+                    <GeometryDrawing.Pen>
+                        <Pen Brush="{StaticResource AppIconCheckBrush}" Thickness="4.875" StartLineCap="Round" EndLineCap="Round" LineJoin="Round" />
+                    </GeometryDrawing.Pen>
+                </GeometryDrawing>
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+
+    <!-- 32: 2層のまま、線幅30（256 換算）、角丸を少し大きく。チェックの脚は両方45° -->
+    <DrawingImage x:Key="AppIcon32Image">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <GeometryDrawing Brush="Transparent">
+                    <GeometryDrawing.Geometry>
+                        <RectangleGeometry Rect="0,0,32,32" />
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+                <GeometryDrawing>
+                    <GeometryDrawing.Brush>
+                        <SolidColorBrush Color="#0067C0" Opacity="0.45" />
+                    </GeometryDrawing.Brush>
+                    <GeometryDrawing.Geometry>
+                        <RectangleGeometry Rect="6,5,20,6" RadiusX="2.25" RadiusY="2.25" />
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+                <GeometryDrawing Brush="{StaticResource AppIconFrontBrush}">
+                    <GeometryDrawing.Geometry>
+                        <RectangleGeometry Rect="3,8,26,21" RadiusX="6" RadiusY="6" />
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+                <GeometryDrawing Geometry="M9,19 L13.5,23.5 L23,14">
+                    <GeometryDrawing.Pen>
+                        <Pen Brush="{StaticResource AppIconCheckBrush}" Thickness="3.75" StartLineCap="Round" EndLineCap="Round" LineJoin="Round" />
+                    </GeometryDrawing.Pen>
+                </GeometryDrawing>
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+
+    <!-- 16: 層を捨てて角丸四角とチェックだけ。線幅34（256 換算）。チェックの脚は両方45° -->
+    <DrawingImage x:Key="AppIcon16Image">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <GeometryDrawing Brush="Transparent">
+                    <GeometryDrawing.Geometry>
+                        <RectangleGeometry Rect="0,0,16,16" />
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+                <GeometryDrawing Brush="{StaticResource AppIconFrontBrush}">
+                    <GeometryDrawing.Geometry>
+                        <RectangleGeometry Rect="1,1,14,14" RadiusX="3.5" RadiusY="3.5" />
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+                <GeometryDrawing Geometry="M4,8 L6.5,10.5 L11.5,5.5">
+                    <GeometryDrawing.Pen>
+                        <Pen Brush="{StaticResource AppIconCheckBrush}" Thickness="2.125" StartLineCap="Round" EndLineCap="Round" LineJoin="Round" />
+                    </GeometryDrawing.Pen>
+                </GeometryDrawing>
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+</ResourceDictionary>

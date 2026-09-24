@@ -1,0 +1,64 @@
+<ui:FluentWindow x:Class="TaskDeck.App.Views.Templates.RecurrencePickerDevWindow"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                 xmlns:pickers="clr-namespace:TaskDeck.App.Controls.Pickers"
+                 Title="繰り返しピッカーの確認（開発用）"
+                 Width="760" Height="860"
+                 ExtendsContentIntoTitleBar="True"
+                 WindowBackdropType="None"
+                 WindowStartupLocation="CenterOwner"
+                 Background="{DynamicResource SurfaceWindowBrush}">
+    <!--
+        開発時だけ開く確認用の小窓（テンプレート画面の「繰り返しピッカーの確認」から）。本番では開く入口が出ない。
+        右はパネルをそのまま置いたもの（影と枠はパネル自身が持つ）。「ポップアップで開く」は詳細ペインと同じ置き方（INTERFACES 5.3）。
+    -->
+    <Grid Background="{DynamicResource SurfaceWindowBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <ui:TitleBar Title="繰り返しピッカーの確認（開発用）" ShowMinimize="False" ShowMaximize="False" />
+        <Grid Grid.Row="1" Margin="16,8,16,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="230" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <StackPanel>
+                <TextBlock Style="{StaticResource TextLabelStyle}" Margin="0,0,0,6" Text="開いたときの値" />
+                <Button Style="{StaticResource StandardButtonStyle}" Margin="0,0,0,6" HorizontalAlignment="Stretch" Content="なし・期限 今日" Tag="none" Click="OnSample" />
+                <Button Style="{StaticResource StandardButtonStyle}" Margin="0,0,0,6" HorizontalAlignment="Stretch" Content="毎週 月・水・期限 今日" Tag="weekly" Click="OnSample" />
+                <Button Style="{StaticResource StandardButtonStyle}" Margin="0,0,0,6" HorizontalAlignment="Stretch" Content="毎月 第3月曜・完了日から・5回" Tag="monthly" Click="OnSample" />
+                <Button Style="{StaticResource StandardButtonStyle}" Margin="0,0,0,6" HorizontalAlignment="Stretch" Content="3日ごと・期限 明日 15:00" Tag="custom" Click="OnSample" />
+                <Button Style="{StaticResource StandardButtonStyle}" Margin="0,0,0,6" HorizontalAlignment="Stretch" Content="読めない規則（2/29 だけ）" Tag="raw" Click="OnSample" />
+                <Button Style="{StaticResource StandardButtonStyle}" Margin="0,0,0,6" HorizontalAlignment="Stretch" Content="毎日・期限なし・12/31 まで" Tag="until" Click="OnSample" />
+                <Button x:Name="PopupButton"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Margin="0,10,0,0"
+                        HorizontalAlignment="Stretch"
+                        Content="ポップアップで開く"
+                        Click="OnOpenPopup"
+                        AutomationProperties.AutomationId="OpenPopup" />
+                <TextBlock Style="{StaticResource TextLabelStyle}" Margin="0,16,0,6" Text="結果（Picked / Cancelled）" />
+                <TextBlock x:Name="ResultText"
+                           Style="{StaticResource TextBodySmallStyle}"
+                           TextWrapping="Wrap"
+                           AutomationProperties.AutomationId="PickResult"
+                           Text="（まだ決めていません）" />
+            </StackPanel>
+            <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" Focusable="False">
+                <pickers:RecurrencePickerPanel x:Name="Picker" HorizontalAlignment="Left" VerticalAlignment="Top" />
+            </ScrollViewer>
+        </Grid>
+
+        <Popup x:Name="PickerPopup"
+               AllowsTransparency="True"
+               StaysOpen="False"
+               Placement="Bottom"
+               HorizontalOffset="-10"
+               VerticalOffset="-8"
+               PlacementTarget="{Binding ElementName=PopupButton}">
+            <pickers:RecurrencePickerPanel x:Name="PopupPicker" AutomationProperties.AutomationId="PopupPicker" />
+        </Popup>
+    </Grid>
+</ui:FluentWindow>

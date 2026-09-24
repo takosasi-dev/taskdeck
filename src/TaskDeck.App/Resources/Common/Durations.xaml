@@ -1,0 +1,18 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!--
+        アニメーションの時間（UI 設計書 7章）。動きは補助で、待たせる理由にしない。一覧のスクロールには付けない。
+        「アニメーションを減らす」が有効なときは、使う側で Duration を 0 にする（動かさずにすぐ切り替える）。
+        判定は ThemeService.ReduceMotion（設定が「Windows に従う」なら OS の「アニメーション効果」）。変わったら ReduceMotionChanged が来る。
+    -->
+    <Duration x:Key="DurationHover">0:0:0.083</Duration>
+    <Duration x:Key="DurationSelection">0:0:0.167</Duration>
+    <Duration x:Key="DurationComplete">0:0:0.167</Duration>
+    <Duration x:Key="DurationQuickInput">0:0:0.150</Duration>
+    <Duration x:Key="DurationPane">0:0:0.250</Duration>
+    <Duration x:Key="DurationViewSwitch">0:0:0.167</Duration>
+
+    <!-- CubicBezier(0,0,0,1) と CubicBezier(0.1,0.9,0.2,1) に近い減速カーブ -->
+    <ExponentialEase x:Key="EaseDecelerate" EasingMode="EaseOut" Exponent="7" />
+    <CubicEase x:Key="EaseStandard" EasingMode="EaseOut" />
+</ResourceDictionary>

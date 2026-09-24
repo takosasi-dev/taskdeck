@@ -1,0 +1,181 @@
+<UserControl x:Class="TaskDeck.App.Controls.Pickers.ProjectPickerPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:pk="clr-namespace:TaskDeck.App.Controls.Pickers"
+             xmlns:input="clr-namespace:TaskDeck.App.Input"
+             x:Name="Root">
+    <!-- プロジェクトピッカー（UI 設計書 12.3）。上に絞り込み、下に「新しく作る」、「なし」は破線の丸。面の幅は 186 -->
+    <UserControl.Resources>
+        <pk:EqualsToVisibilityConverter x:Key="EqualsToVisibility" />
+        <pk:EqualsMultiConverter x:Key="EqualsMulti" />
+        <pk:ProjectColorConverter x:Key="ProjectColor" />
+
+        <Style x:Key="PickerRowStyle" TargetType="Button" BasedOn="{StaticResource ListRowButtonStyle}">
+            <Setter Property="Height" Value="{StaticResource PickerItemHeight}" />
+            <Setter Property="Padding" Value="12,0" />
+        </Style>
+        <Style x:Key="PickerCheckStyle" TargetType="Path" BasedOn="{StaticResource IconPathStyle}">
+            <Setter Property="Width" Value="13" />
+            <Setter Property="Height" Value="13" />
+            <Setter Property="Stretch" Value="Uniform" />
+            <Setter Property="StrokeThickness" Value="2" />
+            <Setter Property="Stroke" Value="{DynamicResource AccentDefaultBrush}" />
+            <Setter Property="Data" Value="{StaticResource IconCheck}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+    </UserControl.Resources>
+
+    <Border Style="{StaticResource PopupShadowStyle}">
+        <Border Style="{StaticResource PopupSurfaceStyle}" Width="{StaticResource SmallPopupWidth}">
+            <StackPanel>
+                <!-- 絞り込み（IME の変換中は走らせない） -->
+                <Grid Margin="10,10,10,6">
+                    <TextBox x:Name="FilterBox"
+                             Style="{StaticResource InputTextBoxStyle}"
+                             MinHeight="28"
+                             Padding="28,0,8,0"
+                             input:ImeGuard.IsEnabled="True"
+                             input:ImeGuard.CompositionCompleted="OnCompositionCompleted"
+                             TextChanged="OnFilterChanged"
+                             PreviewKeyDown="OnFilterKeyDown"
+                             AutomationProperties.Name="プロジェクトを絞り込む" />
+                    <Path Style="{StaticResource IconPathStyle}"
+                          Data="{StaticResource IconSearch}"
+                          Width="12" Height="12" Stretch="Uniform"
+                          Margin="10,0,0,0"
+                          HorizontalAlignment="Left" VerticalAlignment="Center"
+                          Stroke="{DynamicResource TextTertiaryBrush}"
+                          IsHitTestVisible="False" />
+                    <TextBlock Margin="28,0,0,0"
+                               VerticalAlignment="Center"
+                               FontSize="{StaticResource TypeCaptionSize}"
+                               Foreground="{DynamicResource TextTertiaryBrush}"
+                               Text="プロジェクト"
+                               IsHitTestVisible="False">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource TextBaseStyle}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Text, ElementName=FilterBox}" Value="">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+
+                <!-- 一覧（ListBox 自身のスクロールを使う。ScrollViewer で包まない） -->
+                <ListBox x:Name="ProjectList"
+                         MaxHeight="220"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         Padding="0,2"
+                         HorizontalContentAlignment="Stretch"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         PreviewKeyDown="OnListKeyDown"
+                         AutomationProperties.Name="プロジェクト"
+                         MouseLeftButtonUp="OnListClicked">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Padding" Value="12,0" />
+                            <Setter Property="Height" Value="{StaticResource PickerItemHeight}" />
+                            <Setter Property="Cursor" Value="Hand" />
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                            <!-- 読み上げはプロジェクト名（既定だと型名が読まれる） -->
+                            <Setter Property="AutomationProperties.Name" Value="{Binding Name}" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <Border x:Name="Row"
+                                                Background="Transparent"
+                                                CornerRadius="{StaticResource RadiusRow}"
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter VerticalAlignment="Center" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Row" Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="Row" Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Ellipse Width="9" Height="9" VerticalAlignment="Center"
+                                         Fill="{Binding ColorHex, Converter={StaticResource ProjectColor}}" />
+                                <TextBlock Grid.Column="1" Margin="9,0,0,0"
+                                           Style="{StaticResource TextBodySmallStyle}"
+                                           VerticalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis"
+                                           Text="{Binding Name}" />
+                                <Path Grid.Column="2" Style="{StaticResource PickerCheckStyle}">
+                                    <Path.Visibility>
+                                        <MultiBinding Converter="{StaticResource EqualsMulti}">
+                                            <Binding Path="Id" />
+                                            <Binding Path="ProjectId" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                                        </MultiBinding>
+                                    </Path.Visibility>
+                                </Path>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <!-- なし（破線の丸） -->
+                <Button x:Name="NoneRow" Style="{StaticResource PickerRowStyle}" Click="OnNone"
+                        AutomationProperties.Name="プロジェクトを外す">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Ellipse Width="9" Height="9" VerticalAlignment="Center"
+                                 Stroke="{DynamicResource TextDisabledBrush}" StrokeThickness="1"
+                                 StrokeDashArray="2 1.5" />
+                        <TextBlock Grid.Column="1" Margin="9,0,0,0"
+                                   Style="{StaticResource TextBodySmallStyle}"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   VerticalAlignment="Center"
+                                   Text="なし" />
+                        <Path Grid.Column="2" Style="{StaticResource PickerCheckStyle}"
+                              Visibility="{Binding ProjectId, ElementName=Root, Converter={StaticResource EqualsToVisibility}}" />
+                    </Grid>
+                </Button>
+
+                <Border Style="{StaticResource PopupSeparatorStyle}" Margin="12,4" />
+
+                <!-- 新しく作る（絞り込みの文字があれば、その名前で作る） -->
+                <Button x:Name="CreateRow" Style="{StaticResource PickerRowStyle}" Click="OnCreate"
+                        AutomationProperties.Name="新しいプロジェクトを作る">
+                    <StackPanel Orientation="Horizontal">
+                        <Path Style="{StaticResource IconPathStyle}"
+                              Data="{StaticResource IconAdd}"
+                              Width="14" Height="14" Stretch="Uniform"
+                              VerticalAlignment="Center"
+                              Stroke="{DynamicResource AccentDefaultBrush}" />
+                        <TextBlock x:Name="CreateLabel" Margin="9,0,0,0"
+                                   Style="{StaticResource TextBodySmallStyle}"
+                                   Foreground="{DynamicResource AccentDefaultBrush}"
+                                   VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis"
+                                   Text="新しく作る" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Border>
+    </Border>
+</UserControl>

@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>TaskDeck 振り返り</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body { margin: 0; font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; background: #ffffff; }
+</style>
+</helmet>
+<div style="width: 1280px; height: 900px; box-sizing: border-box; display: flex; flex-direction: column; background: #f3f3f3; color: #1a1a1a; font-size: 14px; overflow: hidden; border: 1px solid #d2d2d2; border-radius: 8px;">
+
+  <div style="height: 48px; flex-shrink: 0; display: flex; align-items: center; gap: 12px; padding: 0 0 0 12px; border-bottom: 1px solid #e5e5e5;">
+    <button type="button" aria-label="サイドバーの表示を切り替え" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; border-radius: 4px; cursor: pointer; color: #1a1a1a;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 4h12M2 8h12M2 12h12"/></svg></button>
+    <span style="font-size: 14px; font-weight: 600;">TaskDeck</span>
+    <div style="flex-grow: 1;"></div>
+    <div style="display: flex;">
+      <button type="button" aria-label="最小化" style="width: 46px; height: 47px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; color: #1a1a1a;"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1"><path d="M0 5h10"/></svg></button>
+      <button type="button" aria-label="最大化" style="width: 46px; height: 47px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; color: #1a1a1a;"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1"><rect x="0.5" y="0.5" width="9" height="9"/></svg></button>
+      <button type="button" aria-label="閉じる" style="width: 46px; height: 47px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; color: #1a1a1a;"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1"><path d="M0 0l10 10M10 0L0 10"/></svg></button>
+    </div>
+  </div>
+
+  <div style="flex-grow: 1; display: flex; min-height: 0;">
+
+    <div style="width: 200px; flex-shrink: 0; box-sizing: border-box; padding: 8px; display: flex; flex-direction: column; gap: 2px;">
+      <div style="display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px 0 14px; border-radius: 5px;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#3a3a3a" stroke-width="1.5" stroke-linecap="round"><path d="M8 4.5V8l2.2 1.4"/><circle cx="8" cy="8" r="6"/></svg><span style="flex-grow: 1;">今日</span><span style="font-size: 12px; color: #5d5d5d;">7</span></div>
+      <div style="display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px 0 14px; border-radius: 5px;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#3a3a3a" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M2 6.5h12M5.5 1.6v2.4M10.5 1.6v2.4"/></svg><span style="flex-grow: 1;">予定</span><span style="font-size: 12px; color: #5d5d5d;">28</span></div>
+      <div style="display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px 0 14px; border-radius: 5px;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#3a3a3a" stroke-width="1.5" stroke-linecap="round"><path d="M5.5 4h8M5.5 8h8M5.5 12h8M2.5 4h.01M2.5 8h.01M2.5 12h.01"/></svg><span style="flex-grow: 1;">すべて</span><span style="font-size: 12px; color: #5d5d5d;">94</span></div>
+      <div style="height: 1px; background: #e0e0e0; margin: 8px 10px 6px 10px;"></div>
+      <div style="position: relative; display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px; border-radius: 5px; background: #e6e6e6;">
+        <div style="position: absolute; left: 0; top: 9px; width: 3px; height: 18px; border-radius: 2px; background: #0067c0;"></div>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#0067c0" stroke-width="1.5" stroke-linecap="round" style="margin-left: 4px;"><path d="M2.4 13.2V9M6.2 13.2V5.4M10 13.2v-6M13.8 13.2V3"/></svg>
+        <span style="flex-grow: 1; font-weight: 600;">振り返り</span>
+      </div>
+      <div style="flex-grow: 1;"></div>
+      <div style="padding: 10px 12px; border-radius: 6px; background: #ffffff; border: 1px solid #e5e5e5;">
+        <div style="font-size: 11px; color: #5d5d5d; line-height: 1.75;">完了したタスクは消えません。片付けた量が形になって残ります。</div>
+      </div>
+    </div>
+
+    <div style="flex-grow: 1; min-width: 0; box-sizing: border-box; background: #ffffff; border: 1px solid #e5e5e5; border-right: none; border-bottom: none; border-top-left-radius: 8px; padding: 18px 22px; display: flex; flex-direction: column; gap: 14px; overflow: hidden;">
+
+      <div style="flex-shrink: 0; display: flex; align-items: center; gap: 10px;">
+        <h1 style="margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em;">振り返り</h1>
+        <div style="flex-grow: 1;"></div>
+        <div style="display: flex; gap: 2px; padding: 2px; background: #f0f0f0; border-radius: 6px;">
+          <button type="button" style="height: 26px; padding: 0 13px; font-size: 12px; font-family: inherit; color: #1a1a1a; background: #ffffff; border: 1px solid #e0e0e0; border-radius: 4px; cursor: pointer;">今週</button>
+          <button type="button" style="height: 26px; padding: 0 13px; font-size: 12px; font-family: inherit; color: #5d5d5d; background: transparent; border: none; border-radius: 4px; cursor: pointer;">今月</button>
+          <button type="button" style="height: 26px; padding: 0 13px; font-size: 12px; font-family: inherit; color: #5d5d5d; background: transparent; border: none; border-radius: 4px; cursor: pointer;">今年</button>
+        </div>
+        <button type="button" style="display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 11px; font-size: 12px; font-family: inherit; color: #1a1a1a; background: transparent; border: 1px solid #d6d6d6; border-radius: 5px; cursor: pointer;">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2.6" width="12" height="10.8" rx="1.4"/><path d="M2 6.2h12M6.2 6.2v7.2"/></svg>
+          表で見る
+        </button>
+      </div>
+
+      <div style="flex-shrink: 0; display: flex; gap: 12px;">
+
+        <div style="width: 260px; flex-shrink: 0; box-sizing: border-box; padding: 14px 18px; border: 1px solid #e5e5e5; border-radius: 8px; background: #fbfbfb;">
+          <div style="font-size: 12px; color: #5d5d5d;">今週 片付けたタスク</div>
+          <div style="display: flex; align-items: baseline; gap: 10px; margin-top: 2px;">
+            <span style="font-size: 52px; font-weight: 600; line-height: 1.05; letter-spacing: -0.02em;">42</span>
+            <span style="font-size: 13px; color: #5d5d5d;">件</span>
+            <div style="flex-grow: 1;"></div>
+            <span style="display: inline-flex; align-items: center; gap: 3px; font-size: 12px; font-weight: 600; color: #0b5d45;">
+              <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V3M3.6 7.4 8 3l4.4 4.4"/></svg>
+              18%
+            </span>
+          </div>
+          <div style="margin-top: 6px; font-size: 11px; color: #6e6e6e;">先週は 36 件でした</div>
+        </div>
+
+        <div style="flex-grow: 1; box-sizing: border-box; padding: 14px 16px; border: 1px solid #e5e5e5; border-radius: 8px;">
+          <div style="font-size: 12px; color: #5d5d5d;">期限内に終えた割合</div>
+          <div style="display: flex; align-items: baseline; gap: 5px; margin-top: 4px;"><span style="font-size: 30px; font-weight: 600; line-height: 1.1;">78</span><span style="font-size: 14px; color: #5d5d5d;">%</span></div>
+          <div style="margin-top: 9px; height: 5px; border-radius: 3px; background: #dceafa; overflow: hidden;"><div style="width: 78%; height: 100%; background: #0067c0;"></div></div>
+          <div style="margin-top: 6px; font-size: 11px; color: #6e6e6e;">42 件中 33 件</div>
+        </div>
+
+        <div style="flex-grow: 1; box-sizing: border-box; padding: 14px 16px; border: 1px solid #e5e5e5; border-radius: 8px;">
+          <div style="font-size: 12px; color: #5d5d5d;">連続で片付けた日数</div>
+          <div style="display: flex; align-items: baseline; gap: 5px; margin-top: 4px;"><span style="font-size: 30px; font-weight: 600; line-height: 1.1;">12</span><span style="font-size: 14px; color: #5d5d5d;">日</span></div>
+          <div style="margin-top: 9px; display: flex; align-items: flex-end; gap: 2px; height: 22px;">
+            <sc-for list="{{streak}}" as="s" hint-placeholder-count="12"><div style="flex-grow: 1; background: #0067c0; border-radius: 2px 2px 0 0; height: {{s.h}};"></div></sc-for>
+          </div>
+          <div style="margin-top: 6px; font-size: 11px; color: #6e6e6e;">自己最長は 19 日</div>
+        </div>
+
+        <div style="flex-grow: 1; box-sizing: border-box; padding: 14px 16px; border: 1px solid #e5e5e5; border-radius: 8px;">
+          <div style="font-size: 12px; color: #5d5d5d;">作ってから終えるまで</div>
+          <div style="display: flex; align-items: baseline; gap: 5px; margin-top: 4px;"><span style="font-size: 30px; font-weight: 600; line-height: 1.1;">1.8</span><span style="font-size: 14px; color: #5d5d5d;">日</span></div>
+          <div style="margin-top: 9px; font-size: 11px; color: #6e6e6e; line-height: 1.5;">先月の平均は 2.6 日<br>短いほど溜め込んでいない</div>
+        </div>
+      </div>
+
+      <div style="flex-grow: 1; min-height: 0; display: flex; gap: 12px;">
+
+        <div style="flex-grow: 1; min-width: 0; box-sizing: border-box; padding: 14px 18px 12px 18px; border: 1px solid #e5e5e5; border-radius: 8px; display: flex; flex-direction: column;">
+          <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 14px;">
+            <span style="font-size: 13px; font-weight: 600;">日ごとに片付けた数</span>
+            <span style="font-size: 11px; color: #6e6e6e;">直近 14 日</span>
+          </div>
+
+          <div style="flex-grow: 1; display: flex; min-height: 0;">
+            <div style="width: 26px; flex-shrink: 0; position: relative;">
+              <div style="position: absolute; top: -6px; right: 7px; font-size: 10px; color: #8a8a8a; font-variant-numeric: tabular-nums;">15</div>
+              <div style="position: absolute; top: calc(33.3% - 6px); right: 7px; font-size: 10px; color: #8a8a8a; font-variant-numeric: tabular-nums;">10</div>
+              <div style="position: absolute; top: calc(66.6% - 6px); right: 7px; font-size: 10px; color: #8a8a8a; font-variant-numeric: tabular-nums;">5</div>
+              <div style="position: absolute; bottom: 20px; right: 7px; font-size: 10px; color: #8a8a8a; font-variant-numeric: tabular-nums;">0</div>
+            </div>
+
+            <div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column;">
+              <div style="flex-grow: 1; position: relative; min-height: 0;">
+                <div style="position: absolute; left: 0; right: 0; top: 0; height: 1px; background: #ededed;"></div>
+                <div style="position: absolute; left: 0; right: 0; top: 33.3%; height: 1px; background: #ededed;"></div>
+                <div style="position: absolute; left: 0; right: 0; top: 66.6%; height: 1px; background: #ededed;"></div>
+                <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: #d6d6d6;"></div>
+
+                <div style="position: absolute; inset: 0; display: flex; align-items: flex-end; gap: 2px;">
+                  <sc-for list="{{daily}}" as="d" hint-placeholder-count="14">
+                    <div style="flex-grow: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; position: relative;">
+                      <sc-if value="{{d.isMax}}" hint-placeholder-val="{{true}}"><div style="position: absolute; bottom: {{d.labelBottom}}; font-size: 11px; font-weight: 600; color: #1a1a1a;">14</div></sc-if>
+                      <div style="width: 100%; max-width: 22px; height: {{d.h}}; background: {{d.fill}}; border-radius: 4px 4px 0 0;"></div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+
+              <div style="height: 20px; flex-shrink: 0; display: flex; gap: 2px; padding-top: 5px;">
+                <sc-for list="{{daily}}" as="d" hint-placeholder-count="14"><div style="flex-grow: 1; text-align: center; font-size: 10px; color: {{d.labelColor}}; font-variant-numeric: tabular-nums;">{{d.label}}</div></sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="width: 300px; flex-shrink: 0; box-sizing: border-box; padding: 14px 18px; border: 1px solid #e5e5e5; border-radius: 8px; display: flex; flex-direction: column;">
+          <div style="font-size: 13px; font-weight: 600; margin-bottom: 4px;">何に時間を使ったか</div>
+          <div style="font-size: 11px; color: #6e6e6e; margin-bottom: 14px;">今週の完了 42 件の内訳</div>
+
+          <div style="display: flex; height: 12px; border-radius: 6px; overflow: hidden; gap: 2px; margin-bottom: 14px;">
+            <div style="width: 38%; background: #0067c0;"></div>
+            <div style="width: 26%; background: #ca5010;"></div>
+            <div style="width: 19%; background: #8764b8;"></div>
+            <div style="width: 17%; background: #0e7c5a;"></div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 9px;">
+            <div style="display: flex; align-items: center; gap: 9px;"><span style="width: 10px; height: 10px; border-radius: 3px; background: #0067c0; flex-shrink: 0;"></span><span style="flex-grow: 1; font-size: 12px;">業務改善</span><span style="font-size: 12px; color: #5d5d5d; font-variant-numeric: tabular-nums;">16 件</span><span style="width: 34px; text-align: right; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums;">38%</span></div>
+            <div style="display: flex; align-items: center; gap: 9px;"><span style="width: 10px; height: 10px; border-radius: 3px; background: #ca5010; flex-shrink: 0;"></span><span style="flex-grow: 1; font-size: 12px;">学校</span><span style="font-size: 12px; color: #5d5d5d; font-variant-numeric: tabular-nums;">11 件</span><span style="width: 34px; text-align: right; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums;">26%</span></div>
+            <div style="display: flex; align-items: center; gap: 9px;"><span style="width: 10px; height: 10px; border-radius: 3px; background: #8764b8; flex-shrink: 0;"></span><span style="flex-grow: 1; font-size: 12px;">私物</span><span style="font-size: 12px; color: #5d5d5d; font-variant-numeric: tabular-nums;">8 件</span><span style="width: 34px; text-align: right; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums;">19%</span></div>
+            <div style="display: flex; align-items: center; gap: 9px;"><span style="width: 10px; height: 10px; border-radius: 3px; background: #0e7c5a; flex-shrink: 0;"></span><span style="flex-grow: 1; font-size: 12px; color: #5d5d5d;">その他</span><span style="font-size: 12px; color: #5d5d5d; font-variant-numeric: tabular-nums;">7 件</span><span style="width: 34px; text-align: right; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums;">17%</span></div>
+          </div>
+
+          <div style="height: 1px; background: #f0f0f0; margin: 14px 0 12px 0;"></div>
+
+          <div style="font-size: 13px; font-weight: 600; margin-bottom: 10px;">終わりやすい曜日</div>
+          <div style="display: flex; align-items: flex-end; gap: 4px; height: 58px;">
+            <sc-for list="{{dow}}" as="w" hint-placeholder-count="7">
+              <div style="flex-grow: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px;">
+                <div style="width: 100%; max-width: 20px; height: {{w.h}}; background: {{w.fill}}; border-radius: 3px 3px 0 0;"></div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display: flex; gap: 4px; margin-top: 5px;">
+            <sc-for list="{{dow}}" as="w" hint-placeholder-count="7"><div style="flex-grow: 1; text-align: center; font-size: 10px; color: {{w.labelColor}};">{{w.label}}</div></sc-for>
+          </div>
+          <div style="margin-top: 8px; font-size: 11px; color: #6e6e6e; line-height: 1.55;">水曜がいちばん進んでいます。日曜は平均 3.2 件。</div>
+        </div>
+      </div>
+
+      <div style="flex-shrink: 0; box-sizing: border-box; padding: 14px 18px; border: 1px solid #e5e5e5; border-radius: 8px;">
+        <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 12px;">
+          <span style="font-size: 13px; font-weight: 600;">この半年</span>
+          <span style="font-size: 11px; color: #6e6e6e;">1 日 1 マス・色が濃いほど多く片付けた日</span>
+          <div style="flex-grow: 1;"></div>
+          <span style="font-size: 10px; color: #8a8a8a;">少</span>
+          <span style="width: 11px; height: 11px; border-radius: 2px; border: 1px solid #ededed; box-sizing: border-box;"></span>
+          <span style="width: 11px; height: 11px; border-radius: 2px; background: #7fb2e0;"></span>
+          <span style="width: 11px; height: 11px; border-radius: 2px; background: #4e93d2;"></span>
+          <span style="width: 11px; height: 11px; border-radius: 2px; background: #1d70c3;"></span>
+          <span style="width: 11px; height: 11px; border-radius: 2px; background: #00559e;"></span>
+          <span style="font-size: 10px; color: #8a8a8a;">多</span>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: flex-start;">
+          <div style="display: flex; flex-direction: column; gap: 3px; padding-top: 0;">
+            <div style="height: 11px; font-size: 9px; color: #8a8a8a; line-height: 11px;">月</div>
+            <div style="height: 11px;"></div>
+            <div style="height: 11px; font-size: 9px; color: #8a8a8a; line-height: 11px;">水</div>
+            <div style="height: 11px;"></div>
+            <div style="height: 11px; font-size: 9px; color: #8a8a8a; line-height: 11px;">金</div>
+            <div style="height: 11px;"></div>
+            <div style="height: 11px;"></div>
+          </div>
+          <div style="flex-grow: 1; display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, 11px); gap: 3px;">
+            <sc-for list="{{heat}}" as="c" hint-placeholder-count="182"><div style="border-radius: 2px; background: {{c.bg}}; border: {{c.border}};"></div></sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var dailyVals = [6, 9, 4, 11, 7, 2, 3, 8, 12, 5, 9, 14, 6, 10];
+    var dailyLabels = ['9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22'];
+    var weekendIdx = [5, 6, 12, 13];
+    var max = 15;
+    var daily = dailyVals.map(function (v, i) {
+      var isWeekend = weekendIdx.indexOf(i) !== -1;
+      return {
+        h: (v / max * 100).toFixed(1) + '%',
+        fill: '#0067c0',
+        label: dailyLabels[i],
+        labelColor: isWeekend ? '#a8a8a8' : '#6e6e6e',
+        isMax: v === 14,
+        labelBottom: 'calc(' + (v / max * 100).toFixed(1) + '% + 4px)'
+      };
+    });
+
+    var dowVals = [3.2, 8.1, 7.4, 9.0, 6.8, 5.2, 4.1];
+    var dowLabels = ['日', '月', '火', '水', '木', '金', '土'];
+    var dowMax = 10;
+    var dow = dowVals.map(function (v, i) {
+      return {
+        h: (v / dowMax * 100).toFixed(1) + '%',
+        fill: '#0067c0',
+        label: dowLabels[i],
+        labelColor: (i === 0 || i === 6) ? '#a8a8a8' : '#6e6e6e'
+      };
+    });
+
+    var streakVals = [4, 6, 3, 8, 5, 9, 7, 4, 10, 6, 8, 11];
+    var streak = streakVals.map(function (v) {
+      return { h: (v / 12 * 100).toFixed(0) + '%' };
+    });
+
+    var steps = ['#7fb2e0', '#4e93d2', '#1d70c3', '#00559e'];
+    var heat = [];
+    var seed = 7;
+    for (var w = 0; w < 26; w++) {
+      for (var d = 0; d < 7; d++) {
+        seed = (seed * 1103515245 + 12345) % 2147483648;
+        var r = seed / 2147483648;
+        var weekendPenalty = (d === 0 || d === 6) ? 0.45 : 1;
+        var recency = 0.55 + (w / 26) * 0.6;
+        var score = r * weekendPenalty * recency;
+        var level = score < 0.16 ? 0 : score < 0.34 ? 1 : score < 0.52 ? 2 : score < 0.7 ? 3 : 4;
+        heat.push({
+          bg: level === 0 ? 'transparent' : steps[level - 1],
+          border: level === 0 ? '1px solid #ededed' : 'none'
+        });
+      }
+    }
+
+    return { daily: daily, dow: dow, streak: streak, heat: heat };
+  }
+}
+</script>
+</body>
+</html>

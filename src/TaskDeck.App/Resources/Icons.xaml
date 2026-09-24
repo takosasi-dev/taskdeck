@@ -1,0 +1,138 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!--
+        アイコン（16×16 の座標、線幅 1.5、端と角は丸）。モックアップの SVG を移植したもの（手で直してよい）。
+        使い方: <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconToday}" />
+        大きさを変えるときは Viewbox（Width/Height=14 など）で包む。色は Stroke を DynamicResource で指定する。
+    -->
+    <!-- 今日（時計） -->
+    <StreamGeometry x:Key="IconToday">M8 4.5 V8 l2.2 1.4 M2,8 A6,6 0 1 1 14,8 A6,6 0 1 1 2,8 Z</StreamGeometry>
+    <!-- 予定・期限・カレンダー -->
+    <StreamGeometry x:Key="IconCalendar">M3.5,3 H12.5 A1.5,1.5 0 0 1 14,4.5 V12.5 A1.5,1.5 0 0 1 12.5,14 H3.5 A1.5,1.5 0 0 1 2,12.5 V4.5 A1.5,1.5 0 0 1 3.5,3 Z M2 6.5 h12 M5.5 1.6 v2.4 M10.5 1.6 v2.4</StreamGeometry>
+    <!-- 日付（1日） -->
+    <StreamGeometry x:Key="IconCalendarDay">M3.5,3 H12.5 A1.5,1.5 0 0 1 14,4.5 V12.5 A1.5,1.5 0 0 1 12.5,14 H3.5 A1.5,1.5 0 0 1 2,12.5 V4.5 A1.5,1.5 0 0 1 3.5,3 Z M2 6.5 h12 M5.5 9.5 h2</StreamGeometry>
+    <!-- すべて・リスト表示 -->
+    <StreamGeometry x:Key="IconList">M5.5 4 h8 M5.5 8 h8 M5.5 12 h8 M2.5 4 h0.01 M2.5 8 h0.01 M2.5 12 h0.01</StreamGeometry>
+    <!-- 完了済み・完了 -->
+    <StreamGeometry x:Key="IconCheck">M3 8.5 6.2 11.5 13 4.8</StreamGeometry>
+    <!-- 完了（丸） -->
+    <StreamGeometry x:Key="IconCheckCircle">M1.8,8 A6.2,6.2 0 1 1 14.2,8 A6.2,6.2 0 1 1 1.8,8 Z M5.2 8.2 7 10 l3.8 -3.8</StreamGeometry>
+    <!-- 通知停止中（トレイ） -->
+    <StreamGeometry x:Key="IconCheckOff">M2.6 8.4 6 11.8 13.4 4.4 M1.6 1.6 14.4 14.4</StreamGeometry>
+    <!-- ゴミ箱・削除 -->
+    <StreamGeometry x:Key="IconTrash">M2.6 4.2 h10.8 M6.4 4.2 V2.8 h3.2 v1.4 M4 4.2 l0.7 9.1 h6.6 l0.7 -9.1</StreamGeometry>
+    <!-- 検索 -->
+    <StreamGeometry x:Key="IconSearch">M2.5,7 A4.5,4.5 0 1 1 11.5,7 A4.5,4.5 0 1 1 2.5,7 Z M10.5 10.5 14 14</StreamGeometry>
+    <!-- 設定 -->
+    <StreamGeometry x:Key="IconSettings">M5.8,8 A2.2,2.2 0 1 1 10.2,8 A2.2,2.2 0 1 1 5.8,8 Z M8 1.6 v1.6 M8 12.8 v1.6 M14.4 8 h-1.6 M3.2 8 H1.6 M12.5 3.5 l-1.1 1.1 M4.6 11.4 l-1.1 1.1 M12.5 12.5 l-1.1 -1.1 M4.6 4.6 3.5 3.5</StreamGeometry>
+    <!-- 同期（Phase 5 まで使わない） -->
+    <StreamGeometry x:Key="IconSync">M13.5 7 a5.5,5.5 0 0 0 -9.9,-3.3 M2.5 9 a5.5,5.5 0 0 0 9.9,3.3 M13.5 2.5 V6 H10 M2.5 13.5 V10 H6</StreamGeometry>
+    <!-- 繰り返し -->
+    <StreamGeometry x:Key="IconRepeat">M13.5 7 a5.5,5.5 0 0 0 -9.9,-3.3 M2.5 9 a5.5,5.5 0 0 0 9.9,3.3 M13.5 2.8 V6 H10.4 M2.5 13.2 V10 h3.1</StreamGeometry>
+    <!-- サイドバー切替（ハンバーガー） -->
+    <StreamGeometry x:Key="IconMenu">M2 4 h12 M2 8 h12 M2 12 h12</StreamGeometry>
+    <!-- サイドバー -->
+    <StreamGeometry x:Key="IconSidebar">M3.6,3 H12.4 A1.6,1.6 0 0 1 14,4.6 V11.4 A1.6,1.6 0 0 1 12.4,13 H3.6 A1.6,1.6 0 0 1 2,11.4 V4.6 A1.6,1.6 0 0 1 3.6,3 Z M6.2 3 v10</StreamGeometry>
+    <!-- 追加 -->
+    <StreamGeometry x:Key="IconAdd">M8 3.5 v9 M3.5 8 h9</StreamGeometry>
+    <!-- 追加（大） -->
+    <StreamGeometry x:Key="IconPlus">M8 3 v10 M3 8 h10</StreamGeometry>
+    <!-- 期限切れ・警告 -->
+    <StreamGeometry x:Key="IconWarning">M8 2.2 14.6 13.4 H1.4 L8 2.2 Z M8 6.4 v3 M8 11.4 h0.01</StreamGeometry>
+    <!-- 情報 -->
+    <StreamGeometry x:Key="IconInfo">M2,8 A6,6 0 1 1 14,8 A6,6 0 1 1 2,8 Z M8 7.2 v3.6 M8 5.2 h0.01</StreamGeometry>
+    <!-- 通知 -->
+    <StreamGeometry x:Key="IconBell">M4 6.6 a4,4 0 0 1 8,0 c0 3 1 4 1 4 H3 s1 -1 1 -4 Z M6.8 13.2 a1.6,1.6 0 0 0 2.4,0</StreamGeometry>
+    <!-- リマインド（時計） -->
+    <StreamGeometry x:Key="IconReminder">M2.4,8 A5.6,5.6 0 1 1 13.6,8 A5.6,5.6 0 1 1 2.4,8 Z M8 5.2 V8 l1.9 1.2</StreamGeometry>
+    <!-- 並び替え -->
+    <StreamGeometry x:Key="IconSort">M3 4.5 h10 M4.5 8 h7 M6.5 11.5 h3</StreamGeometry>
+    <!-- 編集（鉛筆） -->
+    <StreamGeometry x:Key="IconEdit">M10.6 2.8 13.2 5.4 5.6 13 H3 v-2.6 L10.6 2.8 Z</StreamGeometry>
+    <!-- 下向き -->
+    <StreamGeometry x:Key="IconChevronDown">M3 6 l5 5 5 -5</StreamGeometry>
+    <!-- 右向き -->
+    <StreamGeometry x:Key="IconChevronRight">M6 3 l5 5 -5 5</StreamGeometry>
+    <!-- 左向き -->
+    <StreamGeometry x:Key="IconChevronLeft">M10 3 5 8 l5 5</StreamGeometry>
+    <!-- 右矢印 -->
+    <StreamGeometry x:Key="IconArrowRight">M3 8 h9 M8.6 4.6 12 8 l-3.4 3.4</StreamGeometry>
+    <!-- 右矢印（長） -->
+    <StreamGeometry x:Key="IconArrowRightLong">M2.5 8 h11 M9.5 4 13.5 8 l-4 4</StreamGeometry>
+    <!-- 上矢印 -->
+    <StreamGeometry x:Key="IconArrowUp">M8 13 V3 M3.6 7.4 8 3 l4.4 4.4</StreamGeometry>
+    <!-- テンプレート -->
+    <StreamGeometry x:Key="IconTemplate">M3.6,1.8 H9.8 A1.4,1.4 0 0 1 11.2,3.2 V11.8 A1.4,1.4 0 0 1 9.8,13.2 H3.6 A1.4,1.4 0 0 1 2.2,11.8 V3.2 A1.4,1.4 0 0 1 3.6,1.8 Z M13.8 4.4 v8 a1.8,1.8 0 0 1 -1.8,1.8 H4.6 M4.8 5 h4 M4.8 7.6 h4 M4.8 10.2 h2.4</StreamGeometry>
+    <!-- 振り返り（棒グラフ） -->
+    <StreamGeometry x:Key="IconChart">M2.4 13.2 V9 M6.2 13.2 V5.4 M10 13.2 v-6 M13.8 13.2 V3</StreamGeometry>
+    <!-- 推移 -->
+    <StreamGeometry x:Key="IconActivity">M2.4 8 h4.2 l2 -4 2.6 8 1.6 -4 h1.4</StreamGeometry>
+    <!-- 表で見る -->
+    <StreamGeometry x:Key="IconTable">M3.4,2.6 H12.6 A1.4,1.4 0 0 1 14,4 V12 A1.4,1.4 0 0 1 12.6,13.4 H3.4 A1.4,1.4 0 0 1 2,12 V4 A1.4,1.4 0 0 1 3.4,2.6 Z M2 6.2 h12 M6.2 6.2 v7.2</StreamGeometry>
+    <!-- 外観・テーマ -->
+    <StreamGeometry x:Key="IconTheme">M2.2,8 A5.8,5.8 0 1 1 13.8,8 A5.8,5.8 0 1 1 2.2,8 Z M8 2.2 v11.6</StreamGeometry>
+    <!-- 色 -->
+    <StreamGeometry x:Key="IconPalette">M8 2.2 a5.8,5.8 0 1 0 0,11.6 c0.9 0 1.4 -0.6 1.4 -1.3 0 -0.9 -0.8 -1.2 -0.8 -2 0 -0.6 0.5 -1.1 1.2 -1.1 h1.1 a2.9,2.9 0 0 0 2.9,-3 c0 -2.4 -2.3 -4.2 -5.8 -4.2 Z M4.6,6.4 A0.8,0.8 0 1 1 6.2,6.4 A0.8,0.8 0 1 1 4.6,6.4 Z M7.2,5 A0.8,0.8 0 1 1 8.8,5 A0.8,0.8 0 1 1 7.2,5 Z M9.8,6.2 A0.8,0.8 0 1 1 11.4,6.2 A0.8,0.8 0 1 1 9.8,6.2 Z</StreamGeometry>
+    <!-- ショートカット -->
+    <StreamGeometry x:Key="IconKeyboard">M3,4 H13 A1.6,1.6 0 0 1 14.6,5.6 V10.4 A1.6,1.6 0 0 1 13,12 H3 A1.6,1.6 0 0 1 1.4,10.4 V5.6 A1.6,1.6 0 0 1 3,4 Z M4.2 6.6 h0.01 M6.8 6.6 h0.01 M9.4 6.6 h0.01 M12 6.6 h0.01 M5 9.4 h6</StreamGeometry>
+    <!-- 全般（画面） -->
+    <StreamGeometry x:Key="IconMonitor">M3,3 H13 A1.2,1.2 0 0 1 14.2,4.2 V10.2 A1.2,1.2 0 0 1 13,11.4 H3 A1.2,1.2 0 0 1 1.8,10.2 V4.2 A1.2,1.2 0 0 1 3,3 Z M5.4 13.8 h5.2</StreamGeometry>
+    <!-- データ -->
+    <StreamGeometry x:Key="IconDatabase">M2.6,4 A5.4,2.2 0 1 1 13.4,4 A5.4,2.2 0 1 1 2.6,4 Z M2.6 4 v8 c0 1.2 2.4 2.2 5.4 2.2 s5.4 -1 5.4 -2.2 V4 M2.6 8 c0 1.2 2.4 2.2 5.4 2.2 s5.4 -1 5.4 -2.2</StreamGeometry>
+    <!-- プロジェクト -->
+    <StreamGeometry x:Key="IconBriefcase">M2.4 6.4 h11.2 v6.4 a1,1 0 0 1 -1,1 H3.4 a1,1 0 0 1 -1,-1 V6.4 Z M5.6 6.4 V3.8 a1,1 0 0 1 1,-1 h2.8 a1,1 0 0 1 1,1 v2.6</StreamGeometry>
+    <!-- アカウント -->
+    <StreamGeometry x:Key="IconPerson">M5.4,5.4 A2.6,2.6 0 1 1 10.6,5.4 A2.6,2.6 0 1 1 5.4,5.4 Z M3 13.4 a5,5 0 0 1 10,0</StreamGeometry>
+    <!-- 終了 -->
+    <StreamGeometry x:Key="IconSignOut">M6 13.4 H3.6 a1.2,1.2 0 0 1 -1.2,-1.2 V3.8 a1.2,1.2 0 0 1 1.2,-1.2 H6 M10.4 11.2 13.6 8 l-3.2 -3.2 M13.6 8 H6.2</StreamGeometry>
+    <!-- ドラッグ用のつまみ -->
+    <StreamGeometry x:Key="IconGrip">M6 4 h0.01 M6 8 h0.01 M6 12 h0.01 M10 4 h0.01 M10 8 h0.01 M10 12 h0.01</StreamGeometry>
+    <!-- フォーカスモード -->
+    <StreamGeometry x:Key="IconFocus">M2.2,8 A5.8,5.8 0 1 1 13.8,8 A5.8,5.8 0 1 1 2.2,8 Z M5.6,8 A2.4,2.4 0 1 1 10.4,8 A2.4,2.4 0 1 1 5.6,8 Z</StreamGeometry>
+    <!-- 閉じる -->
+    <StreamGeometry x:Key="IconClose">M4 4 l8 8 M12 4 l-8 8</StreamGeometry>
+    <!-- その他（…） -->
+    <StreamGeometry x:Key="IconMore">M3.5 8 h0.01 M8 8 h0.01 M12.5 8 h0.01</StreamGeometry>
+    <!-- 元に戻す -->
+    <StreamGeometry x:Key="IconUndo">M5.4 3.6 2.6 6.4 l2.8 2.8 M2.6 6.4 h7 a3.8,3.8 0 0 1 0,7.6 H7</StreamGeometry>
+    <!-- 絞り込み -->
+    <StreamGeometry x:Key="IconFilter">M2.4 3.2 h11.2 L9.2 8.6 v4.2 l-2.4 1.2 V8.6 L2.4 3.2 Z</StreamGeometry>
+    <!-- タグ（#） -->
+    <StreamGeometry x:Key="IconTag">M5.2 2.4 4.2 13.6 M11.8 2.4 l-1 11.2 M2.6 5.8 h11.2 M2.2 10.2 h11.2</StreamGeometry>
+    <!-- メモ -->
+    <StreamGeometry x:Key="IconNote">M3 3.2 h10 M3 6.4 h10 M3 9.6 h6.4</StreamGeometry>
+    <!-- 所要時間 -->
+    <StreamGeometry x:Key="IconDuration">M6 1.8 h4 M2.8,9 A5.2,5.2 0 1 1 13.2,9 A5.2,5.2 0 1 1 2.8,9 Z M8 6.2 V9</StreamGeometry>
+    <!-- 優先度 -->
+    <StreamGeometry x:Key="IconFlag">M3.4 14 V2.6 M3.4 2.8 h8.2 l-1.8 3 1.8 3 H3.4</StreamGeometry>
+    <!-- 書き出し -->
+    <StreamGeometry x:Key="IconExport">M8 2.4 v8 M4.8 5.6 8 2.4 l3.2 3.2 M2.6 10.4 v2.2 a1,1 0 0 0 1,1 h8.8 a1,1 0 0 0 1,-1 v-2.2</StreamGeometry>
+    <!-- 取り込み -->
+    <StreamGeometry x:Key="IconImport">M8 10.4 v-8 M4.8 7.2 8 10.4 l3.2 -3.2 M2.6 10.4 v2.2 a1,1 0 0 0 1,1 h8.8 a1,1 0 0 0 1,-1 v-2.2</StreamGeometry>
+    <!-- フォルダ -->
+    <StreamGeometry x:Key="IconFolder">M2.2 4.4 a1,1 0 0 1 1,-1 h3 l1.4 1.6 h5.2 a1,1 0 0 1 1,1 v6.6 a1,1 0 0 1 -1,1 H3.2 a1,1 0 0 1 -1,-1 V4.4 Z</StreamGeometry>
+    <!-- サブタスク -->
+    <StreamGeometry x:Key="IconSubtask">M3.4 2.6 v6.2 a1.6,1.6 0 0 0 1.6,1.6 h4.2 M7.4 8.2 9.6 10.4 7.4 12.6</StreamGeometry>
+    <!-- 複製 -->
+    <StreamGeometry x:Key="IconCopy">M6.6,5.2 H12.2 A1.4,1.4 0 0 1 13.6,6.6 V12.2 A1.4,1.4 0 0 1 12.2,13.6 H6.6 A1.4,1.4 0 0 1 5.2,12.2 V6.6 A1.4,1.4 0 0 1 6.6,5.2 Z M10.8 5.2 V3.6 a1.2,1.2 0 0 0 -1.2,-1.2 H3.6 a1.2,1.2 0 0 0 -1.2,1.2 v6 a1.2,1.2 0 0 0 1.2,1.2 h1.6</StreamGeometry>
+    <!-- 晴れ -->
+    <StreamGeometry x:Key="IconSun">M5.2,8 A2.8,2.8 0 1 1 10.8,8 A2.8,2.8 0 1 1 5.2,8 Z M8 1.6 v1.4 M8 13 v1.4 M14.4 8 H13 M3 8 H1.6 M12.5 3.5 l-1 1 M4.5 11.5 l-1 1 M12.5 12.5 l-1 -1 M4.5 4.5 l-1 -1</StreamGeometry>
+    <!-- くもり -->
+    <StreamGeometry x:Key="IconCloud">M4.6 12.4 a2.8,2.8 0 0 1 -0.4,-5.6 3.8,3.8 0 0 1 7.4,-0.4 2.9,2.9 0 0 1 0.6,5.7 Z</StreamGeometry>
+    <!-- 雨 -->
+    <StreamGeometry x:Key="IconRain">M4.6 10 a2.8,2.8 0 0 1 -0.4,-5.6 3.8,3.8 0 0 1 7.4,-0.4 2.9,2.9 0 0 1 0.6,5.7 M5.6 11.6 l-0.8 1.8 M8.4 11.6 l-0.8 1.8 M11.2 11.6 l-0.8 1.8</StreamGeometry>
+    <!-- 雪 -->
+    <StreamGeometry x:Key="IconSnow">M8 2 v12 M2.8 5 l10.4 6 M2.8 11 l10.4 -6</StreamGeometry>
+
+    <Style x:Key="IconPathStyle" TargetType="Path">
+        <Setter Property="Width" Value="16" />
+        <Setter Property="Height" Value="16" />
+        <Setter Property="Stretch" Value="None" />
+        <Setter Property="StrokeThickness" Value="1.5" />
+        <Setter Property="StrokeStartLineCap" Value="Round" />
+        <Setter Property="StrokeEndLineCap" Value="Round" />
+        <Setter Property="StrokeLineJoin" Value="Round" />
+        <Setter Property="Stroke" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="SnapsToDevicePixels" Value="False" />
+    </Style>
+</ResourceDictionary>

@@ -1,0 +1,124 @@
+<UserControl x:Class="TaskDeck.App.Controls.Pickers.PriorityPickerPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:pk="clr-namespace:TaskDeck.App.Controls.Pickers"
+             x:Name="Root"
+             KeyboardNavigation.DirectionalNavigation="Cycle">
+    <!-- 優先度ピッカー（UI 設計書 12.3）。5段階を縦に、記号・色・名前。下部に Ctrl+1〜4 の案内。面の幅は 186 -->
+    <UserControl.Resources>
+        <pk:EqualsToVisibilityConverter x:Key="EqualsToVisibility" />
+
+        <Style x:Key="PriorityRowStyle" TargetType="Button" BasedOn="{StaticResource ListRowButtonStyle}">
+            <Setter Property="Height" Value="{StaticResource PickerItemHeight}" />
+            <Setter Property="Padding" Value="12,0" />
+        </Style>
+        <Style x:Key="PriorityMarkStyle" TargetType="TextBlock" BasedOn="{StaticResource TextBaseStyle}">
+            <Setter Property="Width" Value="26" />
+            <Setter Property="FontSize" Value="{StaticResource TypeLabelSize}" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="PriorityNameStyle" TargetType="TextBlock" BasedOn="{StaticResource TextBodySmallStyle}">
+            <Setter Property="Grid.Column" Value="1" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="PriorityCheckStyle" TargetType="Path" BasedOn="{StaticResource IconPathStyle}">
+            <Setter Property="Grid.Column" Value="2" />
+            <Setter Property="Width" Value="13" />
+            <Setter Property="Height" Value="13" />
+            <Setter Property="Stretch" Value="Uniform" />
+            <Setter Property="StrokeThickness" Value="2" />
+            <Setter Property="Stroke" Value="{DynamicResource AccentDefaultBrush}" />
+            <Setter Property="Data" Value="{StaticResource IconCheck}" />
+        </Style>
+    </UserControl.Resources>
+
+    <Border Style="{StaticResource PopupShadowStyle}">
+        <Border Style="{StaticResource PopupSurfaceStyle}" Width="{StaticResource SmallPopupWidth}">
+            <StackPanel>
+                <TextBlock Style="{StaticResource PopupHeaderStyle}" Margin="12,10,12,8" FontSize="{StaticResource TypeCaptionSize}" Text="優先度" />
+                <Border Style="{StaticResource PopupSeparatorStyle}" />
+
+                <StackPanel x:Name="Rows" Margin="0,4">
+                    <Button Style="{StaticResource PriorityRowStyle}" Tag="4" Click="OnPick"
+                            AutomationProperties.Name="優先度を緊急にする">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Style="{StaticResource PriorityMarkStyle}" Text="!!!!" Foreground="{DynamicResource PriorityUrgentBrush}" />
+                            <TextBlock Style="{StaticResource PriorityNameStyle}" Text="緊急" />
+                            <Path Style="{StaticResource PriorityCheckStyle}"
+                                  Visibility="{Binding Priority, ElementName=Root, Converter={StaticResource EqualsToVisibility}, ConverterParameter=Urgent}" />
+                        </Grid>
+                    </Button>
+
+                    <Button Style="{StaticResource PriorityRowStyle}" Tag="3" Click="OnPick"
+                            AutomationProperties.Name="優先度を高にする">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Style="{StaticResource PriorityMarkStyle}" Text="!!!" Foreground="{DynamicResource PriorityHighBrush}" />
+                            <TextBlock Style="{StaticResource PriorityNameStyle}" Text="高" />
+                            <Path Style="{StaticResource PriorityCheckStyle}"
+                                  Visibility="{Binding Priority, ElementName=Root, Converter={StaticResource EqualsToVisibility}, ConverterParameter=High}" />
+                        </Grid>
+                    </Button>
+
+                    <Button Style="{StaticResource PriorityRowStyle}" Tag="2" Click="OnPick"
+                            AutomationProperties.Name="優先度を中にする">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Style="{StaticResource PriorityMarkStyle}" Text="!!" Foreground="{DynamicResource PriorityMediumBrush}" />
+                            <TextBlock Style="{StaticResource PriorityNameStyle}" Text="中" />
+                            <Path Style="{StaticResource PriorityCheckStyle}"
+                                  Visibility="{Binding Priority, ElementName=Root, Converter={StaticResource EqualsToVisibility}, ConverterParameter=Medium}" />
+                        </Grid>
+                    </Button>
+
+                    <Button Style="{StaticResource PriorityRowStyle}" Tag="1" Click="OnPick"
+                            AutomationProperties.Name="優先度を低にする">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Style="{StaticResource PriorityMarkStyle}" Text="!" Foreground="{DynamicResource PriorityLowBrush}" />
+                            <TextBlock Style="{StaticResource PriorityNameStyle}" Text="低" />
+                            <Path Style="{StaticResource PriorityCheckStyle}"
+                                  Visibility="{Binding Priority, ElementName=Root, Converter={StaticResource EqualsToVisibility}, ConverterParameter=Low}" />
+                        </Grid>
+                    </Button>
+
+                    <Button Style="{StaticResource PriorityRowStyle}" Tag="0" Click="OnPick"
+                            AutomationProperties.Name="優先度をなしにする">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Style="{StaticResource PriorityMarkStyle}" Text="—" FontWeight="Normal" Foreground="{DynamicResource TextDisabledBrush}" />
+                            <TextBlock Style="{StaticResource PriorityNameStyle}" Text="なし" />
+                            <Path Style="{StaticResource PriorityCheckStyle}"
+                                  Visibility="{Binding Priority, ElementName=Root, Converter={StaticResource EqualsToVisibility}, ConverterParameter=None}" />
+                        </Grid>
+                    </Button>
+                </StackPanel>
+
+                <Border Style="{StaticResource PopupSeparatorStyle}" />
+                <TextBlock Style="{StaticResource PopupHintStyle}" Text="Ctrl+1 〜 Ctrl+4 で直接指定" />
+            </StackPanel>
+        </Border>
+    </Border>
+</UserControl>

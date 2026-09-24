@@ -1,0 +1,119 @@
+<UserControl x:Class="TaskDeck.App.Settings.Pages.AboutPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:settings="clr-namespace:TaskDeck.App.Settings"
+             xmlns:pk="clr-namespace:TaskDeck.App.Controls.Pickers">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Settings/SettingsResources.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <pk:EqualsToVisibilityConverter x:Key="EqualsToVisibility" />
+            <BooleanToVisibilityConverter x:Key="BoolVisibility" />
+
+            <!-- 名前・用途・右に短い値の1行（ライブラリと外部サービスの一覧） -->
+            <DataTemplate x:Key="InfoRowTemplate">
+                <Border Background="{DynamicResource SettingsCardBrush}"
+                        BorderBrush="{DynamicResource StrokeDividerBrush}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource RadiusRow}"
+                        Margin="0,0,0,4"
+                        Padding="16,10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource TextBodySmallStyle}" Text="{Binding Name}" />
+                            <TextBlock Style="{StaticResource TextCaptionStyle}"
+                                       Foreground="{DynamicResource TextTertiaryBrush}"
+                                       TextWrapping="Wrap"
+                                       Text="{Binding Use}" />
+                        </StackPanel>
+                        <TextBlock Grid.Column="1"
+                                   Margin="12,0,0,0"
+                                   Style="{StaticResource SettingsMonoStyle}"
+                                   VerticalAlignment="Center"
+                                   Text="{Binding License}" />
+                    </Grid>
+                </Border>
+            </DataTemplate>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <StackPanel>
+        <TextBlock Style="{StaticResource SettingsTitleStyle}" Text="TaskDeck について" />
+
+        <settings:SettingsCard Icon="{StaticResource IconInfo}"
+                               Title="TaskDeck"
+                               Description="Windows に常駐する個人用の Todo アプリ。オフラインで完結します">
+            <TextBlock Style="{StaticResource TabularBodyStyle}"
+                       VerticalAlignment="Center"
+                       Text="{Binding Version, StringFormat=バージョン {0}}" />
+        </settings:SettingsCard>
+
+        <!-- 更新の確認（F-198）。結果を控えめに出すだけで、ダイアログもバッジも出さない -->
+        <settings:SettingsCard Icon="{StaticResource IconArrowUp}"
+                               Title="更新の確認"
+                               Description="{Binding UpdateStatusText}"
+                               Visibility="{Binding ShowsUpdates, Converter={StaticResource BoolVisibility}}">
+            <StackPanel Orientation="Horizontal">
+                <Button Style="{StaticResource SettingsButtonStyle}"
+                        Margin="0,0,8,0"
+                        Content="リリースのページを開く"
+                        AutomationProperties.Name="新しい版のリリースのページを開く"
+                        Visibility="{Binding HasUpdate, Converter={StaticResource BoolVisibility}}"
+                        Command="{Binding OpenReleasesCommand}" />
+                <Button Style="{StaticResource SettingsButtonStyle}"
+                        Content="今すぐ確認"
+                        AutomationProperties.Name="更新を今すぐ確認"
+                        Command="{Binding CheckNowCommand}" />
+            </StackPanel>
+            <!-- Expanded の部品は表示されて初めて DataContext を受け継ぐので、Collapsed はバインドで切り替える（最初は Visible） -->
+            <settings:SettingsCard.Expanded>
+                <TextBlock Style="{StaticResource TabularCaptionStyle}"
+                           FontSize="{StaticResource TypeLabelSize}"
+                           AutomationProperties.AutomationId="UpdateCheckedAt"
+                           Text="{Binding UpdateCheckedText}"
+                           Visibility="{Binding HasUpdateCheckedText, Converter={StaticResource BoolVisibility}}" />
+            </settings:SettingsCard.Expanded>
+        </settings:SettingsCard>
+
+        <settings:SettingsCard Icon="{StaticResource IconFolder}"
+                               Title="データのフォルダ"
+                               Description="データベース・設定・バックアップが入っています">
+            <Button Style="{StaticResource SettingsButtonStyle}" Click="OnOpenData" Content="開く"
+                    AutomationProperties.Name="データのフォルダを開く" />
+        </settings:SettingsCard>
+
+        <settings:SettingsCard Icon="{StaticResource IconNote}"
+                               Title="ログのフォルダ"
+                               Description="不具合を調べるときは、ここの taskdeck-*.log を見ます">
+            <Button Style="{StaticResource SettingsButtonStyle}" Click="OnOpenLogs" Content="開く"
+                    AutomationProperties.Name="ログのフォルダを開く" />
+        </settings:SettingsCard>
+
+        <!-- 開発用のデータフォルダで動かしているときだけ出す（AppPaths.IsDevelopment） -->
+        <settings:SettingsCard Icon="{StaticResource IconPalette}"
+                               Title="ピッカーの確認（開発時のみ）"
+                               Description="日付・優先度・プロジェクトの3つを並べて出します"
+                               Visibility="{Binding IsDevelopment, Converter={StaticResource EqualsToVisibility}, ConverterParameter=True}">
+            <Button Style="{StaticResource SettingsButtonStyle}" Click="OnOpenPickers" Content="開く"
+                    AutomationProperties.Name="ピッカーの確認を開く" />
+        </settings:SettingsCard>
+
+        <TextBlock Style="{StaticResource SettingsSectionStyle}" Text="使っているもの" />
+
+        <ItemsControl ItemsSource="{Binding Libraries}" ItemTemplate="{StaticResource InfoRowTemplate}" />
+
+        <TextBlock Style="{StaticResource SettingsSectionStyle}" Text="使っている外部サービス（どれも任意）" />
+
+        <ItemsControl ItemsSource="{Binding ExternalServices}" ItemTemplate="{StaticResource InfoRowTemplate}" />
+
+        <Border Style="{StaticResource SettingsNoticeStyle}">
+            <TextBlock Style="{StaticResource SettingsNoticeTextStyle}"
+                       Text="TaskDeck 自体のライセンスと、各ライブラリの全文は配布物の README と LICENSE に入ります。タスクの内容を外部サービスに送ることはありません。" />
+        </Border>
+    </StackPanel>
+</UserControl>

@@ -1,0 +1,98 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!--
+        入力欄（UI 設計書 4.2・6章）。担当: 波1-D。高さ 32、角丸5、枠は Stroke.Control で下辺だけ濃く
+        （ControlElevationBorderBrush）。フォーカス中は下辺 2px をアクセント色にする（Fluent の作法。
+        枠の太さを変えないので中身がずれない）。
+        IME を使う欄には input:ImeGuard.IsEnabled="True" を付ける（スタイル側では付けない）。
+    -->
+    <Style x:Key="InputTextBoxStyle" TargetType="TextBox">
+        <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource TypeBodySmallSize}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="CaretBrush" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="SelectionBrush" Value="{DynamicResource AccentDefaultBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceContentBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ControlElevationBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="MinHeight" Value="{StaticResource InputHeight}" />
+        <Setter Property="Padding" Value="8,0" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <Border x:Name="Root"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{StaticResource RadiusRow}"
+                            SnapsToDevicePixels="True">
+                        <Grid>
+                            <!--
+                                Padding は TextBox の中（文字の描画側）が自分で空けるので、ここで Margin に使わない（二重になって文字が右へずれる）。
+                                WPF-UI の ScrollViewer の暗黙スタイルは外し、TextBox 標準の中身にする。
+                            -->
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Style="{x:Null}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          Focusable="False" />
+                            <Border x:Name="FocusLine"
+                                    Height="2"
+                                    Margin="1,0,1,0"
+                                    VerticalAlignment="Bottom"
+                                    Background="{DynamicResource AccentDefaultBrush}"
+                                    CornerRadius="0,0,4,4"
+                                    Visibility="Collapsed" />
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource SurfaceContentBrush}" />
+                            <Setter TargetName="FocusLine" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- 一覧の中で直接書き換える欄（枠なし） -->
+    <Style x:Key="InlineTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource InputTextBoxStyle}">
+        <Setter Property="FontSize" Value="{StaticResource TypeBodySize}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="MinHeight" Value="0" />
+    </Style>
+
+    <!-- 複数行のメモ欄（詳細ペイン・設定）。行間は 1.6 -->
+    <Style x:Key="NotesTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource InputTextBoxStyle}">
+        <Setter Property="Background" Value="{DynamicResource SurfaceSubtleBrush}" />
+        <Setter Property="AcceptsReturn" Value="True" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="VerticalContentAlignment" Value="Top" />
+        <Setter Property="Padding" Value="10,8" />
+        <Setter Property="MinHeight" Value="52" />
+    </Style>
+
+    <!--
+        設定画面の ComboBox（幅は使う側で指定）。WPF-UI の既定テンプレートをトークンの色で使う
+        （BasedOn を外すと WPF 標準の古い見た目に戻るので必ず付ける。色は Themes/*.xaml の ComboBox* キーで上書き済み）
+    -->
+    <Style x:Key="SettingsComboBoxStyle" TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
+        <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource TypeCaptionSize}" />
+        <Setter Property="MinHeight" Value="{StaticResource ToolbarButtonHeight}" />
+        <Setter Property="Height" Value="{StaticResource ToolbarButtonHeight}" />
+        <Setter Property="Padding" Value="10,0" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource AppFocusVisualStyle}" />
+    </Style>
+</ResourceDictionary>

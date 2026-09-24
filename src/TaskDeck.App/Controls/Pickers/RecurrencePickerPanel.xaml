@@ -1,0 +1,446 @@
+<UserControl x:Class="TaskDeck.App.Controls.Pickers.RecurrencePickerPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+             xmlns:input="clr-namespace:TaskDeck.App.Input"
+             xmlns:local="clr-namespace:TaskDeck.App.Controls.Pickers"
+             mc:Ignorable="d">
+    <!--
+        繰り返しピッカー（UI 設計書 12.2、モックアップ Pickers.dc.html の中央）。
+        1. プリセットのラジオ（毎週・毎月・カスタムは選ぶと詳細が開く） 2. 次回を数える起点 3. 終了条件 4. 次回とその次のプレビュー
+        浮かせる面（影と枠）はパネルが持つ（INTERFACES 5.3）。ホストは Popup の直下にこのパネルを置き、枠を足さない。
+        面の幅は 318（モックアップ）で、外側は影の余白（左右10・上8・下14）の分だけ大きい。
+        キー: ↑↓ でプリセット、Tab で次の欄、Enter で決定、Esc で閉じる。フォーカス枠はキーボード操作のときだけ（AppFocusVisualStyle）。
+    -->
+    <UserControl.Resources>
+        <sys:Double x:Key="RecurrencePanelWidth">318</sys:Double>
+        <sys:Double x:Key="ChoiceRowHeight">32</sys:Double>
+        <sys:Double x:Key="WeekdaySize">28</sys:Double>
+        <Thickness x:Key="DetailPadding">39,4,14,10</Thickness>
+        <local:EnumMatchConverter x:Key="Is" />
+        <BooleanToVisibilityConverter x:Key="Visible" />
+
+        <!-- 補足の小さい字。空なら詰める -->
+        <Style x:Key="NoteStyle" TargetType="TextBlock" BasedOn="{StaticResource TextBaseStyle}">
+            <Setter Property="FontSize" Value="{StaticResource TypeLabelSize}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="LineHeight" Value="17" />
+            <Style.Triggers>
+                <Trigger Property="Text" Value="">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </Trigger>
+                <Trigger Property="Text" Value="{x:Null}">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- ラジオの丸（15px。選ぶとアクセント地に白い点） -->
+        <ControlTemplate x:Key="RadioMarkTemplate" TargetType="RadioButton">
+            <Border x:Name="Row"
+                    Background="{TemplateBinding Background}"
+                    CornerRadius="{StaticResource RadiusButton}"
+                    Padding="{TemplateBinding Padding}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid Width="15" Height="15" VerticalAlignment="Center">
+                        <Ellipse x:Name="Ring" Fill="Transparent" Stroke="{DynamicResource StrokeControlStrongBrush}" StrokeThickness="1" />
+                        <Ellipse x:Name="Dot" Width="6" Height="6" Fill="{DynamicResource TextOnAccentBrush}" Visibility="Collapsed" />
+                    </Grid>
+                    <ContentPresenter Grid.Column="1"
+                                      Margin="10,0,0,0"
+                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                      VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter TargetName="Row" Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+                </Trigger>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter TargetName="Ring" Property="Fill" Value="{DynamicResource AccentDefaultBrush}" />
+                    <Setter TargetName="Ring" Property="Stroke" Value="{DynamicResource AccentDefaultBrush}" />
+                    <Setter TargetName="Dot" Property="Visibility" Value="Visible" />
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
+        <!-- プリセットの行（高さ32）。Tab で止まるのは選んでいる1つだけ、↑↓ で選び直す -->
+        <Style x:Key="ChoiceRadioStyle" TargetType="RadioButton">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
+            <Setter Property="FontSize" Value="{StaticResource TypeBodySmallSize}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Height" Value="{StaticResource ChoiceRowHeight}" />
+            <Setter Property="Padding" Value="14,0" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{StaticResource AppFocusVisualStyle}" />
+            <Setter Property="IsTabStop" Value="{Binding IsChecked, RelativeSource={RelativeSource Self}}" />
+            <Setter Property="Template" Value="{StaticResource RadioMarkTemplate}" />
+            <EventSetter Event="PreviewKeyDown" Handler="OnChoiceKeyDown" />
+            <Style.Triggers>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+                    <Setter Property="FontWeight" Value="Medium" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- 「毎月」の中の2択（日付／曜日） -->
+        <Style x:Key="SubRadioStyle" TargetType="RadioButton">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
+            <Setter Property="FontSize" Value="{StaticResource TypeCaptionSize}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Padding" Value="0,0,4,0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{StaticResource AppFocusVisualStyle}" />
+            <Setter Property="IsTabStop" Value="{Binding IsChecked, RelativeSource={RelativeSource Self}}" />
+            <Setter Property="Template" Value="{StaticResource RadioMarkTemplate}" />
+            <EventSetter Event="PreviewKeyDown" Handler="OnMonthlyModeKeyDown" />
+        </Style>
+
+        <!-- 起点の2枚のカード（期限日から／完了日から） -->
+        <Style x:Key="BaseCardStyle" TargetType="RadioButton">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
+            <Setter Property="FontSize" Value="{StaticResource TypeCaptionSize}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{StaticResource AppFocusVisualStyle}" />
+            <Setter Property="IsTabStop" Value="{Binding IsChecked, RelativeSource={RelativeSource Self}}" />
+            <EventSetter Event="PreviewKeyDown" Handler="OnBaseKindKeyDown" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Card"
+                                Background="Transparent"
+                                BorderBrush="{DynamicResource StrokeControlBrush}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource RadiusRow}"
+                                Padding="9,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Grid Width="14" Height="14">
+                                    <Ellipse x:Name="Ring" Fill="Transparent" Stroke="{DynamicResource StrokeControlStrongBrush}" StrokeThickness="1" />
+                                    <Ellipse x:Name="Dot" Width="5" Height="5" Fill="{DynamicResource TextOnAccentBrush}" Visibility="Collapsed" />
+                                </Grid>
+                                <ContentPresenter Margin="7,0,0,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Card" Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Card" Property="Background" Value="{DynamicResource SurfaceSelectedBrush}" />
+                                <Setter TargetName="Card" Property="BorderBrush" Value="{DynamicResource AccentDefaultBrush}" />
+                                <Setter TargetName="Ring" Property="Fill" Value="{DynamicResource AccentDefaultBrush}" />
+                                <Setter TargetName="Ring" Property="Stroke" Value="{DynamicResource AccentDefaultBrush}" />
+                                <Setter TargetName="Dot" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 曜日の丸（28px）。日曜は赤、土曜はアクセント、選ぶとアクセント地 -->
+        <Style x:Key="WeekdayToggleStyle" TargetType="ToggleButton">
+            <Setter Property="Width" Value="{StaticResource WeekdaySize}" />
+            <Setter Property="Height" Value="{StaticResource WeekdaySize}" />
+            <Setter Property="Margin" Value="0,0,4,0" />
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
+            <Setter Property="FontSize" Value="{StaticResource TypeLabelSize}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{StaticResource AppFocusVisualStyle}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="Circle"
+                                Background="Transparent"
+                                BorderBrush="{DynamicResource StrokeDividerBrush}"
+                                BorderThickness="1"
+                                CornerRadius="14">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Circle" Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Circle" Property="Background" Value="{DynamicResource AccentDefaultBrush}" />
+                                <Setter TargetName="Circle" Property="BorderBrush" Value="{DynamicResource AccentDefaultBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Day}" Value="Sunday">
+                    <Setter Property="Foreground" Value="{DynamicResource StateOverdueBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Day}" Value="Saturday">
+                    <Setter Property="Foreground" Value="{DynamicResource AccentDefaultBrush}" />
+                </DataTrigger>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource TextOnAccentBrush}" />
+                    <Setter Property="FontWeight" Value="SemiBold" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- 曜日の並び。Tab では1回だけ止まり、←→ で曜日を移って Space で切り替える -->
+        <Style x:Key="WeekdayListStyle" TargetType="ItemsControl">
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="KeyboardNavigation.TabNavigation" Value="Once" />
+            <Setter Property="KeyboardNavigation.DirectionalNavigation" Value="Cycle" />
+            <Setter Property="ItemsPanel">
+                <Setter.Value>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="ItemTemplate">
+                <Setter.Value>
+                    <DataTemplate DataType="{x:Type local:WeekdayToggle}">
+                        <ToggleButton Style="{StaticResource WeekdayToggleStyle}"
+                                      Content="{Binding Label}"
+                                      IsChecked="{Binding IsSelected}"
+                                      AutomationProperties.Name="{Binding Label, StringFormat={}{0}曜}" />
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SmallComboStyle" TargetType="ComboBox" BasedOn="{StaticResource SettingsComboBoxStyle}">
+            <Setter Property="Padding" Value="8,0" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="SelectedValuePath" Value="Value" />
+            <Setter Property="DisplayMemberPath" Value="Label" />
+        </Style>
+
+        <Style x:Key="NumberBoxStyle" TargetType="TextBox" BasedOn="{StaticResource InputTextBoxStyle}">
+            <Setter Property="Width" Value="56" />
+            <Setter Property="MinHeight" Value="30" />
+            <Setter Property="FontSize" Value="{StaticResource TypeCaptionSize}" />
+            <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="input:ImeGuard.IsEnabled" Value="True" />
+        </Style>
+    </UserControl.Resources>
+
+    <Border Style="{StaticResource PopupShadowStyle}">
+    <Border Style="{StaticResource PopupSurfaceStyle}" Width="{StaticResource RecurrencePanelWidth}">
+    <Grid x:Name="Root" d:DataContext="{d:DesignInstance local:RecurrencePickerModel}">
+        <StackPanel>
+            <TextBlock Style="{StaticResource PopupHeaderStyle}" Text="繰り返し" />
+            <Border Style="{StaticResource PopupSeparatorStyle}" />
+
+            <!-- 1. プリセット -->
+            <StackPanel x:Name="ChoiceList" Margin="0,6">
+                <RadioButton Style="{StaticResource ChoiceRadioStyle}" Tag="{x:Static local:RecurrenceChoice.None}" Content="なし"
+                             IsChecked="{Binding Choice, Converter={StaticResource Is}, ConverterParameter=None}" />
+                <RadioButton Style="{StaticResource ChoiceRadioStyle}" Tag="{x:Static local:RecurrenceChoice.Daily}" Content="毎日"
+                             IsChecked="{Binding Choice, Converter={StaticResource Is}, ConverterParameter=Daily}" />
+                <RadioButton Style="{StaticResource ChoiceRadioStyle}" Tag="{x:Static local:RecurrenceChoice.Weekdays}" Content="平日（月〜金）"
+                             IsChecked="{Binding Choice, Converter={StaticResource Is}, ConverterParameter=Weekdays}" />
+                <RadioButton Style="{StaticResource ChoiceRadioStyle}" Tag="{x:Static local:RecurrenceChoice.Weekly}" Content="毎週"
+                             IsChecked="{Binding Choice, Converter={StaticResource Is}, ConverterParameter=Weekly}" />
+                <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="{StaticResource DetailPadding}"
+                        Visibility="{Binding Choice, Converter={StaticResource Is}, ConverterParameter=Weekly}">
+                    <StackPanel>
+                        <ItemsControl Style="{StaticResource WeekdayListStyle}" ItemsSource="{Binding Weekdays}" Margin="0,2,0,0" />
+                        <TextBlock Style="{StaticResource NoteStyle}" Margin="0,6,0,0" Text="{Binding WeekdayHint}" />
+                    </StackPanel>
+                </Border>
+
+                <RadioButton Style="{StaticResource ChoiceRadioStyle}" Tag="{x:Static local:RecurrenceChoice.Monthly}" Content="毎月"
+                             IsChecked="{Binding Choice, Converter={StaticResource Is}, ConverterParameter=Monthly}" />
+                <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="{StaticResource DetailPadding}"
+                        Visibility="{Binding Choice, Converter={StaticResource Is}, ConverterParameter=Monthly}">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,2">
+                            <RadioButton x:Name="MonthByDayRadio" Style="{StaticResource SubRadioStyle}" Width="66" Content="日付"
+                                         IsChecked="{Binding MonthlyMode, Converter={StaticResource Is}, ConverterParameter=DayOfMonth}" />
+                            <ComboBox Style="{StaticResource SmallComboStyle}" Width="88"
+                                      ItemsSource="{x:Static local:RecurrencePickerModel.MonthDayOptions}"
+                                      SelectedValue="{Binding MonthDay}"
+                                      AutomationProperties.Name="毎月の日付" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,2">
+                            <RadioButton x:Name="MonthByNthRadio" Style="{StaticResource SubRadioStyle}" Width="66" Content="曜日"
+                                         IsChecked="{Binding MonthlyMode, Converter={StaticResource Is}, ConverterParameter=NthWeekday}" />
+                            <ComboBox Style="{StaticResource SmallComboStyle}" Width="78"
+                                      ItemsSource="{x:Static local:RecurrencePickerModel.NthOptions}"
+                                      SelectedValue="{Binding MonthNth}"
+                                      AutomationProperties.Name="第何週か" />
+                            <ComboBox Style="{StaticResource SmallComboStyle}" Width="78" Margin="4,0,0,0"
+                                      ItemsSource="{Binding WeekdayOptions}"
+                                      SelectedValue="{Binding MonthWeekday}"
+                                      AutomationProperties.Name="毎月の曜日" />
+                        </StackPanel>
+                        <TextBlock Style="{StaticResource NoteStyle}" Margin="0,4,0,0" Text="{Binding MonthDayHint}" />
+                    </StackPanel>
+                </Border>
+
+                <RadioButton Style="{StaticResource ChoiceRadioStyle}" Tag="{x:Static local:RecurrenceChoice.Yearly}"
+                             AutomationProperties.Name="毎年"
+                             IsChecked="{Binding Choice, Converter={StaticResource Is}, ConverterParameter=Yearly}">
+                    <Grid>
+                        <TextBlock Text="毎年" />
+                        <TextBlock HorizontalAlignment="Right" Style="{StaticResource TabularCaptionStyle}" FontWeight="Normal" Text="{Binding YearlyHint}" />
+                    </Grid>
+                </RadioButton>
+
+                <RadioButton Style="{StaticResource ChoiceRadioStyle}" Tag="{x:Static local:RecurrenceChoice.Custom}" Content="カスタム"
+                             IsChecked="{Binding Choice, Converter={StaticResource Is}, ConverterParameter=Custom}" />
+                <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="{StaticResource DetailPadding}"
+                        Visibility="{Binding Choice, Converter={StaticResource Is}, ConverterParameter=Custom}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource NoteStyle}" Margin="0,2,0,6" Foreground="{DynamicResource TextSecondaryBrush}" Text="{Binding RawRuleText}" />
+                        <StackPanel Orientation="Horizontal" Margin="0,2">
+                            <TextBox Style="{StaticResource NumberBoxStyle}"
+                                     Text="{Binding IntervalText, UpdateSourceTrigger=PropertyChanged}"
+                                     AutomationProperties.Name="間隔" />
+                            <ComboBox Style="{StaticResource SmallComboStyle}" Width="78" Margin="6,0"
+                                      ItemsSource="{x:Static local:RecurrencePickerModel.UnitOptions}"
+                                      SelectedValue="{Binding Unit}"
+                                      AutomationProperties.Name="間隔の単位" />
+                            <TextBlock Style="{StaticResource TextCaptionStyle}" VerticalAlignment="Center" Text="ごと" />
+                        </StackPanel>
+                        <ItemsControl Style="{StaticResource WeekdayListStyle}" ItemsSource="{Binding Weekdays}" Margin="0,8,0,0"
+                                      Visibility="{Binding ShowsCustomWeekdays, Converter={StaticResource Visible}}" />
+                        <TextBlock Style="{StaticResource NoteStyle}" Margin="0,6,0,0" Text="{Binding WeekdayHint}" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <!-- 2. 次回を数える起点 と 3. 終了（「なし」では出さない） -->
+            <StackPanel Visibility="{Binding HasRule, Converter={StaticResource Visible}}">
+                <Border Style="{StaticResource PopupSeparatorStyle}" />
+                <StackPanel Margin="14,10">
+                    <TextBlock Style="{StaticResource TextLabelStyle}" Text="次回を数える起点" />
+                    <Grid Margin="0,7,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="6" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <RadioButton x:Name="BaseDueRadio" Style="{StaticResource BaseCardStyle}" Content="期限日から"
+                                     IsChecked="{Binding BaseKind, Converter={StaticResource Is}, ConverterParameter=DueDate}" />
+                        <RadioButton x:Name="BaseCompletedRadio" Grid.Column="2" Style="{StaticResource BaseCardStyle}" Content="完了日から"
+                                     IsChecked="{Binding BaseKind, Converter={StaticResource Is}, ConverterParameter=CompletedDate}" />
+                    </Grid>
+                    <TextBlock Style="{StaticResource NoteStyle}" Margin="0,7,0,0">
+                        <Run Text="「完了日から」は、3日ごとの掃除のように" /><Run FontWeight="SemiBold" Text="終わった日から数えたい" /><Run Text="ときに使います。" />
+                    </TextBlock>
+                </StackPanel>
+
+                <Border Style="{StaticResource PopupSeparatorStyle}" />
+                <Grid Margin="14,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Style="{StaticResource TextCaptionStyle}" VerticalAlignment="Center" Margin="0,0,10,0" Text="終了" />
+                    <ComboBox Grid.Column="1" Style="{StaticResource SmallComboStyle}"
+                              ItemsSource="{x:Static local:RecurrencePickerModel.EndOptions}"
+                              SelectedValue="{Binding EndKind}"
+                              AutomationProperties.Name="終了の条件" />
+                    <DatePicker Grid.Row="1" Grid.Column="1" Margin="0,6,0,0"
+                                SelectedDate="{Binding EndDate}"
+                                Visibility="{Binding IsEndDate, Converter={StaticResource Visible}}"
+                                AutomationProperties.Name="終わりの日" />
+                    <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="0,6,0,0"
+                                Visibility="{Binding IsEndCount, Converter={StaticResource Visible}}">
+                        <TextBox Style="{StaticResource NumberBoxStyle}"
+                                 Text="{Binding EndCountText, UpdateSourceTrigger=PropertyChanged}"
+                                 AutomationProperties.Name="回数" />
+                        <TextBlock Style="{StaticResource TextCaptionStyle}" VerticalAlignment="Center" Margin="8,0,0,0" Text="回で終わる（今回を含む）" />
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+
+            <!-- 4. プレビュー（この欄が本体: 設定した瞬間に次回の日付を見せる） -->
+            <Border Background="{DynamicResource SurfaceSelectedBrush}"
+                    BorderBrush="{DynamicResource SurfaceSelectedStrokeBrush}"
+                    BorderThickness="0,1"
+                    Padding="14,10,14,12">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource TextLabelStyle}" Foreground="{DynamicResource AccentDefaultBrush}" Margin="0,0,0,5" Text="この設定だと" />
+                    <Grid Visibility="{Binding HasPreviewDates, Converter={StaticResource Visible}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="46" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Style="{StaticResource TextCaptionStyle}" FontSize="{StaticResource TypeLabelSize}" VerticalAlignment="Center" Text="次回" />
+                        <TextBlock Grid.Column="1" Style="{StaticResource TabularBodyStyle}" FontSize="{StaticResource TypeBodySmallSize}" FontWeight="SemiBold"
+                                   Text="{Binding NextText}" AutomationProperties.AutomationId="NextText" />
+                        <TextBlock Grid.Row="1" Style="{StaticResource TextCaptionStyle}" FontSize="{StaticResource TypeLabelSize}" VerticalAlignment="Center" Margin="0,3,0,0" Text="その次" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource TabularCaptionStyle}" Margin="0,3,0,0"
+                                   Text="{Binding AfterNextText}" AutomationProperties.AutomationId="AfterNextText" />
+                    </Grid>
+                    <TextBlock Text="{Binding PreviewMessage}" AutomationProperties.AutomationId="PreviewMessage">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource NoteStyle}">
+                                <Setter Property="FontSize" Value="{StaticResource TypeCaptionSize}" />
+                                <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding CanCommit}" Value="False">
+                                        <Setter Property="Foreground" Value="{DynamicResource StateOverdueBrush}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+
+            <!-- 5. 決める -->
+            <Grid Margin="14,10,14,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel HorizontalAlignment="Left" Visibility="{Binding HadRecurrence, Converter={StaticResource Visible}}">
+                    <Button Style="{StaticResource TextButtonStyle}"
+                            HorizontalAlignment="Left"
+                            MinHeight="28"
+                            Padding="8,0"
+                            FontSize="{StaticResource TypeCaptionSize}"
+                            Foreground="{DynamicResource StateOverdueBrush}"
+                            Content="繰り返しをやめる"
+                            Click="OnStop" />
+                    <TextBlock Style="{StaticResource NoteStyle}" Margin="8,0,0,0" Text="作成済みのタスクは残ります" />
+                </StackPanel>
+                <Button Grid.Column="1"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        MinWidth="72"
+                        VerticalAlignment="Top"
+                        Content="決定"
+                        IsEnabled="{Binding CanCommit}"
+                        Click="OnCommit" />
+            </Grid>
+        </StackPanel>
+    </Grid>
+    </Border>
+    </Border>
+</UserControl>

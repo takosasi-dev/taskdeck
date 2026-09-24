@@ -1,0 +1,48 @@
+<ui:FluentWindow x:Class="TaskDeck.App.Settings.DevPickerPreviewWindow"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                 xmlns:pickers="clr-namespace:TaskDeck.App.Controls.Pickers"
+                 Title="ピッカーの確認（開発時のみ）"
+                 Width="760" Height="720"
+                 ExtendsContentIntoTitleBar="True"
+                 WindowBackdropType="None"
+                 WindowStartupLocation="CenterOwner"
+                 Background="{DynamicResource SurfaceWindowBrush}">
+    <!--
+        開発時だけの確認用（AppPaths.IsDevelopment のときに「TaskDeck について」から開く）。
+        ホスト側（詳細ペイン）は Popup に入れて使うが、ここでは中身を並べて見た目とキー操作を確かめる。
+    -->
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <ui:TitleBar Grid.Row="0" Title="ピッカーの確認（開発時のみ）" ShowMaximize="False" />
+
+        <Grid Grid.Row="1" Margin="8,0,8,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <pickers:DatePickerPanel x:Name="DatePanel" VerticalAlignment="Top" Picked="OnDatePicked" Cancelled="OnCancelled" />
+            <pickers:PriorityPickerPanel x:Name="PriorityPanel" Grid.Column="1" VerticalAlignment="Top"
+                                         Picked="OnPriorityPicked" Cancelled="OnCancelled" />
+            <pickers:ProjectPickerPanel x:Name="ProjectPanel" Grid.Column="2" VerticalAlignment="Top" HorizontalAlignment="Left"
+                                        Picked="OnProjectPicked" Cancelled="OnCancelled" />
+        </Grid>
+
+        <Border Grid.Row="2" Margin="20,8,20,16"
+                Background="{DynamicResource SurfaceContentBrush}"
+                BorderBrush="{DynamicResource StrokeDividerBrush}"
+                BorderThickness="1"
+                CornerRadius="{StaticResource RadiusRow}"
+                Padding="14,10">
+            <TextBlock x:Name="ResultText" Style="{StaticResource TextBodySmallStyle}" TextWrapping="Wrap"
+                       Text="Picked / Cancelled の結果がここに出ます" />
+        </Border>
+    </Grid>
+</ui:FluentWindow>

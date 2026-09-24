@@ -1,0 +1,204 @@
+<UserControl x:Class="TaskDeck.App.Settings.Pages.ExternalPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:input="clr-namespace:TaskDeck.App.Input"
+             xmlns:settings="clr-namespace:TaskDeck.App.Settings">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Settings/SettingsResources.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <BooleanToVisibilityConverter x:Key="BoolVisibility" />
+
+            <!-- カードの中の小さな説明・状況（等幅数字） -->
+            <Style x:Key="StatusTextStyle" TargetType="TextBlock" BasedOn="{StaticResource TabularCaptionStyle}">
+                <Setter Property="FontSize" Value="{StaticResource TypeLabelSize}" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+            </Style>
+
+            <!-- 結果の一言（空なら隠す） -->
+            <Style x:Key="MessageTextStyle" TargetType="TextBlock" BasedOn="{StaticResource StatusTextStyle}">
+                <Setter Property="Margin" Value="0,6,0,0" />
+                <Style.Triggers>
+                    <Trigger Property="Text" Value="">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                    </Trigger>
+                    <Trigger Property="Text" Value="{x:Null}">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <StackPanel>
+        <TextBlock Style="{StaticResource SettingsTitleStyle}" Text="外部サービス" />
+
+        <Border Style="{StaticResource SettingsNoticeStyle}" Margin="0,0,0,10">
+            <TextBlock Style="{StaticResource SettingsNoticeTextStyle}"
+                       Text="どれも任意の機能です。止めても、通信ができなくても、TaskDeck は完全に動きます。タスクの内容を外に送ることはありません。" />
+        </Border>
+
+        <settings:SettingsCard Icon="{StaticResource IconSync}"
+                               Title="オフラインモード"
+                               Description="外部への通信をすべて止めます（取ってある祝日・天気はそのまま使います）">
+            <ui:ToggleSwitch VerticalAlignment="Center" IsChecked="{Binding OfflineMode}"
+                             AutomationProperties.Name="オフラインモード" />
+        </settings:SettingsCard>
+
+        <TextBlock Style="{StaticResource SettingsSectionStyle}" Text="祝日" />
+
+        <settings:SettingsCard Icon="{StaticResource IconCalendar}"
+                               Title="日本の祝日を取得する"
+                               Description="カレンダーと「次の営業日」で使います。送るのは国コードと年だけです"
+                               IsEnabled="{Binding IsOnline}">
+            <ui:ToggleSwitch VerticalAlignment="Center" IsChecked="{Binding HolidaysEnabled}"
+                             AutomationProperties.Name="日本の祝日を取得する" />
+            <settings:SettingsCard.Expanded>
+                <TextBlock x:Name="HolidayStatusText"
+                           Style="{StaticResource StatusTextStyle}"
+                           AutomationProperties.AutomationId="HolidayStatus"
+                           Text="{Binding HolidayStatus}"
+                           Visibility="{Binding CanFetch, Converter={StaticResource BoolVisibility}}" />
+            </settings:SettingsCard.Expanded>
+        </settings:SettingsCard>
+
+        <settings:SettingsCard Icon="{StaticResource IconRepeat}"
+                               Title="平日の繰り返しで祝日を避ける"
+                               Description="「平日のみ」の繰り返しが祝日に当たったら、翌営業日へ送ります">
+            <ui:ToggleSwitch VerticalAlignment="Center" IsChecked="{Binding ShiftWeekdayRecurrenceOnHolidays}"
+                             AutomationProperties.Name="平日の繰り返しで祝日を避ける" />
+        </settings:SettingsCard>
+
+        <TextBlock Style="{StaticResource SettingsSectionStyle}" Text="天気" />
+
+        <settings:SettingsCard Icon="{StaticResource IconSun}"
+                               Title="天気を表示する"
+                               Description="{Binding WeatherLocationName}"
+                               IsEnabled="{Binding IsOnline}">
+            <ui:ToggleSwitch VerticalAlignment="Center" IsChecked="{Binding WeatherEnabled}"
+                             AutomationProperties.Name="天気を表示する" />
+            <settings:SettingsCard.Expanded>
+                <!-- 場所を地名で探して選ぶ（Open-Meteo。送るのは入力した地名だけ） -->
+                <StackPanel Visibility="{Binding CanFetch, Converter={StaticResource BoolVisibility}}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" MaxWidth="320" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="PlaceQueryBox"
+                                 Style="{StaticResource InputTextBoxStyle}"
+                                 MinHeight="0"
+                                 Height="{StaticResource ToolbarButtonHeight}"
+                                 input:ImeGuard.IsEnabled="True"
+                                 AutomationProperties.Name="天気の場所を地名で探す"
+                                 Text="{Binding PlaceQuery, UpdateSourceTrigger=PropertyChanged}"
+                                 PreviewKeyDown="OnPlaceQueryKeyDown" />
+                        <TextBlock Foreground="{DynamicResource TextTertiaryBrush}"
+                                   Margin="9,0,0,0"
+                                   VerticalAlignment="Center"
+                                   IsHitTestVisible="False"
+                                   Text="地名（例: 大阪市、札幌市、Osaka）">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource TextBodySmallStyle}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Text, ElementName=PlaceQueryBox}" Value="">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <Button Grid.Column="1"
+                                Margin="8,0,0,0"
+                                Style="{StaticResource SettingsButtonStyle}"
+                                Content="探す"
+                                AutomationProperties.Name="地名で探す"
+                                Command="{Binding SearchPlacesCommand}" />
+                    </Grid>
+
+                    <TextBlock Style="{StaticResource MessageTextStyle}"
+                               AutomationProperties.AutomationId="PlaceSearchMessage"
+                               Text="{Binding SearchMessage}" />
+
+                    <!-- 候補は10件まで（仮想化は要らない） -->
+                    <ItemsControl ItemsSource="{Binding Places}" Margin="0,6,0,0" MaxWidth="480" HorizontalAlignment="Left">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Style="{StaticResource ListRowButtonStyle}"
+                                        Height="{StaticResource PickerItemHeight}"
+                                        Padding="10,0"
+                                        Command="{Binding DataContext.SelectPlaceCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                        CommandParameter="{Binding}"
+                                        AutomationProperties.Name="{Binding Label, StringFormat='{}{0} を天気の場所にする'}">
+                                    <DockPanel>
+                                        <TextBlock DockPanel.Dock="Right"
+                                                   Margin="12,0,0,0"
+                                                   Style="{StaticResource StatusTextStyle}"
+                                                   VerticalAlignment="Center">
+                                            <Run Text="{Binding Latitude, StringFormat='{}{0:0.00}', Mode=OneWay}" /><Run Text=", " /><Run Text="{Binding Longitude, StringFormat='{}{0:0.00}', Mode=OneWay}" />
+                                        </TextBlock>
+                                        <TextBlock Style="{StaticResource TextBodySmallStyle}"
+                                                   VerticalAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   Text="{Binding Label}" />
+                                    </DockPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <TextBlock Margin="0,8,0,0"
+                               Style="{StaticResource StatusTextStyle}"
+                               Text="送るのは、入力した地名と、選んだ場所の緯度経度（小数第2位まで。約1km）だけです。天気のデータ: Open-Meteo.com" />
+                    <TextBlock Margin="0,4,0,0"
+                               Style="{StaticResource StatusTextStyle}"
+                               AutomationProperties.AutomationId="WeatherStatus"
+                               Text="{Binding WeatherStatus}" />
+                </StackPanel>
+            </settings:SettingsCard.Expanded>
+        </settings:SettingsCard>
+
+        <settings:SettingsCard Icon="{StaticResource IconImport}"
+                               Title="今すぐ取得"
+                               Description="祝日と天気を、次の取得を待たずに取り直します"
+                               IsEnabled="{Binding IsOnline}"
+                               Visibility="{Binding CanFetch, Converter={StaticResource BoolVisibility}}">
+            <Button Style="{StaticResource SettingsButtonStyle}"
+                    Content="今すぐ取得"
+                    AutomationProperties.Name="祝日と天気を今すぐ取得"
+                    Command="{Binding RefreshNowCommand}" />
+            <!--
+                カードの Expanded に入れた部品は、表示されて初めてページの DataContext を受け継ぐ。最初から Collapsed にすると
+                いつまでも受け継がず出てこないので、見える／見えないは（DataContext が来るまで既定の Visible になる）バインドで切り替える
+            -->
+            <settings:SettingsCard.Expanded>
+                <TextBlock Style="{StaticResource StatusTextStyle}"
+                           AutomationProperties.AutomationId="RefreshMessage"
+                           Text="{Binding RefreshMessage}"
+                           Visibility="{Binding HasRefreshMessage, Converter={StaticResource BoolVisibility}}" />
+            </settings:SettingsCard.Expanded>
+        </settings:SettingsCard>
+
+        <TextBlock Style="{StaticResource SettingsSectionStyle}" Text="その他" />
+
+        <settings:SettingsCard Icon="{StaticResource IconNote}"
+                               Title="メモの URL のタイトルを取得する"
+                               Description="オンにすると、メモに書いた URL が Microlink のサーバーに送信されます。既定はオフです"
+                               IsEnabled="{Binding IsOnline}">
+            <ui:ToggleSwitch VerticalAlignment="Center" IsChecked="{Binding LinkPreviewEnabled}"
+                             AutomationProperties.Name="メモの URL のタイトルを取得する" />
+        </settings:SettingsCard>
+
+        <settings:SettingsCard Icon="{StaticResource IconArrowUp}"
+                               Title="更新を確認する"
+                               Description="1日1回、GitHub の公開ページで新しい版が出ていないか見ます（送るのはリポジトリ名だけ。結果は「TaskDeck について」に出ます）"
+                               IsEnabled="{Binding IsOnline}">
+            <ui:ToggleSwitch VerticalAlignment="Center" IsChecked="{Binding UpdateCheckEnabled}"
+                             AutomationProperties.Name="更新を確認する" />
+        </settings:SettingsCard>
+    </StackPanel>
+</UserControl>

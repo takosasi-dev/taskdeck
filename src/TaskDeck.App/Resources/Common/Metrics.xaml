@@ -1,0 +1,69 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=System.Runtime">
+    <!-- 寸法（UI 設計書 4・5章）。テーマで変わらないので StaticResource で参照する。余白は 4/8/12/16/20/32 だけを使う -->
+
+    <!-- 余白 -->
+    <sys:Double x:Key="Space4">4</sys:Double>
+    <sys:Double x:Key="Space8">8</sys:Double>
+    <sys:Double x:Key="Space12">12</sys:Double>
+    <sys:Double x:Key="Space16">16</sys:Double>
+    <sys:Double x:Key="Space20">20</sys:Double>
+    <sys:Double x:Key="Space32">32</sys:Double>
+    <Thickness x:Key="PanePadding">18,20,18,20</Thickness>
+    <Thickness x:Key="RowPadding">8,0,8,0</Thickness>
+
+    <!-- 角丸 -->
+    <CornerRadius x:Key="RadiusButton">4</CornerRadius>
+    <CornerRadius x:Key="RadiusRow">5</CornerRadius>
+    <CornerRadius x:Key="RadiusWindow">8</CornerRadius>
+    <CornerRadius x:Key="RadiusDialog">10</CornerRadius>
+    <CornerRadius x:Key="RadiusChip">12</CornerRadius>
+    <CornerRadius x:Key="RadiusCheckBox">3</CornerRadius>
+    <!-- タスク一覧の左上だけ角を丸め、サイドバーとの段差に見せる -->
+    <CornerRadius x:Key="RadiusContentTopLeft">8,0,0,0</CornerRadius>
+
+    <!-- 高さ -->
+    <sys:Double x:Key="TitleBarHeight">48</sys:Double>
+    <sys:Double x:Key="StatusBarHeight">28</sys:Double>
+    <sys:Double x:Key="TaskRowHeight">42</sys:Double>
+    <sys:Double x:Key="TaskRowCompactHeight">36</sys:Double>
+    <sys:Double x:Key="SubtaskRowHeight">34</sys:Double>
+    <sys:Double x:Key="NavItemHeight">36</sys:Double>
+    <sys:Double x:Key="NavSubItemHeight">34</sys:Double>
+    <sys:Double x:Key="ButtonHeight">32</sys:Double>
+    <sys:Double x:Key="ToolbarButtonHeight">30</sys:Double>
+    <sys:Double x:Key="InputHeight">32</sys:Double>
+    <sys:Double x:Key="ChipHeight">24</sys:Double>
+    <sys:Double x:Key="BadgeHeight">20</sys:Double>
+    <sys:Double x:Key="CalendarChipHeight">18</sys:Double>
+    <sys:Double x:Key="IconButtonSize">32</sys:Double>
+    <sys:Double x:Key="CheckBoxSize">17</sys:Double>
+    <sys:Double x:Key="SubtaskCheckBoxSize">15</sys:Double>
+    <sys:Double x:Key="PriorityColumnWidth">22</sys:Double>
+    <sys:Double x:Key="DueColumnWidth">58</sys:Double>
+    <!-- 入力補助ポップアップ（UI 設計書 12.1）と設定画面（17章） -->
+    <sys:Double x:Key="PickerRowHeight">34</sys:Double>
+    <sys:Double x:Key="PickerItemHeight">32</sys:Double>
+    <sys:Double x:Key="CalendarCellHeight">26</sys:Double>
+    <sys:Double x:Key="SettingsNavItemHeight">36</sys:Double>
+
+    <!-- 幅 -->
+    <sys:Double x:Key="SidebarWidth">220</sys:Double>
+    <sys:Double x:Key="SidebarMinWidth">180</sys:Double>
+    <sys:Double x:Key="SidebarMaxWidth">320</sys:Double>
+    <sys:Double x:Key="DetailPaneWidth">320</sys:Double>
+    <sys:Double x:Key="DetailPaneMinWidth">280</sys:Double>
+    <sys:Double x:Key="DetailPaneMaxWidth">480</sys:Double>
+    <sys:Double x:Key="TaskListMinWidth">400</sys:Double>
+    <sys:Double x:Key="WindowMinWidth">900</sys:Double>
+    <sys:Double x:Key="WindowMinHeight">600</sys:Double>
+    <sys:Double x:Key="PopupWidth">296</sys:Double>
+    <sys:Double x:Key="SmallPopupWidth">186</sys:Double>
+    <sys:Double x:Key="SettingsNavWidth">220</sys:Double>
+    <!-- 設定カードは幅いっぱいに広げ、最大化したときだけここで止める（Windows 11 の設定アプリと同じ程度） -->
+    <sys:Double x:Key="SettingsCardMaxWidth">1000</sys:Double>
+    <sys:Double x:Key="QuickInputWidth">660</sys:Double>
+    <sys:Double x:Key="PaletteWidth">660</sys:Double>
+    <sys:Double x:Key="ToastMaxWidth">480</sys:Double>
+</ResourceDictionary>

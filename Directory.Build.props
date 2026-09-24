@@ -1,0 +1,13 @@
+<Project>
+  <PropertyGroup>
+    <LangVersion>14</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <WarningsAsErrors>$(WarningsAsErrors);nullable;RS0030</WarningsAsErrors>
+    <SatelliteResourceLanguages>ja</SatelliteResourceLanguages>
+    <Version>0.1.0</Version>
+    <Company>takosasi-dev</Company>
+    <Product>TaskDeck</Product>
+  </PropertyGroup>
+</Project>

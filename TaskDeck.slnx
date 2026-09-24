@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/TaskDeck.App/TaskDeck.App.csproj" />
+    <Project Path="src/TaskDeck.Core/TaskDeck.Core.csproj" />
+    <Project Path="src/TaskDeck.Data/TaskDeck.Data.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/TaskDeck.Tests/TaskDeck.Tests.csproj" />
+  </Folder>
+</Solution>

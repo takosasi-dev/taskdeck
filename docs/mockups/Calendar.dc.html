@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>TaskDeck カレンダービュー</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body { margin: 0; font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; background: #f3f3f3; }
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; box-sizing: border-box; display: flex; flex-direction: column; background: #f3f3f3; color: #1a1a1a; font-size: 14px; overflow: hidden; border: 1px solid #d2d2d2; border-radius: 8px;">
+
+  <div style="height: 48px; flex-shrink: 0; display: flex; align-items: center; gap: 12px; padding: 0 0 0 12px; border-bottom: 1px solid #e5e5e5;">
+    <button type="button" aria-label="サイドバーの表示を切り替え" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; border-radius: 4px; cursor: pointer; color: #1a1a1a;">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 4h12M2 8h12M2 12h12"/></svg>
+    </button>
+    <span style="font-size: 14px; font-weight: 600;">TaskDeck</span>
+    <div style="flex-grow: 1; display: flex; justify-content: center;">
+      <div style="position: relative; width: 340px;">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#6e6e6e" stroke-width="1.5" stroke-linecap="round" style="position: absolute; left: 10px; top: 8px;"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg>
+        <input type="search" aria-label="タスクを検索" placeholder="検索  Ctrl+F" style="width: 100%; height: 30px; box-sizing: border-box; padding: 0 12px 0 32px; font-size: 13px; font-family: inherit; color: #1a1a1a; background: #ffffff; border: 1px solid #d6d6d6; border-bottom-color: #8a8a8a; border-radius: 5px;">
+      </div>
+    </div>
+    <button type="button" aria-label="今すぐ同期" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; border-radius: 4px; cursor: pointer; color: #1a1a1a;">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 7a5.5 5.5 0 0 0-9.9-3.3M2.5 9a5.5 5.5 0 0 0 9.9 3.3"/><path d="M13.5 2.5V6H10M2.5 13.5V10H6"/></svg>
+    </button>
+    <button type="button" aria-label="設定" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; border-radius: 4px; cursor: pointer; color: #1a1a1a;">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.2"/><path d="M8 1.6v1.6M8 12.8v1.6M14.4 8h-1.6M3.2 8H1.6M12.5 3.5l-1.1 1.1M4.6 11.4l-1.1 1.1M12.5 12.5l-1.1-1.1M4.6 4.6 3.5 3.5" stroke-linecap="round"/></svg>
+    </button>
+    <div style="display: flex; margin-left: 4px;">
+      <button type="button" aria-label="最小化" style="width: 46px; height: 47px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; color: #1a1a1a;"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1"><path d="M0 5h10"/></svg></button>
+      <button type="button" aria-label="最大化" style="width: 46px; height: 47px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; color: #1a1a1a;"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1"><rect x="0.5" y="0.5" width="9" height="9"/></svg></button>
+      <button type="button" aria-label="閉じる" style="width: 46px; height: 47px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; color: #1a1a1a;"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1"><path d="M0 0l10 10M10 0L0 10"/></svg></button>
+    </div>
+  </div>
+
+  <div style="flex-grow: 1; display: flex; min-height: 0;">
+
+    <div style="width: 220px; flex-shrink: 0; box-sizing: border-box; padding: 8px; display: flex; flex-direction: column; gap: 2px; overflow: hidden;">
+      <div style="display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px 0 14px; border-radius: 5px;">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#3a3a3a" stroke-width="1.5" stroke-linecap="round"><path d="M8 4.5V8l2.2 1.4"/><circle cx="8" cy="8" r="6"/></svg>
+        <span style="flex-grow: 1;">今日</span>
+        <span style="font-size: 12px; color: #5d5d5d;">12</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px 0 14px; border-radius: 5px;">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#3a3a3a" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M2 6.5h12M5.5 1.6v2.4M10.5 1.6v2.4"/></svg>
+        <span style="flex-grow: 1;">予定</span>
+        <span style="font-size: 12px; color: #5d5d5d;">28</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px 0 14px; border-radius: 5px;">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#3a3a3a" stroke-width="1.5" stroke-linecap="round"><path d="M5.5 4h8M5.5 8h8M5.5 12h8M2.5 4h.01M2.5 8h.01M2.5 12h.01"/></svg>
+        <span style="flex-grow: 1;">すべて</span>
+        <span style="font-size: 12px; color: #5d5d5d;">94</span>
+      </div>
+      <div style="height: 1px; background: #e0e0e0; margin: 8px 10px 6px 10px;"></div>
+      <div style="padding: 0 10px 4px 14px; font-size: 11px; font-weight: 600; color: #6e6e6e;">プロジェクト</div>
+      <div style="display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 10px 0 14px;">
+        <span style="width: 9px; height: 9px; border-radius: 50%; background: #0067c0; margin: 0 3px;"></span>
+        <span style="flex-grow: 1;">業務改善</span>
+        <span style="font-size: 12px; color: #5d5d5d;">5</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 10px 0 14px;">
+        <span style="width: 9px; height: 9px; border-radius: 50%; background: #0f7b6c; margin: 0 3px;"></span>
+        <span style="flex-grow: 1;">学校</span>
+        <span style="font-size: 12px; color: #5d5d5d;">4</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 10px 0 14px;">
+        <span style="width: 9px; height: 9px; border-radius: 50%; background: #8764b8; margin: 0 3px;"></span>
+        <span style="flex-grow: 1;">私物</span>
+        <span style="font-size: 12px; color: #5d5d5d;">3</span>
+      </div>
+      <div style="flex-grow: 1;"></div>
+      <div style="padding: 10px 12px; border-radius: 6px; background: #ffffff; border: 1px solid #e5e5e5;">
+        <div style="font-size: 11px; font-weight: 600; color: #3a3a3a; margin-bottom: 6px;">凡例</div>
+        <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 4px;"><span style="width: 10px; height: 10px; border-radius: 2px; background: #c42b1c;"></span><span style="font-size: 11px; color: #5d5d5d;">期限切れ</span></div>
+        <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 4px;"><span style="width: 10px; height: 10px; border-radius: 2px; background: #0067c0;"></span><span style="font-size: 11px; color: #5d5d5d;">時刻あり</span></div>
+        <div style="display: flex; align-items: center; gap: 7px;"><span style="width: 10px; height: 10px; border-radius: 2px; border: 1px dashed #8a8a8a; box-sizing: border-box;"></span><span style="font-size: 11px; color: #5d5d5d;">繰り返し予定</span></div>
+      </div>
+    </div>
+
+    <div style="flex-grow: 1; min-width: 0; box-sizing: border-box; background: #ffffff; border: 1px solid #e5e5e5; border-right: none; border-bottom: none; border-top-left-radius: 8px; display: flex; flex-direction: column; overflow: hidden;">
+
+      <div style="flex-shrink: 0; display: flex; align-items: center; gap: 10px; padding: 16px 20px 12px 20px;">
+        <h1 style="margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em;">2026年 9月</h1>
+        <button type="button" aria-label="前の月" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: transparent; border: 1px solid #d6d6d6; border-radius: 5px; cursor: pointer; color: #1a1a1a;"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3 5 8l5 5"/></svg></button>
+        <button type="button" aria-label="次の月" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: transparent; border: 1px solid #d6d6d6; border-radius: 5px; cursor: pointer; color: #1a1a1a;"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l5 5-5 5"/></svg></button>
+        <button type="button" style="height: 28px; padding: 0 12px; font-size: 13px; font-family: inherit; color: #1a1a1a; background: transparent; border: 1px solid #d6d6d6; border-radius: 5px; cursor: pointer;">今日</button>
+        <div style="flex-grow: 1;"></div>
+        <div style="display: flex; gap: 2px; padding: 2px; background: #f0f0f0; border-radius: 6px;">
+          <button type="button" style="height: 26px; padding: 0 14px; font-size: 12px; font-family: inherit; color: #1a1a1a; background: #ffffff; border: 1px solid #e0e0e0; border-radius: 4px; cursor: pointer;">月</button>
+          <button type="button" style="height: 26px; padding: 0 14px; font-size: 12px; font-family: inherit; color: #5d5d5d; background: transparent; border: none; border-radius: 4px; cursor: pointer;">週</button>
+        </div>
+      </div>
+
+      <div style="flex-shrink: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-bottom: 1px solid #e5e5e5;">
+        <div style="padding: 6px 0; text-align: center; font-size: 11px; font-weight: 600; color: #c42b1c;">日</div>
+        <div style="padding: 6px 0; text-align: center; font-size: 11px; font-weight: 600; color: #5d5d5d;">月</div>
+        <div style="padding: 6px 0; text-align: center; font-size: 11px; font-weight: 600; color: #5d5d5d;">火</div>
+        <div style="padding: 6px 0; text-align: center; font-size: 11px; font-weight: 600; color: #5d5d5d;">水</div>
+        <div style="padding: 6px 0; text-align: center; font-size: 11px; font-weight: 600; color: #5d5d5d;">木</div>
+        <div style="padding: 6px 0; text-align: center; font-size: 11px; font-weight: 600; color: #5d5d5d;">金</div>
+        <div style="padding: 6px 0; text-align: center; font-size: 11px; font-weight: 600; color: #0067c0;">土</div>
+      </div>
+
+      <div style="flex-grow: 1; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-template-rows: repeat(5, minmax(0, 1fr));">
+
+        <div style="border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 4px 5px;"><div style="font-size: 12px; color: #a8a8a8; font-variant-numeric: tabular-nums;">30</div></div>
+        <div style="border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 4px 5px;"><div style="font-size: 12px; color: #a8a8a8; font-variant-numeric: tabular-nums;">31</div></div>
+        <div style="border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 4px 5px;"><div style="font-size: 12px; color: #1a1a1a; font-variant-numeric: tabular-nums;">1</div></div>
+        <div style="border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 4px 5px;"><div style="font-size: 12px; color: #1a1a1a; font-variant-numeric: tabular-nums;">2</div></div>
+        <div style="border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 4px 5px;"><div style="font-size: 12px; color: #1a1a1a; font-variant-numeric: tabular-nums;">3</div></div>
+        <div style="border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 4px 5px;"><div style="font-size: 12px; color: #1a1a1a; font-variant-numeric: tabular-nums;">4</div></div>
+        <div style="border-bottom: 1px solid #f0f0f0; padding: 4px 5px;"><div style="font-size: 12px; color: #0067c0; font-variant-numeric: tabular-nums;">5</div></div>
+
+        <div style="border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 4px 5px;"><div style="font-size: 12px; color: #c42b1c; font-variant-numeric: tabular-nums;">6</div></div>
+        <div style="border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 4px 5px;"><div style="font-size: 12px; font-variant-numeric: tabular-nums;">7</div></div>
+        <div style="border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 4px 5px;"><div style="font-size: 12px; font-variant-numeric: tabular-nums;">8</div><div style="margin-top: 3px; display: flex; align-items: center; gap: 4px; height: 18px; padding: 0 5px; border-radius: 3px; background: #eef4fb;"><span style="width: 4px; height: 10px; border-radius: 2px; background: #0f7b6c; flex-shrink: 0;"></span><span style="font-size: 10px; color: #1a1a1a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">小テスト</span></div></div>
+        <div style="border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 4px 5px;"><div style="font-size: 12px; font-variant-numeric: tabular-nums;">9</div></div>
+        <div style="border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 4px 5px;"><div style="font-size: 12px; font-variant-numeric: tabular-nums;">10</div></div>
+        <div style="border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 4px 5px;"><div style="font-size: 12px; font-variant-numeric: tabular-nums;">11</div></div>
+        <div style="border-bottom: 1px solid #f0f0f0; padding: 4px 5px;"><div style="font-size: 12px; color: #0067c0; font-variant-numeric: tabular-nums;">12</div></div>
+
+        <div style="border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 4px 5px;"><div style="font-size: 12px; color: #c42b1c; font-variant-numeric: tabular-nums;">13</div></div>
+        <div style="border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 4px 5px;"><div style="font-size: 12px; font-variant-numeric: tabular-nums;">14</div><div style="margin-top: 3px; display: flex; align-items: center; gap: 4px; height: 18px; padding: 0 5px; border-radius: 3px; border: 1px dashed #c6c6c6;"><span style="font-size: 10px; color: #8a8a8a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">週次の買い出し</span></div></div>
+        <div style="border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 4px 5px;"><div style="font-size: 12px; font-variant-numeric: tabular-nums;">15</div></div>
+        <div style="border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 4px 5px;"><div style="font-size: 12px; font-variant-numeric: tabular-nums;">16</div></div>
+        <div style="border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 4px 5px;"><div style="font-size: 12px; font-variant-numeric: tabular-nums;">17</div></div>
+        <div style="border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 4px 5px;"><div style="font-size: 12px; font-variant-numeric: tabular-nums;">18</div></div>
+        <div style="border-bottom: 1px solid #f0f0f0; padding: 4px 5px;"><div style="font-size: 12px; color: #0067c0; font-variant-numeric: tabular-nums;">19</div><div style="margin-top: 3px; display: flex; align-items: center; gap: 4px; height: 18px; padding: 0 5px; border-radius: 3px; background: #fdeeec;"><span style="width: 4px; height: 10px; border-radius: 2px; background: #c42b1c; flex-shrink: 0;"></span><span style="font-size: 10px; color: #a8241a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">請求書を出す</span></div></div>
+
+        <div style="border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 4px 5px;"><div style="font-size: 12px; color: #c42b1c; font-variant-numeric: tabular-nums;">20</div><div style="margin-top: 3px; display: flex; align-items: center; gap: 4px; height: 18px; padding: 0 5px; border-radius: 3px; background: #fdeeec;"><span style="width: 4px; height: 10px; border-radius: 2px; background: #c42b1c; flex-shrink: 0;"></span><span style="font-size: 10px; color: #a8241a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">歯医者に電話</span></div></div>
+        <div style="border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 4px 5px;"><div style="font-size: 12px; font-variant-numeric: tabular-nums;">21</div><div style="margin-top: 3px; display: flex; align-items: center; gap: 4px; height: 18px; padding: 0 5px; border-radius: 3px; border: 1px dashed #c6c6c6;"><span style="font-size: 10px; color: #8a8a8a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">週次の買い出し</span></div></div>
+
+        <div style="border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 4px 5px; background: #f7fafd; outline: 1.5px solid #0067c0; outline-offset: -1.5px;">
+          <div style="display: flex; align-items: center; gap: 4px;"><span style="display: inline-flex; align-items: center; justify-content: center; width: 19px; height: 19px; border-radius: 50%; background: #0067c0; color: #ffffff; font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums;">22</span></div>
+          <div style="margin-top: 3px; display: flex; align-items: center; gap: 4px; height: 18px; padding: 0 5px; border-radius: 3px; background: #eef4fb;"><span style="width: 4px; height: 10px; border-radius: 2px; background: #0067c0; flex-shrink: 0;"></span><span style="font-size: 10px; font-weight: 600; color: #1a1a1a; flex-shrink: 0;">15:00</span><span style="font-size: 10px; color: #1a1a1a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">会議資料</span></div>
+          <div style="margin-top: 2px; display: flex; align-items: center; gap: 4px; height: 18px; padding: 0 5px; border-radius: 3px; background: #eefaf6;"><span style="width: 4px; height: 10px; border-radius: 2px; background: #0f7b6c; flex-shrink: 0;"></span><span style="font-size: 10px; font-weight: 600; color: #1a1a1a; flex-shrink: 0;">18:30</span><span style="font-size: 10px; color: #1a1a1a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">AWS</span></div>
+          <div style="margin-top: 2px; padding: 0 5px; font-size: 10px; color: #5d5d5d;">他 3 件</div>
+        </div>
+
+        <div style="border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 4px 5px;"><div style="font-size: 12px; font-variant-numeric: tabular-nums;">23</div><div style="margin-top: 3px; display: flex; align-items: center; gap: 4px; height: 18px; padding: 0 5px; border-radius: 3px; background: #eef4fb;"><span style="width: 4px; height: 10px; border-radius: 2px; background: #0067c0; flex-shrink: 0;"></span><span style="font-size: 10px; font-weight: 600; color: #1a1a1a; flex-shrink: 0;">10:00</span><span style="font-size: 10px; color: #1a1a1a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">定例</span></div></div>
+        <div style="border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 4px 5px;"><div style="font-size: 12px; font-variant-numeric: tabular-nums;">24</div></div>
+        <div style="border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 4px 5px;"><div style="font-size: 12px; font-variant-numeric: tabular-nums;">25</div><div style="margin-top: 3px; display: flex; align-items: center; gap: 4px; height: 18px; padding: 0 5px; border-radius: 3px; background: #eefaf6;"><span style="width: 4px; height: 10px; border-radius: 2px; background: #0f7b6c; flex-shrink: 0;"></span><span style="font-size: 10px; color: #1a1a1a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">レポート提出</span></div></div>
+        <div style="border-bottom: 1px solid #f0f0f0; padding: 4px 5px;"><div style="font-size: 12px; color: #0067c0; font-variant-numeric: tabular-nums;">26</div></div>
+
+        <div style="border-right: 1px solid #f0f0f0; padding: 4px 5px;"><div style="font-size: 12px; color: #c42b1c; font-variant-numeric: tabular-nums;">27</div></div>
+        <div style="border-right: 1px solid #f0f0f0; padding: 4px 5px;"><div style="font-size: 12px; font-variant-numeric: tabular-nums;">28</div><div style="margin-top: 3px; display: flex; align-items: center; gap: 4px; height: 18px; padding: 0 5px; border-radius: 3px; border: 1px dashed #c6c6c6;"><span style="font-size: 10px; color: #8a8a8a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">週次の買い出し</span></div></div>
+        <div style="border-right: 1px solid #f0f0f0; padding: 4px 5px;"><div style="font-size: 12px; font-variant-numeric: tabular-nums;">29</div><div style="margin-top: 3px; display: flex; align-items: center; gap: 4px; height: 18px; padding: 0 5px; border-radius: 3px; background: #f5f0fb;"><span style="width: 4px; height: 10px; border-radius: 2px; background: #8764b8; flex-shrink: 0;"></span><span style="font-size: 10px; color: #1a1a1a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">面接対策</span></div></div>
+        <div style="border-right: 1px solid #f0f0f0; padding: 4px 5px;"><div style="font-size: 12px; font-variant-numeric: tabular-nums;">30</div></div>
+        <div style="border-right: 1px solid #f0f0f0; padding: 4px 5px; background: #fafafa;"><div style="font-size: 12px; color: #a8a8a8; font-variant-numeric: tabular-nums;">10/1</div><div style="margin-top: 3px; display: flex; align-items: center; gap: 4px; height: 18px; padding: 0 5px; border-radius: 3px; border: 1px dashed #c6c6c6;"><span style="font-size: 10px; color: #8a8a8a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">月初の棚卸し</span></div></div>
+        <div style="border-right: 1px solid #f0f0f0; padding: 4px 5px; background: #fafafa;"><div style="font-size: 12px; color: #a8a8a8; font-variant-numeric: tabular-nums;">2</div></div>
+        <div style="padding: 4px 5px; background: #fafafa;"><div style="font-size: 12px; color: #a8a8a8; font-variant-numeric: tabular-nums;">3</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height: 28px; flex-shrink: 0; display: flex; align-items: center; gap: 14px; padding: 0 12px; border-top: 1px solid #e5e5e5; font-size: 11px; color: #5d5d5d;">
+    <div style="display: flex; align-items: center; gap: 5px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: #0f7b6c;"></span>最終同期 14:32</div>
+    <span>未同期 0 件</span>
+    <div style="flex-grow: 1;"></div>
+    <div style="display: flex; gap: 2px;">
+      <button type="button" style="height: 20px; padding: 0 9px; font-size: 11px; font-family: inherit; color: #5d5d5d; background: transparent; border: none; border-radius: 4px; cursor: pointer;">リスト</button>
+      <button type="button" style="height: 20px; padding: 0 9px; font-size: 11px; font-family: inherit; color: #1a1a1a; background: #e6e6e6; border: none; border-radius: 4px; cursor: pointer;">カレンダー</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

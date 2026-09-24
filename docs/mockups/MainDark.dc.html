@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>TaskDeck メインウィンドウ ダーク</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body { margin: 0; font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; background: #202020; }
+a { color: #4cc2ff; } a:hover { color: #7fd5ff; }
+input[type="checkbox"] { accent-color: #4cc2ff; }
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; box-sizing: border-box; display: flex; flex-direction: column; background: #202020; color: #ffffff; font-size: 14px; overflow: hidden; border: 1px solid #3d3d3d; border-radius: 8px;">
+
+  <div style="height: 48px; flex-shrink: 0; display: flex; align-items: center; gap: 12px; padding: 0 0 0 12px; border-bottom: 1px solid #2f2f2f; background: #202020;">
+    <button type="button" aria-label="サイドバーの表示を切り替え" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; border-radius: 4px; cursor: pointer; color: #ffffff;">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 4h12M2 8h12M2 12h12"/></svg>
+    </button>
+    <span style="font-size: 14px; font-weight: 600; letter-spacing: 0.01em;">TaskDeck</span>
+    <div style="flex-grow: 1; display: flex; justify-content: center;">
+      <div style="position: relative; width: 340px;">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#9b9b9b" stroke-width="1.5" stroke-linecap="round" style="position: absolute; left: 10px; top: 8px;"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg>
+        <input type="search" aria-label="タスクを検索" placeholder="検索  Ctrl+F" style="width: 100%; height: 30px; box-sizing: border-box; padding: 0 12px 0 32px; font-size: 13px; font-family: inherit; color: #ffffff; background: #2d2d2d; border: 1px solid #3d3d3d; border-bottom-color: #6b6b6b; border-radius: 5px;">
+      </div>
+    </div>
+    <button type="button" aria-label="今すぐ同期" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; border-radius: 4px; cursor: pointer; color: #ffffff;">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 7a5.5 5.5 0 0 0-9.9-3.3M2.5 9a5.5 5.5 0 0 0 9.9 3.3"/><path d="M13.5 2.5V6H10M2.5 13.5V10H6"/></svg>
+    </button>
+    <button type="button" aria-label="設定" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; border-radius: 4px; cursor: pointer; color: #ffffff;">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.2"/><path d="M8 1.6v1.6M8 12.8v1.6M14.4 8h-1.6M3.2 8H1.6M12.5 3.5l-1.1 1.1M4.6 11.4l-1.1 1.1M12.5 12.5l-1.1-1.1M4.6 4.6 3.5 3.5" stroke-linecap="round"/></svg>
+    </button>
+    <div style="display: flex; margin-left: 4px;">
+      <button type="button" aria-label="最小化" style="width: 46px; height: 47px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; color: #ffffff;">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1"><path d="M0 5h10"/></svg>
+      </button>
+      <button type="button" aria-label="最大化" style="width: 46px; height: 47px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; color: #ffffff;">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1"><rect x="0.5" y="0.5" width="9" height="9"/></svg>
+      </button>
+      <button type="button" aria-label="閉じる" style="width: 46px; height: 47px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; color: #ffffff;">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1"><path d="M0 0l10 10M10 0L0 10"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div style="flex-grow: 1; display: flex; min-height: 0;">
+
+    <div style="width: 220px; flex-shrink: 0; box-sizing: border-box; padding: 8px 8px 12px 8px; display: flex; flex-direction: column; gap: 2px; background: #202020; overflow: hidden;">
+
+      <div style="position: relative; display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px; border-radius: 5px; background: #2d2d2d;">
+        <div style="position: absolute; left: 0; top: 9px; width: 3px; height: 18px; border-radius: 2px; background: #4cc2ff;"></div>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#4cc2ff" stroke-width="1.5" stroke-linecap="round" style="margin-left: 4px;"><path d="M8 4.5V8l2.2 1.4"/><circle cx="8" cy="8" r="6"/></svg>
+        <span style="flex-grow: 1; font-weight: 600;">今日</span>
+        <span style="font-size: 12px; color: #c8c8c8; font-variant-numeric: tabular-nums;">12</span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px 0 14px; border-radius: 5px;">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#d6d6d6" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M2 6.5h12M5.5 1.6v2.4M10.5 1.6v2.4"/></svg>
+        <span style="flex-grow: 1;">予定</span>
+        <span style="font-size: 12px; color: #c8c8c8; font-variant-numeric: tabular-nums;">28</span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px 0 14px; border-radius: 5px;">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#d6d6d6" stroke-width="1.5" stroke-linecap="round"><path d="M5.5 4h8M5.5 8h8M5.5 12h8M2.5 4h.01M2.5 8h.01M2.5 12h.01"/></svg>
+        <span style="flex-grow: 1;">すべて</span>
+        <span style="font-size: 12px; color: #c8c8c8; font-variant-numeric: tabular-nums;">94</span>
+      </div>
+
+      <div style="height: 1px; background: #333333; margin: 8px 10px 6px 10px;"></div>
+      <div style="padding: 0 10px 4px 14px; font-size: 11px; font-weight: 600; color: #9b9b9b; letter-spacing: 0.03em;">プロジェクト</div>
+
+      <div style="display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 10px 0 14px; border-radius: 5px;">
+        <span style="width: 9px; height: 9px; border-radius: 50%; background: #4cc2ff; flex-shrink: 0; margin: 0 3px;"></span>
+        <span style="flex-grow: 1;">業務改善</span>
+        <span style="font-size: 12px; color: #c8c8c8; font-variant-numeric: tabular-nums;">5</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 10px 0 14px; border-radius: 5px;">
+        <span style="width: 9px; height: 9px; border-radius: 50%; background: #3fd0b4; flex-shrink: 0; margin: 0 3px;"></span>
+        <span style="flex-grow: 1;">学校</span>
+        <span style="font-size: 12px; color: #c8c8c8; font-variant-numeric: tabular-nums;">4</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 10px 0 14px; border-radius: 5px;">
+        <span style="width: 9px; height: 9px; border-radius: 50%; background: #b18bec; flex-shrink: 0; margin: 0 3px;"></span>
+        <span style="flex-grow: 1;">私物</span>
+        <span style="font-size: 12px; color: #c8c8c8; font-variant-numeric: tabular-nums;">3</span>
+      </div>
+
+      <div style="height: 1px; background: #333333; margin: 8px 10px 6px 10px;"></div>
+      <div style="padding: 0 10px 4px 14px; font-size: 11px; font-weight: 600; color: #9b9b9b; letter-spacing: 0.03em;">タグ</div>
+
+      <div style="display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 10px 0 14px; border-radius: 5px;">
+        <span style="width: 15px; text-align: center; color: #9b9b9b; font-size: 13px; flex-shrink: 0;">#</span>
+        <span style="flex-grow: 1;">仕事</span>
+        <span style="font-size: 12px; color: #c8c8c8; font-variant-numeric: tabular-nums;">8</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 10px 0 14px; border-radius: 5px;">
+        <span style="width: 15px; text-align: center; color: #9b9b9b; font-size: 13px; flex-shrink: 0;">#</span>
+        <span style="flex-grow: 1;">買い物</span>
+        <span style="font-size: 12px; color: #c8c8c8; font-variant-numeric: tabular-nums;">2</span>
+      </div>
+
+      <div style="flex-grow: 1;"></div>
+      <div style="height: 1px; background: #333333; margin: 6px 10px;"></div>
+
+      <div style="display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 10px 0 14px; border-radius: 5px; color: #c8c8c8;">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5 6.2 11.5 13 4.8"/></svg>
+        <span style="flex-grow: 1;">完了済み</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 10px 0 14px; border-radius: 5px; color: #c8c8c8;">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.6 4.2h10.8M6.4 4.2V2.8h3.2v1.4M4 4.2l.7 9.1h6.6l.7-9.1"/></svg>
+        <span style="flex-grow: 1;">ゴミ箱</span>
+      </div>
+    </div>
+
+    <div style="flex-grow: 1; min-width: 0; box-sizing: border-box; background: #272727; border: 1px solid #333333; border-right: none; border-bottom: none; border-top-left-radius: 8px; display: flex; flex-direction: column; overflow: hidden;">
+
+      <div style="flex-shrink: 0; display: flex; align-items: flex-end; justify-content: space-between; padding: 20px 20px 12px 20px;">
+        <div>
+          <h1 style="margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em;">今日</h1>
+          <div style="margin-top: 2px; font-size: 12px; color: #9b9b9b;">9月22日（火）・残り 7 件</div>
+        </div>
+        <button type="button" style="display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; font-size: 13px; font-family: inherit; color: #ffffff; background: #2d2d2d; border: 1px solid #3d3d3d; border-radius: 5px; cursor: pointer;">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 4.5h10M4.5 8h7M6.5 11.5h3"/></svg>
+          期限順
+        </button>
+      </div>
+
+      <div style="flex-grow: 1; overflow: hidden; padding: 0 12px;">
+
+        <div style="display: flex; align-items: center; gap: 8px; padding: 6px 8px 6px 8px;">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#ff6b5e" stroke-width="1.5" stroke-linecap="round"><path d="M8 2.2 14.6 13.4H1.4L8 2.2Z"/><path d="M8 6.4v3M8 11.4h.01"/></svg>
+          <span style="font-size: 12px; font-weight: 600; color: #ff6b5e;">期限切れ</span>
+          <span style="font-size: 12px; color: #9b9b9b;">2</span>
+          <div style="flex-grow: 1; height: 1px; background: #333333;"></div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 8px; border-radius: 5px;">
+          <input type="checkbox" aria-label="請求書を出す を完了にする" style="width: 17px; height: 17px; margin: 0; flex-shrink: 0;">
+          <span style="font-size: 12px; font-weight: 700; color: #ff8c42; width: 22px; flex-shrink: 0;">!!!</span>
+          <span style="flex-grow: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">請求書を出す</span>
+          <span style="font-size: 11px; color: #c8c8c8; background: #333333; padding: 2px 7px; border-radius: 10px;">業務改善</span>
+          <span style="font-size: 12px; color: #ff6b5e; font-weight: 600; width: 58px; text-align: right; font-variant-numeric: tabular-nums;">3日超過</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 8px; border-radius: 5px;">
+          <input type="checkbox" aria-label="歯医者に電話 を完了にする" style="width: 17px; height: 17px; margin: 0; flex-shrink: 0;">
+          <span style="width: 22px; flex-shrink: 0;"></span>
+          <span style="flex-grow: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">歯医者に電話</span>
+          <span style="font-size: 12px; color: #ff6b5e; font-weight: 600; width: 58px; text-align: right; font-variant-numeric: tabular-nums;">2日超過</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px; padding: 14px 8px 6px 8px;">
+          <span style="font-size: 12px; font-weight: 600; color: #d6d6d6;">今日</span>
+          <span style="font-size: 12px; color: #9b9b9b;">5</span>
+          <div style="flex-grow: 1; height: 1px; background: #333333;"></div>
+        </div>
+
+        <div style="border-radius: 5px; background: #313131; outline: 1px solid #41484d;">
+          <div style="display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 8px;">
+            <input type="checkbox" aria-label="会議資料まとめる を完了にする" style="width: 17px; height: 17px; margin: 0; flex-shrink: 0;">
+            <span style="font-size: 12px; font-weight: 700; color: #ff8c42; width: 22px; flex-shrink: 0;">!!!</span>
+            <span style="flex-grow: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500;">会議資料まとめる</span>
+            <span style="font-size: 11px; color: #c8c8c8;">#仕事</span>
+            <span style="font-size: 11px; color: #c8c8c8; background: #3d3d3d; padding: 2px 7px; border-radius: 10px;">業務改善</span>
+            <span style="font-size: 12px; color: #ffffff; font-weight: 600; width: 58px; text-align: right; font-variant-numeric: tabular-nums;">15:00</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 8px 0 36px;">
+            <input type="checkbox" checked aria-label="素材を集める を未完了にする" style="width: 15px; height: 15px; margin: 0; flex-shrink: 0;">
+            <span style="flex-grow: 1; font-size: 13px; color: #9b9b9b; text-decoration: line-through;">素材を集める</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 8px 0 36px;">
+            <input type="checkbox" aria-label="グラフを作る を完了にする" style="width: 15px; height: 15px; margin: 0; flex-shrink: 0;">
+            <span style="flex-grow: 1; font-size: 13px;">グラフを作る</span>
+          </div>
+          <div style="height: 6px;"></div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 8px; border-radius: 5px;">
+          <input type="checkbox" aria-label="週次の買い出し を完了にする" style="width: 17px; height: 17px; margin: 0; flex-shrink: 0;">
+          <span style="font-size: 12px; font-weight: 700; color: #ffc83d; width: 22px; flex-shrink: 0;">!!</span>
+          <span style="flex-grow: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">週次の買い出し</span>
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#c8c8c8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M13.5 7a5.5 5.5 0 0 0-9.9-3.3M2.5 9a5.5 5.5 0 0 0 9.9 3.3"/><path d="M13.5 2.8V6H10.4M2.5 13.2V10h3.1"/></svg>
+          <span style="font-size: 11px; color: #c8c8c8;">#買い物</span>
+          <span style="font-size: 12px; color: #c8c8c8; width: 58px; text-align: right;">終日</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 8px; border-radius: 5px;">
+          <input type="checkbox" aria-label="AWS課題 EFS編 を完了にする" style="width: 17px; height: 17px; margin: 0; flex-shrink: 0;">
+          <span style="width: 22px; flex-shrink: 0;"></span>
+          <span style="flex-grow: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">AWS課題 EFS編</span>
+          <span style="font-size: 11px; color: #c8c8c8; background: #333333; padding: 2px 7px; border-radius: 10px;">学校</span>
+          <span style="font-size: 12px; color: #ffffff; font-weight: 600; width: 58px; text-align: right; font-variant-numeric: tabular-nums;">18:30</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 8px; border-radius: 5px;">
+          <input type="checkbox" aria-label="Snort のルール整理 を完了にする" style="width: 17px; height: 17px; margin: 0; flex-shrink: 0;">
+          <span style="font-size: 12px; font-weight: 700; color: #4cc2ff; width: 22px; flex-shrink: 0;">!</span>
+          <span style="flex-grow: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Snort のルール整理</span>
+          <span style="font-size: 11px; color: #c8c8c8; background: #333333; padding: 2px 7px; border-radius: 10px;">学校</span>
+          <span style="font-size: 12px; color: #c8c8c8; width: 58px; text-align: right;">終日</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 8px; border-radius: 5px; color: #9b9b9b;">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex-shrink: 0; margin: 0 1px;"><path d="M8 3.5v9M3.5 8h9"/></svg>
+          <span style="font-size: 13px;">タスクを追加   Ctrl+N</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="width: 320px; flex-shrink: 0; box-sizing: border-box; background: #272727; border-left: 1px solid #333333; border-top: 1px solid #333333; padding: 20px 18px; display: flex; flex-direction: column; gap: 14px; overflow: hidden;">
+
+      <div style="font-size: 17px; font-weight: 600; line-height: 1.35;">会議資料まとめる</div>
+
+      <div style="font-size: 13px; color: #c8c8c8; line-height: 1.6; background: #2d2d2d; border: 1px solid #3d3d3d; border-radius: 5px; padding: 8px 10px; min-height: 52px;">前四半期の数字と、8月のインシデント件数の推移を入れる。</div>
+
+      <div style="display: flex; flex-direction: column; gap: 1px;">
+        <div style="display: flex; align-items: center; height: 34px; gap: 10px;">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#9b9b9b" stroke-width="1.5" stroke-linecap="round" style="flex-shrink: 0;"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M2 6.5h12M5.5 1.6v2.4M10.5 1.6v2.4"/></svg>
+          <span style="width: 68px; font-size: 13px; color: #c8c8c8; flex-shrink: 0;">期限</span>
+          <span style="font-size: 13px; font-weight: 500;">9月22日 15:00</span>
+        </div>
+        <div style="display: flex; align-items: center; height: 34px; gap: 10px;">
+          <span style="width: 15px; text-align: center; font-size: 12px; font-weight: 700; color: #ff8c42; flex-shrink: 0;">!!!</span>
+          <span style="width: 68px; font-size: 13px; color: #c8c8c8; flex-shrink: 0;">優先度</span>
+          <span style="font-size: 13px; font-weight: 500; color: #ff8c42;">高</span>
+        </div>
+        <div style="display: flex; align-items: center; height: 34px; gap: 10px;">
+          <span style="width: 15px; display: flex; justify-content: center; flex-shrink: 0;"><span style="width: 9px; height: 9px; border-radius: 50%; background: #4cc2ff;"></span></span>
+          <span style="width: 68px; font-size: 13px; color: #c8c8c8; flex-shrink: 0;">プロジェクト</span>
+          <span style="font-size: 13px; font-weight: 500;">業務改善</span>
+        </div>
+        <div style="display: flex; align-items: center; height: 34px; gap: 10px;">
+          <span style="width: 15px; text-align: center; font-size: 13px; color: #9b9b9b; flex-shrink: 0;">#</span>
+          <span style="width: 68px; font-size: 13px; color: #c8c8c8; flex-shrink: 0;">タグ</span>
+          <span style="font-size: 12px; color: #ffffff; background: #3d3d3d; padding: 2px 8px; border-radius: 10px;">仕事</span>
+        </div>
+        <div style="display: flex; align-items: center; height: 34px; gap: 10px;">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#9b9b9b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M13.5 7a5.5 5.5 0 0 0-9.9-3.3M2.5 9a5.5 5.5 0 0 0 9.9 3.3"/><path d="M13.5 2.8V6H10.4M2.5 13.2V10h3.1"/></svg>
+          <span style="width: 68px; font-size: 13px; color: #c8c8c8; flex-shrink: 0;">繰り返し</span>
+          <span style="font-size: 13px; color: #9b9b9b;">なし</span>
+        </div>
+        <div style="display: flex; align-items: center; height: 34px; gap: 10px;">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#9b9b9b" stroke-width="1.5" stroke-linecap="round" style="flex-shrink: 0;"><circle cx="8" cy="8" r="5.6"/><path d="M8 5.2V8l1.9 1.2"/></svg>
+          <span style="width: 68px; font-size: 13px; color: #c8c8c8; flex-shrink: 0;">通知</span>
+          <span style="font-size: 13px; font-weight: 500;">1時間前</span>
+        </div>
+      </div>
+
+      <div style="height: 1px; background: #333333;"></div>
+
+      <div>
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+          <span style="font-size: 12px; font-weight: 600; color: #d6d6d6;">サブタスク</span>
+          <span style="font-size: 12px; color: #9b9b9b; font-variant-numeric: tabular-nums;">1 / 2</span>
+          <div style="flex-grow: 1; height: 3px; border-radius: 2px; background: #3d3d3d; overflow: hidden;">
+            <div style="width: 50%; height: 100%; background: #4cc2ff;"></div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 9px; height: 30px;">
+          <input type="checkbox" checked aria-label="素材を集める を未完了にする" style="width: 15px; height: 15px; margin: 0;">
+          <span style="font-size: 13px; color: #9b9b9b; text-decoration: line-through;">素材を集める</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 9px; height: 30px;">
+          <input type="checkbox" aria-label="グラフを作る を完了にする" style="width: 15px; height: 15px; margin: 0;">
+          <span style="font-size: 13px;">グラフを作る</span>
+        </div>
+      </div>
+
+      <div style="flex-grow: 1;"></div>
+      <div style="font-size: 11px; color: #9b9b9b;">作成 9/20 10:12 ・ 更新 9/22 09:40</div>
+    </div>
+  </div>
+
+  <div style="height: 28px; flex-shrink: 0; display: flex; align-items: center; gap: 14px; padding: 0 12px; background: #202020; border-top: 1px solid #2f2f2f; font-size: 11px; color: #c8c8c8;">
+    <div style="display: flex; align-items: center; gap: 5px;">
+      <span style="width: 6px; height: 6px; border-radius: 50%; background: #3fd0b4;"></span>
+      最終同期 14:32
+    </div>
+    <span>未同期 0 件</span>
+    <div style="flex-grow: 1;"></div>
+    <div style="display: flex; gap: 2px;">
+      <button type="button" style="height: 20px; padding: 0 9px; font-size: 11px; font-family: inherit; color: #ffffff; background: #3d3d3d; border: none; border-radius: 4px; cursor: pointer;">リスト</button>
+      <button type="button" style="height: 20px; padding: 0 9px; font-size: 11px; font-family: inherit; color: #c8c8c8; background: transparent; border: none; border-radius: 4px; cursor: pointer;">カレンダー</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

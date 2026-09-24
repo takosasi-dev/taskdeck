@@ -1,0 +1,74 @@
+<UserControl x:Class="TaskDeck.App.Settings.Pages.ShortcutsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:settings="clr-namespace:TaskDeck.App.Settings"
+             xmlns:pages="clr-namespace:TaskDeck.App.Settings.Pages"
+             xmlns:conv="clr-namespace:TaskDeck.App.Converters">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Settings/SettingsResources.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <conv:IconKeyToGeometryConverter x:Key="IconGeometry" />
+            <BooleanToVisibilityConverter x:Key="BoolVisibility" />
+
+            <Style x:Key="KeyCapTextStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource KeyCapFontFamily}" />
+                <Setter Property="FontSize" Value="{StaticResource TypeCaptionSize}" />
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <StackPanel>
+        <TextBlock Style="{StaticResource SettingsTitleStyle}" Text="ショートカット" />
+
+        <!-- どのアプリからでも効くもの（UI 設計書 21.3 と同じく見出しだけアクセント色にして、アプリ内のキーと分ける） -->
+        <TextBlock Style="{StaticResource SettingsSectionStyle}"
+                   Margin="0,4,0,8"
+                   Foreground="{DynamicResource AccentDefaultBrush}"
+                   Text="どのアプリからでも" />
+
+        <ItemsControl ItemsSource="{Binding Rows}" Focusable="False">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="{x:Type pages:HotkeyRow}">
+                    <settings:SettingsCard Icon="{Binding IconKey, Converter={StaticResource IconGeometry}}"
+                                           Title="{Binding Title}"
+                                           Description="{Binding Description}">
+                        <StackPanel Orientation="Horizontal">
+                            <Border x:Name="KeyCap" Style="{StaticResource KeyCapStyle}">
+                                <TextBlock Style="{StaticResource KeyCapTextStyle}" Text="{Binding Keys}" />
+                            </Border>
+                            <Button Style="{StaticResource SettingsButtonStyle}"
+                                    Margin="8,0,0,0"
+                                    Content="変更"
+                                    Click="OnChangeClick"
+                                    AutomationProperties.Name="{Binding ChangeLabel}" />
+                        </StackPanel>
+                        <settings:SettingsCard.Expanded>
+                            <TextBlock x:Name="StatusText"
+                                       Style="{StaticResource SettingsNoticeTextStyle}"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       Text="{Binding Status}"
+                                       Visibility="{Binding HasStatus, Converter={StaticResource BoolVisibility}}" />
+                        </settings:SettingsCard.Expanded>
+                    </settings:SettingsCard>
+                    <DataTemplate.Triggers>
+                        <DataTrigger Binding="{Binding HasProblem}" Value="True">
+                            <Setter TargetName="StatusText" Property="Foreground" Value="{DynamicResource StateOverdueBrush}" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsRecording}" Value="True">
+                            <Setter TargetName="KeyCap" Property="BorderBrush" Value="{DynamicResource AccentDefaultBrush}" />
+                        </DataTrigger>
+                    </DataTemplate.Triggers>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <Border Style="{StaticResource SettingsNoticeStyle}" Margin="0,10,0,0">
+            <TextBlock Style="{StaticResource SettingsNoticeTextStyle}"
+                       Text="「変更」を押してから、使いたいキーの組み合わせを押します（Ctrl・Alt・Win のどれかを含めます）。アプリの中のショートカット一覧は ? で開きます。" />
+        </Border>
+    </StackPanel>
+</UserControl>

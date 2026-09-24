@@ -1,0 +1,98 @@
+{
+  "v": 3,
+  "createdOnFiles": { "v": 1, "at": "2026-09-22T10:50:00Z" },
+  "title": "TaskDeck UI モックアップ",
+  "launch": { "view": "canvas" },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": { "x": 0, "y": 0, "w": 1280, "h": 800, "title": "メインウィンドウ（ライト）", "radius": 8 },
+    "MainDark.dc.html": { "x": 1360, "y": 0, "w": 1280, "h": 800, "title": "メインウィンドウ（ダーク）", "radius": 8 },
+    "Calendar.dc.html": { "x": 0, "y": 1053, "w": 1280, "h": 800, "title": "カレンダー（月）", "radius": 8 },
+    "WeekView.dc.html": { "x": 1360, "y": 1053, "w": 1280, "h": 800, "title": "カレンダー（週）", "radius": 8 },
+    "QuickInput.dc.html": { "x": 0, "y": 2113, "w": 820, "h": 560, "title": "クイック入力窓", "radius": 8 },
+    "CommandPalette.dc.html": { "x": 900, "y": 2113, "w": 820, "h": 620, "title": "コマンドパレット Ctrl+K", "radius": 8 },
+    "Pickers.dc.html": { "x": 1800, "y": 2113, "w": 920, "h": 720, "title": "日付・繰り返し・優先度", "radius": 8 },
+    "Notifications.dc.html": { "x": 0, "y": 3093, "w": 900, "h": 760, "title": "通知とタスクトレイ", "radius": 8 },
+    "States.dc.html": { "x": 980, "y": 3093, "w": 1280, "h": 860, "title": "空状態・複数選択・競合", "radius": 8 },
+    "Settings.dc.html": { "x": 0, "y": 4213, "w": 1080, "h": 820, "title": "設定", "radius": 8 },
+    "Shortcuts.dc.html": { "x": 1160, "y": 4213, "w": 900, "h": 820, "title": "ショートカット一覧", "radius": 8 },
+    "Templates.dc.html": { "x": 0, "y": 5293, "w": 1280, "h": 860, "title": "テンプレートから作る", "radius": 8 },
+    "Focus.dc.html": { "x": 1360, "y": 5293, "w": 900, "h": 640, "title": "フォーカスモード", "radius": 12 },
+    "Stats.dc.html": { "x": 0, "y": 6413, "w": 1280, "h": 900, "title": "振り返り", "radius": 8 },
+    "Onboarding.dc.html": { "x": 1360, "y": 6413, "w": 1280, "h": 700, "title": "初回起動の3画面", "radius": 8 },
+    "Brand.dc.html": { "x": 0, "y": 7573, "w": 1280, "h": 980, "title": "アイコンと起動画面", "radius": 8 },
+    "Tokens.dc.html": { "x": 1360, "y": 7573, "w": 1080, "h": 1420, "title": "デザイントークン", "radius": 8 }
+  },
+  "order": [
+    "Main.dc.html",
+    "MainDark.dc.html",
+    "Calendar.dc.html",
+    "WeekView.dc.html",
+    "QuickInput.dc.html",
+    "CommandPalette.dc.html",
+    "Pickers.dc.html",
+    "Notifications.dc.html",
+    "States.dc.html",
+    "Settings.dc.html",
+    "Shortcuts.dc.html",
+    "Templates.dc.html",
+    "Focus.dc.html",
+    "Stats.dc.html",
+    "Onboarding.dc.html",
+    "Brand.dc.html",
+    "Tokens.dc.html"
+  ],
+  "notes": {
+    "n1": { "x": 0, "y": -300, "text": "メインウィンドウ", "kind": "title1", "maxW": 2640 },
+    "n2": { "x": 0, "y": 830, "text": "カレンダー", "kind": "title1", "maxW": 2640 },
+    "n3": { "x": 0, "y": 1890, "text": "入力とコマンド", "kind": "title1", "maxW": 2720 },
+    "n4": { "x": 0, "y": 2870, "text": "通知と状態", "kind": "title1", "maxW": 2260 },
+    "n5": { "x": 0, "y": 3990, "text": "設定とショートカット", "kind": "title1", "maxW": 2060 },
+    "n6": { "x": 0, "y": 5070, "text": "テンプレートとフォーカス", "kind": "title1", "maxW": 2260 },
+    "n7": { "x": 0, "y": 6190, "text": "振り返りと初回起動", "kind": "title1", "maxW": 2640 },
+    "n8": { "x": 0, "y": 7350, "text": "アイコン・起動画面・トークン", "kind": "title1", "maxW": 2440 },
+    "s1": {
+      "x": 2720,
+      "y": 0,
+      "w": 400,
+      "text": "配色は Windows 11 Fluent の既定トークンに合わせてある。アクセントは OS のシステムアクセントカラーを拾う前提なので、Windows 側で色を変えるとアプリも追従する。",
+      "fill": "blue"
+    },
+    "s2": {
+      "x": 2800,
+      "y": 2113,
+      "w": 400,
+      "text": "コマンドパレットが最大の投資対効果。検索・コマンド実行・プロジェクト移動を 1 箇所に集約すれば、サイドバーを触る回数そのものが減る。",
+      "fill": "green"
+    },
+    "s3": {
+      "x": 2340,
+      "y": 3093,
+      "w": 400,
+      "text": "確認ダイアログを出さない代わりに、削除も完了も必ず取り消せる。操作を止めずに間違いを直せる方が、毎回確認されるより速い。",
+      "fill": "orange"
+    },
+    "s4": {
+      "x": 2340,
+      "y": 5293,
+      "w": 400,
+      "text": "テンプレートの期限は絶対日付ではなく「基準日からの相対」で持つ。出発日を 1 つ決めれば 8 件ぶんの期限が自動で埋まる。絶対日付だと毎回直すことになり、結局使われなくなる。",
+      "fill": "purple"
+    },
+    "s5": {
+      "x": 2720,
+      "y": 6413,
+      "w": 420,
+      "text": "振り返りの配色は色覚検証を通したものに差し替えた。プロジェクト色の緑を彩度の高いティール寄りに動かし、橙と赤紫が隣り合わない並び順にしてある。ヒートマップは単色 4 段。",
+      "fill": "teal"
+    },
+    "s6": {
+      "x": 2520,
+      "y": 7573,
+      "w": 400,
+      "text": "起動画面は 0.5 秒しか見えない。要素ごとに独立してフェードさせ、途中で切れても不自然にならないようにする。アイコンはサイズごとに別の絵として描く。",
+      "fill": "pink"
+    }
+  },
+  "designSystems": []
+}

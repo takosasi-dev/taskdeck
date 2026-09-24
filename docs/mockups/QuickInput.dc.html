@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>TaskDeck クイック入力窓</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body { margin: 0; font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; }
+</style>
+</helmet>
+<div style="width: 820px; height: 560px; box-sizing: border-box; display: flex; flex-direction: column;">
+
+  <div style="height: 280px; box-sizing: border-box; padding: 40px 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: #a9aeb5;">
+
+    <div style="width: 100%; border-radius: 10px; background: #fbfbfb; border: 1px solid #d2d2d2; box-shadow: 0 12px 32px rgba(0,0,0,0.30), 0 2px 6px rgba(0,0,0,0.18); overflow: hidden;">
+      <div style="display: flex; align-items: center; gap: 12px; height: 58px; padding: 0 18px;">
+        <svg width="19" height="19" viewBox="0 0 16 16" fill="none" stroke="#0067c0" stroke-width="1.7" stroke-linecap="round" style="flex-shrink: 0;"><path d="M8 3v10M3 8h10"/></svg>
+        <span style="flex-grow: 1; font-size: 17px; color: #1a1a1a; white-space: nowrap;">会議資料まとめる <span style="color: #0067c0;">明日 15:00</span> <span style="color: #8764b8;">#仕事</span> <span style="color: #f7630c;">!高</span><span style="display: inline-block; width: 1.5px; height: 20px; background: #1a1a1a; margin-left: 2px; vertical-align: -4px;"></span></span>
+      </div>
+      <div style="height: 1px; background: #ededed;"></div>
+      <div style="display: flex; align-items: center; gap: 8px; height: 46px; padding: 0 18px; background: #f6f6f6;">
+        <div style="display: flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 13px; background: #ffffff; border: 1px solid #d6d6d6;">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#5d5d5d" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M2 6.5h12M5.5 1.6v2.4M10.5 1.6v2.4"/></svg>
+          <span style="font-size: 12px; color: #1a1a1a;">9/23（水） 15:00</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 5px; height: 26px; padding: 0 10px; border-radius: 13px; background: #ffffff; border: 1px solid #d6d6d6;">
+          <span style="font-size: 12px; color: #6e6e6e;">#</span>
+          <span style="font-size: 12px; color: #1a1a1a;">仕事</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 5px; height: 26px; padding: 0 10px; border-radius: 13px; background: #ffffff; border: 1px solid #d6d6d6;">
+          <span style="font-size: 11px; font-weight: 700; color: #f7630c;">!!!</span>
+          <span style="font-size: 12px; color: #1a1a1a;">高</span>
+        </div>
+        <div style="flex-grow: 1;"></div>
+        <span style="font-size: 11px; color: #5d5d5d;">クリックで修正</span>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 18px; font-size: 11px; color: #33383e;">
+      <span><strong style="font-weight: 600;">Enter</strong> 登録</span>
+      <span><strong style="font-weight: 600;">Esc</strong> 閉じる</span>
+      <span><strong style="font-weight: 600;">↑</strong> 履歴</span>
+    </div>
+  </div>
+
+  <div style="height: 280px; box-sizing: border-box; padding: 40px 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: #3a3d42;">
+
+    <div style="width: 100%; border-radius: 10px; background: #2c2c2c; border: 1px solid #454545; box-shadow: 0 12px 32px rgba(0,0,0,0.50), 0 2px 6px rgba(0,0,0,0.35); overflow: hidden;">
+      <div style="display: flex; align-items: center; gap: 12px; height: 58px; padding: 0 18px;">
+        <svg width="19" height="19" viewBox="0 0 16 16" fill="none" stroke="#4cc2ff" stroke-width="1.7" stroke-linecap="round" style="flex-shrink: 0;"><path d="M8 3v10M3 8h10"/></svg>
+        <span style="flex-grow: 1; font-size: 17px; color: #9b9b9b; white-space: nowrap;">やること、日付、#タグ、!優先度<span style="display: inline-block; width: 1.5px; height: 20px; background: #ffffff; margin-left: 2px; vertical-align: -4px;"></span></span>
+      </div>
+      <div style="height: 1px; background: #3d3d3d;"></div>
+      <div style="display: flex; align-items: center; gap: 10px; height: 46px; padding: 0 18px; background: #262626;">
+        <span style="font-size: 11px; color: #9b9b9b;">例：</span>
+        <span style="font-size: 11px; color: #c8c8c8; font-family: Consolas, monospace;">明日 15:00 / 来週火曜 / *毎週月曜 / @業務改善</span>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 18px; font-size: 11px; color: #d6d6d6;">
+      <span><strong style="font-weight: 600;">Ctrl+Shift+Space</strong> でどこからでも呼び出し</span>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":820,"height":560}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

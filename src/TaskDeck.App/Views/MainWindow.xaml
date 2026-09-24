@@ -1,0 +1,359 @@
+<ui:FluentWindow x:Class="TaskDeck.App.Views.MainWindow"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                 xmlns:conv="clr-namespace:TaskDeck.App.Converters"
+                 xmlns:input="clr-namespace:TaskDeck.App.Input"
+                 xmlns:main="clr-namespace:TaskDeck.App.Views.Main"
+                 xmlns:scratch="clr-namespace:TaskDeck.App.Views.Scratch"
+                 xmlns:vm="clr-namespace:TaskDeck.App.ViewModels"
+                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                 mc:Ignorable="d"
+                 d:DataContext="{d:DesignInstance vm:MainViewModel}"
+                 Title="TaskDeck"
+                 Width="1280" Height="800"
+                 MinWidth="{StaticResource WindowMinWidth}" MinHeight="{StaticResource WindowMinHeight}"
+                 ExtendsContentIntoTitleBar="True"
+                 WindowBackdropType="None"
+                 WindowCornerPreference="Round"
+                 WindowStartupLocation="CenterScreen"
+                 Background="{DynamicResource SurfaceWindowBrush}"
+                 KeyDown="OnWindowKeyDown"
+                 SizeChanged="OnWindowSizeChanged"
+                 Closing="OnWindowClosing"
+                 AllowDrop="True"
+                 PreviewDragEnter="OnWindowPreviewDragOver"
+                 PreviewDragOver="OnWindowPreviewDragOver"
+                 DragOver="OnWindowDragOver">
+    <ui:FluentWindow.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolVisibility" />
+
+        <!-- ステータスバーの［リスト］［カレンダー］。いま出している方は地を敷く -->
+        <Style x:Key="ModeButtonStyle" TargetType="Button" BasedOn="{StaticResource TextButtonStyle}">
+            <Setter Property="MinHeight" Value="20" />
+            <Setter Property="Height" Value="20" />
+            <Setter Property="Padding" Value="9,0" />
+            <Setter Property="FontSize" Value="{StaticResource TypeLabelSize}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource StrokeDividerBrush}" />
+                    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </ui:FluentWindow.Resources>
+
+    <ui:FluentWindow.InputBindings>
+        <KeyBinding Modifiers="Control" Key="D1" Command="{Binding SelectViewByKeyCommand}" CommandParameter="Today" />
+        <KeyBinding Modifiers="Control" Key="D2" Command="{Binding SelectViewByKeyCommand}" CommandParameter="Upcoming" />
+        <KeyBinding Modifiers="Control" Key="D3" Command="{Binding SelectViewByKeyCommand}" CommandParameter="All" />
+        <KeyBinding Modifiers="Control" Key="D4" Command="{Binding SelectViewByKeyCommand}" CommandParameter="Completed" />
+        <KeyBinding Modifiers="Control" Key="D5" Command="{Binding SelectViewByKeyCommand}" CommandParameter="Calendar" />
+        <KeyBinding Modifiers="Control" Key="D6" Command="{Binding SelectViewByKeyCommand}" CommandParameter="Stats" />
+        <KeyBinding Modifiers="Control" Key="NumPad1" Command="{Binding SelectViewByKeyCommand}" CommandParameter="Today" />
+        <KeyBinding Modifiers="Control" Key="NumPad2" Command="{Binding SelectViewByKeyCommand}" CommandParameter="Upcoming" />
+        <KeyBinding Modifiers="Control" Key="NumPad3" Command="{Binding SelectViewByKeyCommand}" CommandParameter="All" />
+        <KeyBinding Modifiers="Control" Key="NumPad4" Command="{Binding SelectViewByKeyCommand}" CommandParameter="Completed" />
+        <KeyBinding Modifiers="Control" Key="NumPad5" Command="{Binding SelectViewByKeyCommand}" CommandParameter="Calendar" />
+        <KeyBinding Modifiers="Control" Key="NumPad6" Command="{Binding SelectViewByKeyCommand}" CommandParameter="Stats" />
+        <KeyBinding Modifiers="Control" Key="B" Command="{Binding ToggleSidebarCommand}" />
+        <KeyBinding Modifiers="Control" Key="I" Command="{Binding ToggleDetailPaneCommand}" />
+        <KeyBinding Modifiers="Control" Key="F" Command="{Binding FocusSearchCommand}" />
+        <KeyBinding Modifiers="Control" Key="N" Command="{Binding BeginAddTaskCommand}" />
+        <KeyBinding Modifiers="Control" Key="Z" Command="{Binding UndoCommand}" />
+        <KeyBinding Modifiers="Control" Key="K" Command="{Binding OpenCommandPaletteCommand}" />
+        <KeyBinding Modifiers="Control" Key="T" Command="{Binding OpenTemplatesCommand}" />
+        <KeyBinding Modifiers="Control" Key="OemComma" Command="{Binding OpenSettingsCommand}" />
+        <KeyBinding Modifiers="Control+Shift" Key="F" Command="{Binding OpenFocusModeCommand}" />
+    </ui:FluentWindow.InputBindings>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="{Binding Source={StaticResource TitleBarHeight}}" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="{Binding Source={StaticResource StatusBarHeight}}" />
+        </Grid.RowDefinitions>
+
+        <!--
+            タイトルバー。操作部品は必ず TitleBar の Header / CenterContent / TrailingContent に入れる。
+            WPF-UI の TitleBar は、この3つ以外の自分の範囲を HTCAPTION（ドラッグ）として返すため、
+            上に重ねただけの部品はクリックできない。Panel の空き・当たり判定の無い子（「TaskDeck」の文字）はドラッグできる。
+        -->
+        <ui:TitleBar x:Name="AppTitleBar"
+                     Grid.Row="0"
+                     ShowMaximize="True"
+                     ShowMinimize="True"
+                     HorizontalContentAlignment="Center">
+            <ui:TitleBar.Header>
+                <StackPanel Orientation="Horizontal" Margin="12,0,0,0" VerticalAlignment="Center">
+                    <Button x:Name="SidebarToggleButton"
+                            Style="{StaticResource IconButtonStyle}"
+                            AutomationProperties.Name="サイドバーの表示を切り替え"
+                            ToolTip="サイドバー（Ctrl+B）"
+                            Command="{Binding ToggleSidebarCommand}">
+                        <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconMenu}" />
+                    </Button>
+                    <TextBlock Style="{StaticResource TextBodyStyle}"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"
+                               Margin="12,0,0,0"
+                               IsHitTestVisible="False"
+                               Text="TaskDeck" />
+                </StackPanel>
+            </ui:TitleBar.Header>
+
+            <!-- 検索欄（Ctrl+F）。IME の変換中は検索を走らせない -->
+            <ui:TitleBar.CenterContent>
+                <Grid Width="340" Height="30" VerticalAlignment="Center">
+                    <TextBox x:Name="SearchBox"
+                             Style="{StaticResource InputTextBoxStyle}"
+                             MinHeight="0"
+                             Height="30"
+                             Padding="30,0,52,0"
+                             input:ImeGuard.IsEnabled="True"
+                             AutomationProperties.Name="タスクを検索"
+                             TextChanged="OnSearchTextChanged" />
+                    <Path Width="14" Height="14"
+                          Stretch="Uniform"
+                          HorizontalAlignment="Left"
+                          Margin="10,0,0,0"
+                          VerticalAlignment="Center"
+                          IsHitTestVisible="False"
+                          Data="{StaticResource IconSearch}"
+                          Stroke="{DynamicResource TextTertiaryBrush}"
+                          StrokeThickness="1.5"
+                          StrokeStartLineCap="Round"
+                          StrokeEndLineCap="Round" />
+                    <TextBlock x:Name="SearchPlaceholder"
+                               Style="{StaticResource TextBodySmallStyle}"
+                               Foreground="{DynamicResource TextTertiaryBrush}"
+                               VerticalAlignment="Center"
+                               Margin="32,0,0,0"
+                               IsHitTestVisible="False"
+                               Text="検索  Ctrl+F" />
+                    <TextBlock Style="{StaticResource TabularCaptionStyle}"
+                               FontSize="{StaticResource TypeLabelSize}"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Center"
+                               Margin="0,0,10,0"
+                               IsHitTestVisible="False"
+                               Text="{Binding List.SearchSummary}" />
+                </Grid>
+            </ui:TitleBar.CenterContent>
+
+            <ui:TitleBar.TrailingContent>
+                <Button x:Name="SettingsButton"
+                        Style="{StaticResource IconButtonStyle}"
+                        Margin="0,0,4,0"
+                        VerticalAlignment="Center"
+                        AutomationProperties.Name="設定を開く"
+                        ToolTip="設定（Ctrl+,）"
+                        Command="{Binding OpenSettingsCommand}">
+                    <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconSettings}" />
+                </Button>
+            </ui:TitleBar.TrailingContent>
+        </ui:TitleBar>
+        <Border Grid.Row="0" Height="1" VerticalAlignment="Bottom" IsHitTestVisible="False"
+                Background="{DynamicResource StrokeDividerBrush}" />
+
+        <!-- 3ペイン -->
+        <Grid Grid.Row="1">
+            <Grid x:Name="PaneGrid">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition x:Name="SidebarColumn"
+                                      Width="{Binding Source={StaticResource SidebarWidth}}"
+                                      MinWidth="{StaticResource SidebarMinWidth}"
+                                      MaxWidth="{StaticResource SidebarMaxWidth}" />
+                    <ColumnDefinition x:Name="SidebarSplitterColumn" Width="Auto" />
+                    <ColumnDefinition Width="*" MinWidth="{StaticResource TaskListMinWidth}" />
+                    <ColumnDefinition x:Name="DetailSplitterColumn" Width="Auto" />
+                    <ColumnDefinition x:Name="DetailColumn"
+                                      Width="{Binding Source={StaticResource DetailPaneWidth}}"
+                                      MinWidth="{StaticResource DetailPaneMinWidth}"
+                                      MaxWidth="{StaticResource DetailPaneMaxWidth}" />
+                </Grid.ColumnDefinitions>
+
+                <main:SidebarView x:Name="Sidebar" Grid.Column="0" DataContext="{Binding Sidebar}" />
+
+                <GridSplitter x:Name="SidebarSplitter"
+                              Grid.Column="1"
+                              Width="4"
+                              HorizontalAlignment="Stretch"
+                              VerticalAlignment="Stretch"
+                              Background="Transparent"
+                              Cursor="SizeWE"
+                              Focusable="False"
+                              AutomationProperties.Name="サイドバーの幅"
+                              DragCompleted="OnSidebarSplitterDragCompleted" />
+
+                <Border Grid.Column="2"
+                        Background="{DynamicResource SurfaceContentBrush}"
+                        BorderBrush="{DynamicResource StrokeDividerBrush}"
+                        BorderThickness="1,1,0,0"
+                        CornerRadius="{StaticResource RadiusContentTopLeft}">
+                    <Grid>
+                        <main:TaskListView x:Name="TaskList"
+                                           DataContext="{Binding List}"
+                                           Visibility="{Binding DataContext.IsListMode, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolVisibility}}" />
+                        <!-- カレンダー（CalendarView）と振り返り（StatsView）は初めて開いたときに中へ作る（MainWindow.xaml.cs の EnsureModeViews） -->
+                        <Border x:Name="CalendarHost" Visibility="{Binding IsCalendarMode, Converter={StaticResource BoolVisibility}}" />
+                        <Border x:Name="StatsHost" Visibility="{Binding IsStatsMode, Converter={StaticResource BoolVisibility}}" />
+                        <!-- 使い捨てリスト（ビューが ViewKind.Scratch のとき。小窓に出している間は「小窓で表示中［戻す］」） -->
+                        <scratch:ScratchPaneView x:Name="ScratchPane"
+                                                 DataContext="{Binding Scratch}"
+                                                 Visibility="{Binding DataContext.IsScratchMode, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolVisibility}}" />
+                    </Grid>
+                </Border>
+
+                <GridSplitter x:Name="DetailSplitter"
+                              Grid.Column="3"
+                              Width="4"
+                              HorizontalAlignment="Stretch"
+                              VerticalAlignment="Stretch"
+                              Background="Transparent"
+                              Cursor="SizeWE"
+                              Focusable="False"
+                              AutomationProperties.Name="詳細ペインの幅"
+                              DragCompleted="OnDetailSplitterDragCompleted" />
+
+                <Border x:Name="DetailPane"
+                        Grid.Column="4"
+                        Background="{DynamicResource SurfaceContentBrush}"
+                        BorderBrush="{DynamicResource StrokeDividerBrush}"
+                        BorderThickness="1,1,0,0">
+                    <Grid>
+                        <!-- 詳細ペインの中身（DetailPaneView）は、初めて出すときか起動が落ち着いてから中へ作る（MainWindow.xaml.cs の EnsureDetailPane） -->
+                        <Border x:Name="DetailHost" />
+
+                        <!--
+                            一覧で複数選択中は「N 件を選択中」だけを出す（まとめての操作は一覧の下のツールバーから S-10）。
+                            カレンダー・振り返りを出している間は、詳細ペインはそちらで選んだタスクのまま
+                        -->
+                        <Border Background="{DynamicResource SurfaceContentBrush}">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding List.IsMultiSelection}" Value="True" />
+                                                <Condition Binding="{Binding IsListMode}" Value="True" />
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <StackPanel Margin="18,20,18,0">
+                                <TextBlock Style="{StaticResource TextSubtitleStyle}"
+                                           Typography.NumeralAlignment="Tabular"
+                                           AutomationProperties.AutomationId="MultiSelectionTitle"
+                                           Text="{Binding List.SelectionSummary, StringFormat={}{0}を選択中}" />
+                                <TextBlock Style="{StaticResource TextCaptionStyle}"
+                                           Margin="0,8,0,0"
+                                           TextWrapping="Wrap"
+                                           Text="まとめて変えるときは、一覧の下のツールバーを使います（完了・期限・優先度・プロジェクト・タグ・削除）。Esc で選択を解除します。" />
+                                <Button Style="{StaticResource StandardButtonStyle}"
+                                        Margin="0,14,0,0"
+                                        HorizontalAlignment="Left"
+                                        Content="選択を解除"
+                                        AutomationProperties.Name="選択を解除"
+                                        Command="{Binding List.ClearSelectionCommand}" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!--
+                取り消しトースト（下端中央・下から16px）。複数選択のツールバー（一覧の下から12px・高さ42）が出ている間は、
+                ツールバーに重ならないようその上に出す（一括操作のトーストと並んで見える）
+            -->
+            <main:ToastHost DataContext="{Binding Toast}"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Bottom"
+                            Panel.ZIndex="10">
+                <main:ToastHost.Style>
+                    <Style TargetType="main:ToastHost">
+                        <Setter Property="Margin" Value="0,0,0,16" />
+                        <Style.Triggers>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding DataContext.List.IsMultiSelection, RelativeSource={RelativeSource AncestorType=Window}}" Value="True" />
+                                    <Condition Binding="{Binding DataContext.IsListMode, RelativeSource={RelativeSource AncestorType=Window}}" Value="True" />
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="Margin" Value="0,0,0,66" />
+                            </MultiDataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </main:ToastHost.Style>
+            </main:ToastHost>
+        </Grid>
+
+        <!-- ステータスバー（同期表示は Phase 5 まで出さない） -->
+        <Border Grid.Row="2" BorderBrush="{DynamicResource StrokeDividerBrush}" BorderThickness="0,1,0,0">
+            <StackPanel Margin="12,0" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button x:Name="ListModeButton"
+                        Style="{StaticResource ModeButtonStyle}"
+                        Content="リスト"
+                        Tag="{Binding IsListMode}"
+                        AutomationProperties.Name="リスト表示"
+                        Command="{Binding ShowListCommand}" />
+                <Button x:Name="CalendarModeButton"
+                        Style="{StaticResource ModeButtonStyle}"
+                        Margin="2,0,0,0"
+                        Content="カレンダー"
+                        Tag="{Binding IsCalendarMode}"
+                        AutomationProperties.Name="カレンダー表示"
+                        Command="{Binding ShowCalendarCommand}" />
+            </StackPanel>
+        </Border>
+
+        <!--
+            ドラッグ中のゴースト（UI 設計書 15.5）: 白地＋枠＋影、-1.2度傾ける。左端にグリップ点、右端に行き先（「N 番目へ」など）。
+            サイドバーへ運ぶときも付いてくるよう窓全体に重ね、位置は PreviewDragOver で入れる。影は DropShadowEffect を使わず面を重ねる
+        -->
+        <Canvas x:Name="DragLayer" Grid.Row="0" Grid.RowSpan="3" IsHitTestVisible="False" Panel.ZIndex="20">
+            <Grid x:Name="DragGhost" Width="300" DataContext="{Binding List.ActiveDrag}">
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+                <Grid.RenderTransform>
+                    <RotateTransform Angle="-1.2" />
+                </Grid.RenderTransform>
+                <Border Margin="-2,-1,-2,-5" CornerRadius="7" Background="{DynamicResource PopupShadowBrush}" />
+                <Border Height="38"
+                        Padding="8,0"
+                        CornerRadius="{StaticResource RadiusRow}"
+                        Background="{DynamicResource SurfaceContentBrush}"
+                        BorderBrush="{DynamicResource SurfaceSelectedStrokeBrush}"
+                        BorderThickness="1">
+                    <DockPanel>
+                        <Viewbox DockPanel.Dock="Left" Width="13" Height="13" Margin="0,0,9,0" VerticalAlignment="Center">
+                            <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconGrip}" Stroke="{DynamicResource TextTertiaryBrush}" />
+                        </Viewbox>
+                        <TextBlock DockPanel.Dock="Right"
+                                   Margin="8,0,0,0"
+                                   VerticalAlignment="Center"
+                                   FontSize="{StaticResource TypeLabelSize}"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AccentDefaultBrush}"
+                                   Text="{Binding Hint}" />
+                        <TextBlock Style="{StaticResource TextBodySmallStyle}"
+                                   VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis"
+                                   Text="{Binding Title}" />
+                    </DockPanel>
+                </Border>
+            </Grid>
+        </Canvas>
+    </Grid>
+</ui:FluentWindow>

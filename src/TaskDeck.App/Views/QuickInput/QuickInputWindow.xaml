@@ -1,0 +1,303 @@
+<Window x:Class="TaskDeck.App.Views.QuickInput.QuickInputWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:conv="clr-namespace:TaskDeck.App.Converters"
+        xmlns:input="clr-namespace:TaskDeck.App.Input"
+        xmlns:pickers="clr-namespace:TaskDeck.App.Controls.Pickers"
+        xmlns:local="clr-namespace:TaskDeck.App.Views.QuickInput"
+        xmlns:core="clr-namespace:TaskDeck.Core;assembly=TaskDeck.Core"
+        Title="クイック入力"
+        SizeToContent="WidthAndHeight"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ShowInTaskbar="False" ResizeMode="NoResize" Topmost="True"
+        WindowStartupLocation="CenterScreen"
+        AutomationProperties.AutomationId="QuickInputWindow">
+    <!--
+        クイック入力（S-02、UI 設計書 5.2、モックアップ QuickInput.dc.html）。担当: 波3-H。
+        幅660（QuickInputWidth。窓は影の余白の左右10ずつだけ広い）、入力行58、プレビュー行46、枠 1px Stroke.Control・角丸10。
+        影は DropShadowEffect を使わず PopupShadowStyle（外側の余白＋半透明の Border）で描く（150ms で出すため）。
+    -->
+    <Window.Resources>
+        <conv:IconKeyToGeometryConverter x:Key="IconGeometry" />
+        <BooleanToVisibilityConverter x:Key="BoolVisibility" />
+
+        <!-- 入力欄（枠なし・17px）。共通の入力欄の見た目（ホバーの地・下線）は付けない -->
+        <Style x:Key="QuickInputBoxStyle" TargetType="TextBox">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
+            <Setter Property="FontSize" Value="{StaticResource TypeSubtitleSize}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+            <Setter Property="CaretBrush" Value="{DynamicResource TextPrimaryBrush}" />
+            <Setter Property="SelectionBrush" Value="{DynamicResource AccentDefaultBrush}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <ScrollViewer x:Name="PART_ContentHost"
+                                      Style="{x:Null}"
+                                      Background="Transparent"
+                                      Focusable="False"
+                                      VerticalAlignment="Center"
+                                      HorizontalScrollBarVisibility="Hidden"
+                                      VerticalScrollBarVisibility="Hidden" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- プレビューのチップ（高さ26・全丸・地 Surface.Content・枠 Stroke.Control）。手で直したものは枠をアクセントに -->
+        <Style x:Key="ChipButtonStyle" TargetType="Button">
+            <Setter Property="Margin" Value="0,0,8,0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Background" Value="{DynamicResource SurfaceContentBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource StrokeControlBrush}" />
+            <Setter Property="FocusVisualStyle" Value="{StaticResource AppFocusVisualStyle}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Chip"
+                                Height="26"
+                                Padding="10,0"
+                                CornerRadius="13"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Chip" Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 下の案内（Enter 登録・Esc 閉じる・↑ 履歴）。押しても同じことができる -->
+        <Style x:Key="HintButtonStyle" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
+            <Setter Property="FontSize" Value="{StaticResource TypeLabelSize}" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Root" Background="Transparent" CornerRadius="{StaticResource RadiusButton}" Padding="8,3">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ChipTextStyle" TargetType="TextBlock" BasedOn="{StaticResource TextBaseStyle}">
+            <Setter Property="FontSize" Value="{StaticResource TypeCaptionSize}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <StackPanel x:Name="Root" Opacity="0">
+            <StackPanel.RenderTransform>
+                <TranslateTransform x:Name="Slide" />
+            </StackPanel.RenderTransform>
+
+            <Border Style="{StaticResource PopupShadowStyle}" CornerRadius="11">
+                <Border Width="{StaticResource QuickInputWidth}"
+                        Background="{DynamicResource SettingsCardBrush}"
+                        BorderBrush="{DynamicResource StrokeControlBrush}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource RadiusDialog}"
+                        SnapsToDevicePixels="True">
+                    <StackPanel>
+                        <!-- 入力行（58） -->
+                        <DockPanel Height="58" Margin="18,0">
+                            <Path DockPanel.Dock="Left"
+                                  Width="19" Height="19"
+                                  Margin="0,0,12,0"
+                                  VerticalAlignment="Center"
+                                  Stretch="Uniform"
+                                  StrokeThickness="1.7"
+                                  StrokeStartLineCap="Round"
+                                  StrokeEndLineCap="Round"
+                                  Stroke="{DynamicResource AccentDefaultBrush}"
+                                  Data="{StaticResource IconPlus}" />
+                            <Grid>
+                                <TextBlock x:Name="Placeholder"
+                                           Style="{StaticResource TextBaseStyle}"
+                                           FontSize="{StaticResource TypeSubtitleSize}"
+                                           Foreground="{DynamicResource TextTertiaryBrush}"
+                                           VerticalAlignment="Center"
+                                           Margin="2,0,0,0"
+                                           IsHitTestVisible="False"
+                                           Text="やること、日付、#タグ、!優先度" />
+                                <TextBox x:Name="InputBox"
+                                         Style="{StaticResource QuickInputBoxStyle}"
+                                         input:ImeGuard.IsEnabled="True"
+                                         Text="{Binding Text, UpdateSourceTrigger=PropertyChanged}"
+                                         PreviewKeyDown="OnInputKeyDown"
+                                         TextChanged="OnInputChanged"
+                                         AutomationProperties.AutomationId="QuickInputBox"
+                                         AutomationProperties.Name="クイック入力" />
+                            </Grid>
+                        </DockPanel>
+
+                        <Border Height="1" Background="{DynamicResource StrokeDividerBrush}" />
+
+                        <!-- プレビュー行（46）: 解釈のチップ。無いときは書き方の例、取り消した直後はその知らせ -->
+                        <Border Height="46" Padding="18,0" CornerRadius="0,0,9,9" Background="{DynamicResource SurfaceSubtleBrush}">
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Right"
+                                           Style="{StaticResource TextBaseStyle}"
+                                           FontSize="{StaticResource TypeLabelSize}"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           VerticalAlignment="Center"
+                                           Text="クリックで修正"
+                                           Visibility="{Binding ShowFixHint, Converter={StaticResource BoolVisibility}}" />
+                                <Grid VerticalAlignment="Center">
+                                    <ItemsControl ItemsSource="{Binding Chips}"
+                                                  Focusable="False"
+                                                  AutomationProperties.AutomationId="QuickInputChips">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate DataType="{x:Type local:QuickInputChip}">
+                                                <Button x:Name="ChipButton"
+                                                        Style="{StaticResource ChipButtonStyle}"
+                                                        Click="OnChipClick"
+                                                        IsHitTestVisible="{Binding CanEdit}"
+                                                        Focusable="{Binding CanEdit}"
+                                                        AutomationProperties.Name="{Binding AccessibleName}">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Path x:Name="ChipIcon"
+                                                              Width="13" Height="13"
+                                                              Margin="0,0,6,0"
+                                                              VerticalAlignment="Center"
+                                                              Stretch="Uniform"
+                                                              StrokeThickness="1.5"
+                                                              StrokeStartLineCap="Round"
+                                                              StrokeEndLineCap="Round"
+                                                              StrokeLineJoin="Round"
+                                                              Stroke="{DynamicResource TextSecondaryBrush}"
+                                                              Data="{Binding IconKey, Converter={StaticResource IconGeometry}}" />
+                                                        <TextBlock x:Name="ChipSymbol"
+                                                                   Style="{StaticResource ChipTextStyle}"
+                                                                   Margin="0,0,5,0"
+                                                                   Foreground="{DynamicResource TextTertiaryBrush}"
+                                                                   Text="{Binding Symbol}" />
+                                                        <TextBlock Style="{StaticResource ChipTextStyle}"
+                                                                   Typography.NumeralAlignment="Tabular"
+                                                                   Text="{Binding Text}" />
+                                                    </StackPanel>
+                                                </Button>
+                                                <DataTemplate.Triggers>
+                                                    <DataTrigger Binding="{Binding IconKey}" Value="{x:Null}">
+                                                        <Setter TargetName="ChipIcon" Property="Visibility" Value="Collapsed" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Symbol}" Value="{x:Null}">
+                                                        <Setter TargetName="ChipSymbol" Property="Visibility" Value="Collapsed" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsCorrected}" Value="True">
+                                                        <Setter TargetName="ChipButton" Property="BorderBrush" Value="{DynamicResource AccentDefaultBrush}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Priority}" Value="{x:Static core:Priority.Urgent}">
+                                                        <Setter TargetName="ChipSymbol" Property="Foreground" Value="{DynamicResource PriorityUrgentBrush}" />
+                                                        <Setter TargetName="ChipSymbol" Property="FontWeight" Value="Bold" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Priority}" Value="{x:Static core:Priority.High}">
+                                                        <Setter TargetName="ChipSymbol" Property="Foreground" Value="{DynamicResource PriorityHighBrush}" />
+                                                        <Setter TargetName="ChipSymbol" Property="FontWeight" Value="Bold" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Priority}" Value="{x:Static core:Priority.Medium}">
+                                                        <Setter TargetName="ChipSymbol" Property="Foreground" Value="{DynamicResource PriorityMediumBrush}" />
+                                                        <Setter TargetName="ChipSymbol" Property="FontWeight" Value="Bold" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Priority}" Value="{x:Static core:Priority.Low}">
+                                                        <Setter TargetName="ChipSymbol" Property="Foreground" Value="{DynamicResource PriorityLowBrush}" />
+                                                        <Setter TargetName="ChipSymbol" Property="FontWeight" Value="Bold" />
+                                                    </DataTrigger>
+                                                </DataTemplate.Triggers>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+
+                                    <StackPanel Orientation="Horizontal"
+                                                Visibility="{Binding ShowExamples, Converter={StaticResource BoolVisibility}}">
+                                        <TextBlock Style="{StaticResource TextBaseStyle}"
+                                                   FontSize="{StaticResource TypeLabelSize}"
+                                                   Foreground="{DynamicResource TextTertiaryBrush}"
+                                                   VerticalAlignment="Center"
+                                                   Text="例：" />
+                                        <TextBlock Style="{StaticResource TextBaseStyle}"
+                                                   Margin="8,0,0,0"
+                                                   FontFamily="{StaticResource KeyCapFontFamily}"
+                                                   FontSize="{StaticResource TypeLabelSize}"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   VerticalAlignment="Center"
+                                                   Text="明日 15:00 / 来週火曜 / *毎週月曜 / @業務改善" />
+                                    </StackPanel>
+
+                                    <TextBlock Style="{StaticResource TextBaseStyle}"
+                                               FontSize="{StaticResource TypeCaptionSize}"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                               VerticalAlignment="Center"
+                                               TextTrimming="CharacterEllipsis"
+                                               Text="{Binding Notice}"
+                                               AutomationProperties.AutomationId="QuickInputNotice" />
+                                </Grid>
+                            </DockPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </Border>
+
+            <!-- 操作の案内。デスクトップの色に左右されないよう、面の色の上に置く -->
+            <Border HorizontalAlignment="Center"
+                    Margin="0,0,0,8"
+                    Padding="4,2"
+                    CornerRadius="12"
+                    Background="{DynamicResource SettingsCardBrush}"
+                    BorderBrush="{DynamicResource StrokeControlBrush}"
+                    BorderThickness="1">
+                <StackPanel Orientation="Horizontal">
+                    <Button Style="{StaticResource HintButtonStyle}" Click="OnSubmitClick"
+                            AutomationProperties.AutomationId="QuickInputSubmit" AutomationProperties.Name="Enter 登録">
+                        <TextBlock><Run FontWeight="SemiBold" Text="Enter" /><Run Text=" 登録" /></TextBlock>
+                    </Button>
+                    <Button Style="{StaticResource HintButtonStyle}" Click="OnCloseClick"
+                            AutomationProperties.AutomationId="QuickInputClose" AutomationProperties.Name="Esc 閉じる">
+                        <TextBlock><Run FontWeight="SemiBold" Text="Esc" /><Run Text=" 閉じる" /></TextBlock>
+                    </Button>
+                    <Button Style="{StaticResource HintButtonStyle}" Click="OnHistoryClick"
+                            AutomationProperties.AutomationId="QuickInputHistory" AutomationProperties.Name="↑ 履歴">
+                        <TextBlock><Run FontWeight="SemiBold" Text="↑" /><Run Text=" 履歴" /></TextBlock>
+                    </Button>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+
+        <!-- チップの手動補正（INTERFACES 5.3 の形。枠と影はパネルが持つ） -->
+        <Popup x:Name="DuePopup" Placement="Bottom" StaysOpen="False" AllowsTransparency="True" HorizontalOffset="-10" VerticalOffset="-8" Closed="OnPopupClosed">
+            <pickers:DatePickerPanel x:Name="DatePicker" />
+        </Popup>
+        <Popup x:Name="PriorityPopup" Placement="Bottom" StaysOpen="False" AllowsTransparency="True" HorizontalOffset="-10" VerticalOffset="-8" Closed="OnPopupClosed">
+            <pickers:PriorityPickerPanel x:Name="PriorityPicker" />
+        </Popup>
+        <Popup x:Name="ProjectPopup" Placement="Bottom" StaysOpen="False" AllowsTransparency="True" HorizontalOffset="-10" VerticalOffset="-8" Closed="OnPopupClosed">
+            <pickers:ProjectPickerPanel x:Name="ProjectPicker" />
+        </Popup>
+    </Grid>
+</Window>

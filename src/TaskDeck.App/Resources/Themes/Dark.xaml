@@ -1,0 +1,262 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!--
+        色トークン（ダーク）。Light.xaml と同じキー・同じ並び。UI 設計書 2章に値の無いものは、同じ役割になるよう暗い地に合わせた値。
+        値を変えたら tools/validate-palette.js のコントラスト検査（contrast オプション）を通す（NFR #19）。
+    -->
+
+    <Color x:Key="SurfaceWindowColor">#FF202020</Color>
+    <Color x:Key="SurfaceContentColor">#FF272727</Color>
+    <Color x:Key="SurfaceSubtleColor">#FF2D2D2D</Color>
+    <Color x:Key="SurfaceHoverColor">#FF2F2F2F</Color>
+    <Color x:Key="SurfaceSelectedColor">#FF313131</Color>
+    <Color x:Key="SurfaceSelectedStrokeColor">#FF41484D</Color>
+    <Color x:Key="StrokeDividerColor">#FF333333</Color>
+    <Color x:Key="StrokeSubtleColor">#FF2F2F2F</Color>
+    <Color x:Key="StrokeControlColor">#FF3D3D3D</Color>
+    <!-- モックアップの #6B6B6B は Surface.Content の上で 2.8:1 しかなく、未チェックの枠が見えにくい。3:1 を超える #7C7C7C にした -->
+    <Color x:Key="StrokeControlStrongColor">#FF7C7C7C</Color>
+
+    <Color x:Key="TextPrimaryColor">#FFFFFFFF</Color>
+    <Color x:Key="TextSecondaryColor">#FFC8C8C8</Color>
+    <Color x:Key="TextTertiaryColor">#FF9B9B9B</Color>
+    <Color x:Key="TextDisabledColor">#FF6B6B6B</Color>
+    <Color x:Key="TextOnAccentColor">#FF000000</Color>
+    <Color x:Key="TextOnDangerColor">#FFFFFFFF</Color>
+
+    <Color x:Key="AccentDefaultColor">#FF4CC2FF</Color>
+    <Color x:Key="AccentHoverColor">#FF69CBFF</Color>
+    <Color x:Key="AccentPressedColor">#FF3BA9E0</Color>
+
+    <Color x:Key="StateOverdueColor">#FFFF6B5E</Color>
+    <Color x:Key="StateOverdueBgColor">#FF3A2321</Color>
+    <Color x:Key="StateSuccessColor">#FF3FD0B4</Color>
+    <Color x:Key="DangerColor">#FFC42B1C</Color>
+
+    <Color x:Key="PriorityUrgentColor">#FFFF6B5E</Color>
+    <Color x:Key="PriorityHighColor">#FFFF8C42</Color>
+    <Color x:Key="PriorityMediumColor">#FFFFC83D</Color>
+    <Color x:Key="PriorityLowColor">#FF4CC2FF</Color>
+
+    <!-- サイドバー・設定のカテゴリで選択中の項目（Surface.Window の上に乗る） -->
+    <Color x:Key="NavSelectedColor">#FF2D2D2D</Color>
+    <Color x:Key="SearchHighlightColor">#FF5C4A12</Color>
+    <Color x:Key="AnchorBandColor">#FF242A30</Color>
+    <Color x:Key="PastWarnBackgroundColor">#FF3A301E</Color>
+    <Color x:Key="PastWarnForegroundColor">#FFF2C46B</Color>
+    <Color x:Key="PastWarnStrokeColor">#FF5A4A2E</Color>
+    <Color x:Key="SettingsCardColor">#FF2B2B2B</Color>
+    <Color x:Key="AttentionDotColor">#FFFFC83D</Color>
+    <Color x:Key="HeatLevel1Color">#FF1F4E78</Color>
+    <Color x:Key="HeatLevel2Color">#FF2D6FA8</Color>
+    <Color x:Key="HeatLevel3Color">#FF4A93D6</Color>
+    <Color x:Key="HeatLevel4Color">#FF7DBCF2</Color>
+    <!-- 暗い地では薄い影が見えないので濃くする -->
+    <Color x:Key="PopupShadowColor">#66000000</Color>
+
+    <Color x:Key="ToastBackgroundColor">#FF323232</Color>
+    <Color x:Key="ToastForegroundColor">#FFFFFFFF</Color>
+    <Color x:Key="ToastActionColor">#FF4CC2FF</Color>
+    <Color x:Key="BulkDangerColor">#FFFF8C7A</Color>
+    <Color x:Key="SplashBackgroundColor">#FF14161A</Color>
+    <Color x:Key="FocusRemainingColor">#FFFFB64D</Color>
+
+    <SolidColorBrush x:Key="SurfaceWindowBrush" Color="{StaticResource SurfaceWindowColor}" />
+    <SolidColorBrush x:Key="SurfaceContentBrush" Color="{StaticResource SurfaceContentColor}" />
+    <SolidColorBrush x:Key="SurfaceSubtleBrush" Color="{StaticResource SurfaceSubtleColor}" />
+    <SolidColorBrush x:Key="SurfaceHoverBrush" Color="{StaticResource SurfaceHoverColor}" />
+    <SolidColorBrush x:Key="SurfaceSelectedBrush" Color="{StaticResource SurfaceSelectedColor}" />
+    <SolidColorBrush x:Key="SurfaceSelectedStrokeBrush" Color="{StaticResource SurfaceSelectedStrokeColor}" />
+    <SolidColorBrush x:Key="StrokeDividerBrush" Color="{StaticResource StrokeDividerColor}" />
+    <SolidColorBrush x:Key="StrokeSubtleBrush" Color="{StaticResource StrokeSubtleColor}" />
+    <SolidColorBrush x:Key="StrokeControlBrush" Color="{StaticResource StrokeControlColor}" />
+    <SolidColorBrush x:Key="StrokeControlStrongBrush" Color="{StaticResource StrokeControlStrongColor}" />
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimaryColor}" />
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryColor}" />
+    <SolidColorBrush x:Key="TextTertiaryBrush" Color="{StaticResource TextTertiaryColor}" />
+    <SolidColorBrush x:Key="TextDisabledBrush" Color="{StaticResource TextDisabledColor}" />
+    <SolidColorBrush x:Key="TextOnAccentBrush" Color="{StaticResource TextOnAccentColor}" />
+    <SolidColorBrush x:Key="TextOnDangerBrush" Color="{StaticResource TextOnDangerColor}" />
+    <SolidColorBrush x:Key="AccentDefaultBrush" Color="{StaticResource AccentDefaultColor}" />
+    <SolidColorBrush x:Key="AccentHoverBrush" Color="{StaticResource AccentHoverColor}" />
+    <SolidColorBrush x:Key="AccentPressedBrush" Color="{StaticResource AccentPressedColor}" />
+    <SolidColorBrush x:Key="StateOverdueBrush" Color="{StaticResource StateOverdueColor}" />
+    <SolidColorBrush x:Key="StateOverdueBgBrush" Color="{StaticResource StateOverdueBgColor}" />
+    <SolidColorBrush x:Key="StateSuccessBrush" Color="{StaticResource StateSuccessColor}" />
+    <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource DangerColor}" />
+    <SolidColorBrush x:Key="PriorityUrgentBrush" Color="{StaticResource PriorityUrgentColor}" />
+    <SolidColorBrush x:Key="PriorityHighBrush" Color="{StaticResource PriorityHighColor}" />
+    <SolidColorBrush x:Key="PriorityMediumBrush" Color="{StaticResource PriorityMediumColor}" />
+    <SolidColorBrush x:Key="PriorityLowBrush" Color="{StaticResource PriorityLowColor}" />
+    <SolidColorBrush x:Key="NavSelectedBrush" Color="{StaticResource NavSelectedColor}" />
+    <SolidColorBrush x:Key="SearchHighlightBrush" Color="{StaticResource SearchHighlightColor}" />
+    <SolidColorBrush x:Key="AnchorBandBrush" Color="{StaticResource AnchorBandColor}" />
+    <SolidColorBrush x:Key="PastWarnBackgroundBrush" Color="{StaticResource PastWarnBackgroundColor}" />
+    <SolidColorBrush x:Key="PastWarnForegroundBrush" Color="{StaticResource PastWarnForegroundColor}" />
+    <SolidColorBrush x:Key="PastWarnStrokeBrush" Color="{StaticResource PastWarnStrokeColor}" />
+    <SolidColorBrush x:Key="SettingsCardBrush" Color="{StaticResource SettingsCardColor}" />
+    <SolidColorBrush x:Key="AttentionDotBrush" Color="{StaticResource AttentionDotColor}" />
+    <SolidColorBrush x:Key="HeatLevel1Brush" Color="{StaticResource HeatLevel1Color}" />
+    <SolidColorBrush x:Key="HeatLevel2Brush" Color="{StaticResource HeatLevel2Color}" />
+    <SolidColorBrush x:Key="HeatLevel3Brush" Color="{StaticResource HeatLevel3Color}" />
+    <SolidColorBrush x:Key="HeatLevel4Brush" Color="{StaticResource HeatLevel4Color}" />
+    <SolidColorBrush x:Key="PopupShadowBrush" Color="{StaticResource PopupShadowColor}" />
+    <SolidColorBrush x:Key="ToastBackgroundBrush" Color="{StaticResource ToastBackgroundColor}" />
+    <SolidColorBrush x:Key="ToastForegroundBrush" Color="{StaticResource ToastForegroundColor}" />
+    <SolidColorBrush x:Key="ToastActionBrush" Color="{StaticResource ToastActionColor}" />
+    <SolidColorBrush x:Key="BulkDangerBrush" Color="{StaticResource BulkDangerColor}" />
+    <SolidColorBrush x:Key="SplashBackgroundBrush" Color="{StaticResource SplashBackgroundColor}" />
+    <SolidColorBrush x:Key="FocusRemainingBrush" Color="{StaticResource FocusRemainingColor}" />
+
+    <!--
+        ===== WPF-UI（4.3.0）のキーの上書き =====
+        Light.xaml と同じキー・同じ並び。値は自前のダークのトークンを参照する
+        （アクセントに付いてくるものは既定値。実際の色は ThemeService がアプリ全体に置き直す）。
+    -->
+    <Color x:Key="ApplicationBackgroundColor">#FF202020</Color>
+    <SolidColorBrush x:Key="ApplicationBackgroundBrush" Color="{StaticResource SurfaceWindowColor}" />
+    <SolidColorBrush x:Key="WindowBackground" Color="{StaticResource SurfaceWindowColor}" />
+    <SolidColorBrush x:Key="WindowForeground" Color="{StaticResource TextPrimaryColor}" />
+    <SolidColorBrush x:Key="TextFillColorPrimaryBrush" Color="{StaticResource TextPrimaryColor}" />
+    <SolidColorBrush x:Key="TextFillColorSecondaryBrush" Color="{StaticResource TextSecondaryColor}" />
+    <SolidColorBrush x:Key="TextFillColorTertiaryBrush" Color="{StaticResource TextTertiaryColor}" />
+    <SolidColorBrush x:Key="TextFillColorDisabledBrush" Color="{StaticResource TextDisabledColor}" />
+    <SolidColorBrush x:Key="TextOnAccentFillColorPrimaryBrush" Color="{StaticResource TextOnAccentColor}" />
+    <SolidColorBrush x:Key="TextOnAccentFillColorSecondaryBrush" Color="{StaticResource TextOnAccentColor}" />
+
+    <!-- 面 -->
+    <SolidColorBrush x:Key="SolidBackgroundFillColorBaseBrush" Color="{StaticResource SurfaceWindowColor}" />
+    <SolidColorBrush x:Key="SolidBackgroundFillColorSecondaryBrush" Color="{StaticResource SurfaceSubtleColor}" />
+    <SolidColorBrush x:Key="SolidBackgroundFillColorTertiaryBrush" Color="{StaticResource SurfaceSubtleColor}" />
+    <SolidColorBrush x:Key="SolidBackgroundFillColorQuarternaryBrush" Color="{StaticResource SurfaceContentColor}" />
+    <SolidColorBrush x:Key="LayerFillColorDefaultBrush" Color="{StaticResource SurfaceContentColor}" />
+    <SolidColorBrush x:Key="LayerFillColorAltBrush" Color="{StaticResource SurfaceContentColor}" />
+    <SolidColorBrush x:Key="NavigationViewContentBackground" Color="{StaticResource SurfaceContentColor}" />
+    <SolidColorBrush x:Key="CardBackground" Color="{StaticResource SettingsCardColor}" />
+    <SolidColorBrush x:Key="CardBackgroundFillColorDefaultBrush" Color="{StaticResource SettingsCardColor}" />
+    <SolidColorBrush x:Key="CardBackgroundFillColorSecondaryBrush" Color="{StaticResource SurfaceSubtleColor}" />
+    <SolidColorBrush x:Key="CardBorderBrush" Color="{StaticResource StrokeDividerColor}" />
+    <SolidColorBrush x:Key="CardStrokeColorDefaultBrush" Color="{StaticResource StrokeDividerColor}" />
+    <SolidColorBrush x:Key="CardStrokeColorDefaultSolidBrush" Color="{StaticResource StrokeDividerColor}" />
+    <SolidColorBrush x:Key="DividerStrokeColorDefaultBrush" Color="{StaticResource StrokeDividerColor}" />
+    <SolidColorBrush x:Key="FlyoutBackground" Color="{StaticResource SurfaceContentColor}" />
+    <SolidColorBrush x:Key="FlyoutBorderBrush" Color="{StaticResource StrokeControlColor}" />
+    <SolidColorBrush x:Key="ContextMenuBackground" Color="{StaticResource SurfaceContentColor}" />
+    <SolidColorBrush x:Key="ContextMenuBorderBrush" Color="{StaticResource StrokeControlColor}" />
+    <SolidColorBrush x:Key="ContextMenuForeground" Color="{StaticResource TextPrimaryColor}" />
+    <SolidColorBrush x:Key="ToolTipBackground" Color="{StaticResource SurfaceContentColor}" />
+    <SolidColorBrush x:Key="ToolTipBorderBrush" Color="{StaticResource StrokeControlColor}" />
+    <SolidColorBrush x:Key="ToolTipForeground" Color="{StaticResource TextPrimaryColor}" />
+
+    <!-- コントロールの地と枠 -->
+    <SolidColorBrush x:Key="ControlFillColorDefaultBrush" Color="{StaticResource SurfaceSubtleColor}" />
+    <SolidColorBrush x:Key="ControlFillColorSecondaryBrush" Color="{StaticResource SurfaceHoverColor}" />
+    <SolidColorBrush x:Key="ControlFillColorTertiaryBrush" Color="{StaticResource SurfaceSelectedColor}" />
+    <SolidColorBrush x:Key="ControlFillColorDisabledBrush" Color="{StaticResource SurfaceSubtleColor}" />
+    <SolidColorBrush x:Key="ControlFillColorInputActiveBrush" Color="{StaticResource SurfaceSubtleColor}" />
+    <SolidColorBrush x:Key="ControlSolidFillColorDefaultBrush" Color="{StaticResource SurfaceSubtleColor}" />
+    <SolidColorBrush x:Key="ControlStrokeColorDefaultBrush" Color="{StaticResource StrokeControlColor}" />
+    <SolidColorBrush x:Key="ControlStrokeColorSecondaryBrush" Color="{StaticResource StrokeControlStrongColor}" />
+    <SolidColorBrush x:Key="ControlStrongStrokeColorDefaultBrush" Color="{StaticResource StrokeControlStrongColor}" />
+    <SolidColorBrush x:Key="ControlStrongFillColorDefaultBrush" Color="{StaticResource TextSecondaryColor}" />
+    <!-- 下辺だけ濃い枠（UI 設計書 6.3） -->
+    <LinearGradientBrush x:Key="ControlElevationBorderBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Offset="0.0" Color="{StaticResource StrokeControlColor}" />
+        <GradientStop Offset="0.9" Color="{StaticResource StrokeControlColor}" />
+        <GradientStop Offset="1.0" Color="{StaticResource StrokeControlStrongColor}" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="TextControlElevationBorderBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Offset="0.0" Color="{StaticResource StrokeControlColor}" />
+        <GradientStop Offset="0.9" Color="{StaticResource StrokeControlColor}" />
+        <GradientStop Offset="1.0" Color="{StaticResource StrokeControlStrongColor}" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="CircleElevationBorderBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Offset="0.0" Color="{StaticResource StrokeControlColor}" />
+        <GradientStop Offset="0.9" Color="{StaticResource StrokeControlColor}" />
+        <GradientStop Offset="1.0" Color="{StaticResource StrokeControlStrongColor}" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="AccentControlElevationBorderBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Offset="0.0" Color="{StaticResource AccentHoverColor}" />
+        <GradientStop Offset="1.0" Color="{StaticResource AccentPressedColor}" />
+    </LinearGradientBrush>
+
+    <!-- ボタン -->
+    <SolidColorBrush x:Key="ButtonBackground" Color="{StaticResource SurfaceSubtleColor}" />
+    <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="{StaticResource SurfaceHoverColor}" />
+    <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="{StaticResource SurfaceSelectedColor}" />
+    <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="{StaticResource SurfaceSubtleColor}" />
+    <SolidColorBrush x:Key="ButtonForeground" Color="{StaticResource TextPrimaryColor}" />
+    <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="{StaticResource TextPrimaryColor}" />
+    <SolidColorBrush x:Key="ButtonForegroundPressed" Color="{StaticResource TextSecondaryColor}" />
+    <SolidColorBrush x:Key="ButtonForegroundDisabled" Color="{StaticResource TextDisabledColor}" />
+    <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Color="{StaticResource StrokeControlColor}" />
+
+    <!-- 入力欄・ComboBox -->
+    <SolidColorBrush x:Key="TextControlBackground" Color="{StaticResource SurfaceSubtleColor}" />
+    <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="{StaticResource SurfaceHoverColor}" />
+    <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="{StaticResource SurfaceSubtleColor}" />
+    <SolidColorBrush x:Key="TextControlBackgroundDisabled" Color="{StaticResource SurfaceSubtleColor}" />
+    <SolidColorBrush x:Key="TextControlForeground" Color="{StaticResource TextPrimaryColor}" />
+    <SolidColorBrush x:Key="TextControlForegroundDisabled" Color="{StaticResource TextDisabledColor}" />
+    <SolidColorBrush x:Key="TextControlPlaceholderForeground" Color="{StaticResource TextTertiaryColor}" />
+    <SolidColorBrush x:Key="TextControlBorderBrushDisabled" Color="{StaticResource StrokeControlColor}" />
+    <SolidColorBrush x:Key="TextControlFocusedBorderBrush" Color="{StaticResource AccentDefaultColor}" />
+    <SolidColorBrush x:Key="TextControlButtonForeground" Color="{StaticResource TextSecondaryColor}" />
+    <SolidColorBrush x:Key="ComboBoxBackground" Color="{StaticResource SurfaceSubtleColor}" />
+    <SolidColorBrush x:Key="ComboBoxBackgroundPointerOver" Color="{StaticResource SurfaceHoverColor}" />
+    <SolidColorBrush x:Key="ComboBoxBackgroundFocused" Color="{StaticResource SurfaceSubtleColor}" />
+    <SolidColorBrush x:Key="ComboBoxBackgroundDisabled" Color="{StaticResource SurfaceSubtleColor}" />
+    <SolidColorBrush x:Key="ComboBoxForeground" Color="{StaticResource TextPrimaryColor}" />
+    <SolidColorBrush x:Key="ComboBoxForegroundDisabled" Color="{StaticResource TextDisabledColor}" />
+    <SolidColorBrush x:Key="ComboBoxDropDownBackground" Color="{StaticResource SurfaceSubtleColor}" />
+    <SolidColorBrush x:Key="ComboBoxDropDownBorderBrush" Color="{StaticResource StrokeControlColor}" />
+    <SolidColorBrush x:Key="ComboBoxDropDownGlyphForeground" Color="{StaticResource TextSecondaryColor}" />
+    <SolidColorBrush x:Key="ComboBoxItemForeground" Color="{StaticResource TextPrimaryColor}" />
+    <SolidColorBrush x:Key="ComboBoxItemForegroundSelected" Color="{StaticResource TextPrimaryColor}" />
+    <SolidColorBrush x:Key="ComboBoxItemBackgroundSelected" Color="{StaticResource SurfaceHoverColor}" />
+    <SolidColorBrush x:Key="ComboBoxItemPillFillBrush" Color="{StaticResource AccentDefaultColor}" />
+
+    <!-- チェック・ラジオ・トグル（オンの地はアクセント） -->
+    <SolidColorBrush x:Key="CheckBoxBorderBrush" Color="{StaticResource StrokeControlStrongColor}" />
+    <SolidColorBrush x:Key="CheckBoxCheckGlyphForeground" Color="{StaticResource TextOnAccentColor}" />
+    <SolidColorBrush x:Key="CheckBoxForeground" Color="{StaticResource TextPrimaryColor}" />
+    <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillChecked" Color="{StaticResource AccentDefaultColor}" />
+    <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPointerOver" Color="{StaticResource AccentHoverColor}" />
+    <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPressed" Color="{StaticResource AccentPressedColor}" />
+    <SolidColorBrush x:Key="RadioButtonForeground" Color="{StaticResource TextPrimaryColor}" />
+    <SolidColorBrush x:Key="RadioButtonOuterEllipseStroke" Color="{StaticResource StrokeControlStrongColor}" />
+    <SolidColorBrush x:Key="RadioButtonOuterEllipseFill" Color="{StaticResource SurfaceSubtleColor}" />
+    <SolidColorBrush x:Key="RadioButtonCheckGlyphFill" Color="{StaticResource TextOnAccentColor}" />
+    <SolidColorBrush x:Key="RadioButtonOuterEllipseCheckedStroke" Color="{StaticResource AccentDefaultColor}" />
+    <SolidColorBrush x:Key="RadioButtonOuterEllipseCheckedStrokePointerOver" Color="{StaticResource AccentHoverColor}" />
+    <SolidColorBrush x:Key="ToggleSwitchContentForeground" Color="{StaticResource TextPrimaryColor}" />
+    <SolidColorBrush x:Key="ToggleSwitchFillOn" Color="{StaticResource AccentDefaultColor}" />
+    <SolidColorBrush x:Key="ToggleSwitchFillOnPointerOver" Color="{StaticResource AccentHoverColor}" />
+    <SolidColorBrush x:Key="ToggleSwitchFillOnPressed" Color="{StaticResource AccentPressedColor}" />
+    <SolidColorBrush x:Key="ToggleSwitchStrokeOn" Color="{StaticResource AccentDefaultColor}" />
+    <SolidColorBrush x:Key="ToggleSwitchStrokeOnPointerOver" Color="{StaticResource AccentHoverColor}" />
+    <SolidColorBrush x:Key="ToggleSwitchStrokeOnPressed" Color="{StaticResource AccentPressedColor}" />
+    <SolidColorBrush x:Key="ToggleSwitchStrokeOff" Color="{StaticResource StrokeControlStrongColor}" />
+    <SolidColorBrush x:Key="ToggleSwitchKnobFillOff" Color="{StaticResource TextSecondaryColor}" />
+    <SolidColorBrush x:Key="ToggleSwitchKnobFillOn" Color="{StaticResource TextOnAccentColor}" />
+
+    <!-- 選択・フォーカス・状態 -->
+    <SolidColorBrush x:Key="ListViewItemBackgroundPointerOver" Color="{StaticResource SurfaceHoverColor}" />
+    <SolidColorBrush x:Key="ListViewItemForeground" Color="{StaticResource TextPrimaryColor}" />
+    <SolidColorBrush x:Key="ListViewItemPillFillBrush" Color="{StaticResource AccentDefaultColor}" />
+    <SolidColorBrush x:Key="NavigationViewItemForeground" Color="{StaticResource TextPrimaryColor}" />
+    <SolidColorBrush x:Key="NavigationViewItemBackgroundPointerOver" Color="{StaticResource SurfaceHoverColor}" />
+    <SolidColorBrush x:Key="NavigationViewItemBackgroundSelected" Color="{StaticResource NavSelectedColor}" />
+    <SolidColorBrush x:Key="NavigationViewSelectionIndicatorForeground" Color="{StaticResource AccentDefaultColor}" />
+    <SolidColorBrush x:Key="HyperlinkButtonForeground" Color="{StaticResource AccentDefaultColor}" />
+    <SolidColorBrush x:Key="HyperlinkButtonForegroundPointerOver" Color="{StaticResource AccentHoverColor}" />
+    <SolidColorBrush x:Key="HyperlinkButtonForegroundPressed" Color="{StaticResource AccentPressedColor}" />
+    <SolidColorBrush x:Key="FocusStrokeColorOuterBrush" Color="{StaticResource TextPrimaryColor}" />
+    <SolidColorBrush x:Key="FocusStrokeColorInnerBrush" Color="{StaticResource SurfaceWindowColor}" />
+    <SolidColorBrush x:Key="KeyboardFocusBorderColorBrush" Color="{StaticResource TextPrimaryColor}" />
+    <SolidColorBrush x:Key="SystemFillColorCriticalBrush" Color="{StaticResource StateOverdueColor}" />
+    <SolidColorBrush x:Key="SystemFillColorSuccessBrush" Color="{StaticResource StateSuccessColor}" />
+    <SolidColorBrush x:Key="SystemFillColorAttentionBrush" Color="{StaticResource AccentDefaultColor}" />
+    <SolidColorBrush x:Key="ScrollBarThumbFill" Color="{StaticResource TextTertiaryColor}" />
+    <SolidColorBrush x:Key="ScrollBarTrackFillPointerOver" Color="{StaticResource SurfaceSubtleColor}" />
+</ResourceDictionary>

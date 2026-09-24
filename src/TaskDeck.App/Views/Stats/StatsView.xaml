@@ -1,0 +1,809 @@
+<UserControl x:Class="TaskDeck.App.Views.Stats.StatsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:TaskDeck.App.Views.Stats"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignWidth="900" d:DesignHeight="900">
+    <!--
+        振り返り（S-13、UI 設計書 22章、モックアップ Stats.dc.html）。担当: 波3-K。
+        グラフは WPF の図形で描く（外部ライブラリなし）。棒は Grid の * 行で高さを比にする。
+        色: 単一系列の棒は Accent.Default の1色、内訳はプロジェクト色、ヒートマップは HeatLevel1〜4（0件は地＋1px の枠）。
+        文字は必ずテキストの色（系列色を文字に使わない）。数字の欄は等幅数字。
+        この UserControl 自身の DataContext はメイン画面のもの（Visibility のバインドに使われる）なので、中身の Root だけを ViewModel につなぐ。
+    -->
+    <UserControl.Resources>
+        <local:RatioToStarConverter x:Key="Star" />
+        <local:HexToBrushConverter x:Key="HexBrush" />
+        <local:StatsBoolToVisibilityConverter x:Key="Visible" />
+
+        <!-- カード（角丸8・枠 Stroke.Divider） -->
+        <Style x:Key="StatsCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource SurfaceContentBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource StrokeDividerBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="{StaticResource RadiusWindow}" />
+            <Setter Property="Padding" Value="16,14" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+        </Style>
+
+        <Style x:Key="CardTitleStyle" TargetType="TextBlock" BasedOn="{StaticResource TextBaseStyle}">
+            <Setter Property="FontSize" Value="{StaticResource TypeBodySmallSize}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+
+        <Style x:Key="CardLabelStyle" TargetType="TextBlock" BasedOn="{StaticResource TextCaptionStyle}" />
+
+        <Style x:Key="CardNoteStyle" TargetType="TextBlock" BasedOn="{StaticResource TextBaseStyle}">
+            <Setter Property="FontSize" Value="{StaticResource TypeLabelSize}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
+        </Style>
+
+        <!-- KPI の数字（30px）と単位 -->
+        <Style x:Key="KpiNumberStyle" TargetType="TextBlock" BasedOn="{StaticResource TextBaseStyle}">
+            <Setter Property="FontSize" Value="30" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
+        </Style>
+        <Style x:Key="KpiUnitStyle" TargetType="TextBlock" BasedOn="{StaticResource TextBaseStyle}">
+            <Setter Property="FontSize" Value="{StaticResource TypeBodySize}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+            <Setter Property="VerticalAlignment" Value="Bottom" />
+            <Setter Property="Margin" Value="5,0,0,6" />
+        </Style>
+
+        <!-- 軸の数値・日付（10px、等幅数字） -->
+        <Style x:Key="AxisTextStyle" TargetType="TextBlock" BasedOn="{StaticResource TextBaseStyle}">
+            <Setter Property="FontSize" Value="10" />
+            <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}" />
+            <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
+        </Style>
+
+        <!-- 今週／今月／今年（地の上に選んだものだけ白い面を置く） -->
+        <Style x:Key="SegmentStyle" TargetType="RadioButton">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
+            <Setter Property="FontSize" Value="{StaticResource TypeCaptionSize}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{StaticResource AppFocusVisualStyle}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Face"
+                                Height="26"
+                                Padding="13,0"
+                                CornerRadius="{StaticResource RadiusButton}"
+                                Background="Transparent"
+                                BorderBrush="Transparent"
+                                BorderThickness="1">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Face" Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Face" Property="Background" Value="{DynamicResource SurfaceContentBrush}" />
+                                <Setter TargetName="Face" Property="BorderBrush" Value="{DynamicResource StrokeControlBrush}" />
+                                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SegmentHostStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource StrokeSubtleBrush}" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Padding" Value="2" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <!-- 見出しの右のボタン（表で見る・Markdown） -->
+        <Style x:Key="HeaderButtonStyle" TargetType="Button" BasedOn="{StaticResource StandardButtonStyle}">
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="Height" Value="{StaticResource ToolbarButtonHeight}" />
+            <Setter Property="Padding" Value="11,0" />
+            <Setter Property="FontSize" Value="{StaticResource TypeCaptionSize}" />
+            <Setter Property="Margin" Value="8,0,0,0" />
+        </Style>
+
+        <Style x:Key="SmallIconStyle" TargetType="Path" BasedOn="{StaticResource IconPathStyle}">
+            <Setter Property="Stroke" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+        </Style>
+
+        <!--
+            単一系列の棒（Accent.Default の1色。上端だけ角丸4、最大22px）。
+            一番上の 18px は直接ラベルの置き場（軸の上端まで伸びた棒でもラベルが切れないように。目盛り線も同じだけ下げてある）
+        -->
+        <DataTemplate x:Key="TrendBarTemplate" DataType="{x:Type local:StatsBar}">
+            <Grid ToolTip="{Binding ToolTip}" AutomationProperties.Name="{Binding ToolTip}" Background="Transparent">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="18" />
+                    <RowDefinition Height="{Binding Rest, Converter={StaticResource Star}}" />
+                    <RowDefinition Height="{Binding Ratio, Converter={StaticResource Star}}" />
+                </Grid.RowDefinitions>
+                <!-- 直接ラベルは最大値の1本だけ -->
+                <TextBlock Grid.RowSpan="2"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Bottom"
+                           Margin="0,0,0,3"
+                           Style="{StaticResource TextBaseStyle}"
+                           FontSize="{StaticResource TypeLabelSize}"
+                           FontWeight="SemiBold"
+                           Typography.NumeralAlignment="Tabular"
+                           Text="{Binding Count}"
+                           Visibility="{Binding IsPeak, Converter={StaticResource Visible}}" />
+                <Border Grid.Row="2"
+                        MaxWidth="22"
+                        Margin="1,0"
+                        CornerRadius="4,4,0,0"
+                        Background="{DynamicResource AccentDefaultBrush}" />
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="TrendLabelTemplate" DataType="{x:Type local:StatsBar}">
+            <TextBlock x:Name="Label" HorizontalAlignment="Center" Style="{StaticResource AxisTextStyle}" Text="{Binding Label}" />
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding IsWeekend}" Value="True">
+                    <Setter TargetName="Label" Property="Foreground" Value="{DynamicResource TextDisabledBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsFuture}" Value="True">
+                    <Setter TargetName="Label" Property="Foreground" Value="{DynamicResource TextDisabledBrush}" />
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+        <ItemsPanelTemplate x:Key="RowPanel">
+            <UniformGrid Rows="1" />
+        </ItemsPanelTemplate>
+
+        <ItemsPanelTemplate x:Key="ColumnPanel">
+            <UniformGrid Columns="1" />
+        </ItemsPanelTemplate>
+
+        <!-- 表で見る: 1行（左の見出しの幅は表ごとにそろえる） -->
+        <DataTemplate x:Key="TableRowTemplate" DataType="{x:Type local:StatsTableRow}">
+            <Border BorderBrush="{DynamicResource StrokeSubtleBrush}" BorderThickness="0,0,0,1" Padding="12,6">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" MinWidth="220" SharedSizeGroup="TableLabel" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Style="{StaticResource TextBodySmallStyle}" Foreground="{DynamicResource TextSecondaryBrush}" Text="{Binding Label}" Margin="0,0,16,0" />
+                    <TextBlock Grid.Column="1" Style="{StaticResource TextBodySmallStyle}" Typography.NumeralAlignment="Tabular" Text="{Binding Value}" TextWrapping="Wrap" />
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Grid x:Name="Root" Background="{DynamicResource SurfaceContentBrush}" d:DataContext="{d:DesignInstance local:StatsViewModel}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- 見出し: 期間の切替（F-161）は1行だけ。右に Markdown と「表で見る」 -->
+        <DockPanel Margin="22,18,22,0" LastChildFill="False">
+            <TextBlock DockPanel.Dock="Left" Style="{StaticResource TextTitleStyle}" VerticalAlignment="Center" Text="振り返り" />
+            <Button DockPanel.Dock="Right"
+                    x:Name="TableButton"
+                    Style="{StaticResource HeaderButtonStyle}"
+                    AutomationProperties.Name="{Binding TableButtonText}"
+                    Command="{Binding ToggleTableCommand}">
+                <StackPanel Orientation="Horizontal">
+                    <Viewbox Width="13" Height="13" Margin="0,0,6,0">
+                        <Path Style="{StaticResource SmallIconStyle}" Data="{StaticResource IconTable}" />
+                    </Viewbox>
+                    <TextBlock Text="{Binding TableButtonText}" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+            <Button DockPanel.Dock="Right"
+                    Style="{StaticResource HeaderButtonStyle}"
+                    AutomationProperties.Name="Markdown で書き出す"
+                    ToolTip="完了したタスクを Markdown で書き出す（Obsidian のデイリーノートに貼れる形）"
+                    Command="{Binding Export.ToggleCommand}">
+                <StackPanel Orientation="Horizontal">
+                    <Viewbox Width="13" Height="13" Margin="0,0,6,0">
+                        <Path Style="{StaticResource SmallIconStyle}" Data="{StaticResource IconExport}" />
+                    </Viewbox>
+                    <TextBlock Text="Markdown" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+            <Border DockPanel.Dock="Right" Style="{StaticResource SegmentHostStyle}" Margin="0,0,4,0">
+                <StackPanel Orientation="Horizontal">
+                    <RadioButton Style="{StaticResource SegmentStyle}" GroupName="StatsPeriod" Content="今週" IsChecked="{Binding IsWeek}" AutomationProperties.Name="今週" />
+                    <RadioButton Style="{StaticResource SegmentStyle}" GroupName="StatsPeriod" Content="今月" IsChecked="{Binding IsMonth}" Margin="2,0,0,0" AutomationProperties.Name="今月" />
+                    <RadioButton Style="{StaticResource SegmentStyle}" GroupName="StatsPeriod" Content="今年" IsChecked="{Binding IsYear}" Margin="2,0,0,0" AutomationProperties.Name="今年" />
+                </StackPanel>
+            </Border>
+        </DockPanel>
+
+        <!-- Markdown で書き出す（F-108・F-109） -->
+        <Border Grid.Row="1"
+                Margin="22,12,22,0"
+                Style="{StaticResource StatsCardStyle}"
+                Background="{DynamicResource SettingsCardBrush}"
+                Visibility="{Binding Export.IsOpen, Converter={StaticResource Visible}}">
+            <StackPanel DataContext="{Binding Export}">
+                <DockPanel Margin="0,0,0,10">
+                    <Button DockPanel.Dock="Right"
+                            Style="{StaticResource IconButtonStyle}"
+                            Width="28" Height="28"
+                            AutomationProperties.Name="書き出しを閉じる"
+                            Command="{Binding ToggleCommand}">
+                        <Viewbox Width="12" Height="12">
+                            <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconClose}" />
+                        </Viewbox>
+                    </Button>
+                    <TextBlock Style="{StaticResource CardTitleStyle}" VerticalAlignment="Center" Text="Markdown で書き出す" />
+                </DockPanel>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Style="{StaticResource CardLabelStyle}" VerticalAlignment="Center" Margin="0,0,16,0" Text="期間" />
+                    <WrapPanel Grid.Column="1" Orientation="Horizontal">
+                        <Border Style="{StaticResource SegmentHostStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton Style="{StaticResource SegmentStyle}" GroupName="ExportRange" Content="今日" IsChecked="{Binding IsToday}" AutomationProperties.Name="書き出す期間: 今日" />
+                                <RadioButton Style="{StaticResource SegmentStyle}" GroupName="ExportRange" Content="今週" IsChecked="{Binding IsWeek}" Margin="2,0,0,0" AutomationProperties.Name="書き出す期間: 今週" />
+                                <RadioButton Style="{StaticResource SegmentStyle}" GroupName="ExportRange" Content="今月" IsChecked="{Binding IsMonth}" Margin="2,0,0,0" AutomationProperties.Name="書き出す期間: 今月" />
+                                <RadioButton Style="{StaticResource SegmentStyle}" GroupName="ExportRange" Content="今年" IsChecked="{Binding IsYear}" Margin="2,0,0,0" AutomationProperties.Name="書き出す期間: 今年" />
+                            </StackPanel>
+                        </Border>
+                        <TextBlock Style="{StaticResource CardNoteStyle}" VerticalAlignment="Center" Margin="12,0,0,0"
+                                   AutomationProperties.AutomationId="ExportRangeText"
+                                   Text="{Binding RangeText}" />
+                    </WrapPanel>
+
+                    <TextBlock Grid.Row="1" Style="{StaticResource CardLabelStyle}" VerticalAlignment="Center" Margin="0,10,16,0" Text="出力先" />
+                    <WrapPanel Grid.Row="1" Grid.Column="1" Margin="0,10,0,0" Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource TextCaptionStyle}"
+                                   FontFamily="{StaticResource KeyCapFontFamily}"
+                                   VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis"
+                                   MaxWidth="420"
+                                   AutomationProperties.AutomationId="ExportFolderText"
+                                   Text="{Binding FolderText}"
+                                   ToolTip="{Binding FolderText}" />
+                        <Button Style="{StaticResource HeaderButtonStyle}" Margin="12,0,0,0" Content="フォルダを選ぶ…"
+                                AutomationProperties.Name="出力先のフォルダを選ぶ"
+                                Click="OnChooseFolder" />
+                        <Button Style="{StaticResource HeaderButtonStyle}" Content="毎回たずねる"
+                                AutomationProperties.Name="出力先を毎回たずねる"
+                                Visibility="{Binding HasFolder, Converter={StaticResource Visible}}"
+                                Command="{Binding AskEveryTimeCommand}" />
+                    </WrapPanel>
+                </Grid>
+
+                <TextBlock Style="{StaticResource CardNoteStyle}" Margin="0,10,0,0"
+                           Text="期間に完了したタスクを、完了した日ごとに「- [x] タイトル」の形で書きます。Obsidian のデイリーノートにそのまま貼れます（ファイル名は TaskDeck_ で始まるので、デイリーノートを上書きしません）" />
+
+                <DockPanel Margin="0,10,0,0">
+                    <Button DockPanel.Dock="Right"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            MinHeight="0" Height="{StaticResource ToolbarButtonHeight}"
+                            Content="書き出す"
+                            AutomationProperties.Name="Markdown を書き出す"
+                            Click="OnExport" />
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock x:Name="ExportMessage"
+                                   TextWrapping="Wrap"
+                                   AutomationProperties.AutomationId="ExportMessage"
+                                   Text="{Binding Message}"
+                                   Visibility="{Binding HasMessage, Converter={StaticResource Visible}}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource TextBodySmallStyle}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsError}" Value="True">
+                                            <Setter Property="Foreground" Value="{DynamicResource StateOverdueBrush}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <StackPanel Orientation="Horizontal" Margin="-10,2,0,0">
+                            <Button Style="{StaticResource TextButtonStyle}" MinHeight="0" Height="26" FontSize="{StaticResource TypeCaptionSize}"
+                                    Content="フォルダを開く"
+                                    AutomationProperties.Name="書き出したファイルのフォルダを開く"
+                                    Visibility="{Binding CanOpenLastFolder, Converter={StaticResource Visible}}"
+                                    Command="{Binding OpenLastFolderCommand}" />
+                            <Button Style="{StaticResource TextButtonStyle}" MinHeight="0" Height="26" FontSize="{StaticResource TypeCaptionSize}"
+                                    Content="次からもこのフォルダに書き出す"
+                                    AutomationProperties.Name="次からもこのフォルダに書き出す"
+                                    Visibility="{Binding CanRememberLastFolder, Converter={StaticResource Visible}}"
+                                    Command="{Binding RememberLastFolderCommand}" />
+                        </StackPanel>
+                    </StackPanel>
+                </DockPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- 中身。グラフと「表で見る」は同じ場所に切り替えて出す。件数の少ない一覧だけなので ScrollViewer で包んでよい -->
+        <ScrollViewer Grid.Row="2"
+                      x:Name="Scroller"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      Focusable="False"
+                      Visibility="{Binding IsLoaded, Converter={StaticResource Visible}}">
+            <Grid Margin="22,14,22,22">
+                <!-- グラフ -->
+                <StackPanel x:Name="ChartsPanel"
+                            Visibility="{Binding IsTableMode, Converter={StaticResource Visible}, ConverterParameter=invert}">
+
+                    <!-- 1段目: ヒーロー数値と3つの指標 -->
+                    <Grid x:Name="KpiGrid">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition x:Name="KpiColumn0" Width="260" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition x:Name="KpiColumn2" Width="*" />
+                            <ColumnDefinition x:Name="KpiColumn3" Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <!-- 片付けた数（ヒーロー数値は画面に1つだけ）と前の期間との比較（F-16A） -->
+                        <Border x:Name="HeroCard" Style="{StaticResource StatsCardStyle}" Background="{DynamicResource SettingsCardBrush}" Padding="18,14" Margin="0,0,12,0">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource CardLabelStyle}" Text="{Binding Display.HeroCaption}" />
+                                <DockPanel Margin="0,2,0,0">
+                                    <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
+                                        <TextBlock Style="{StaticResource TextBaseStyle}"
+                                                   FontSize="52" FontWeight="SemiBold"
+                                                   Typography.NumeralAlignment="Tabular"
+                                                   AutomationProperties.AutomationId="HeroCount"
+                                                   Text="{Binding Display.HeroCount}" />
+                                        <TextBlock Style="{StaticResource TextBaseStyle}"
+                                                   FontSize="{StaticResource TypeBodySmallSize}"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   VerticalAlignment="Bottom" Margin="10,0,0,12" Text="件" />
+                                    </StackPanel>
+                                    <StackPanel x:Name="ChangeBadge"
+                                                Orientation="Horizontal"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Bottom"
+                                                Margin="8,0,0,12"
+                                                ToolTip="{Binding Display.ChangeDescription}"
+                                                AutomationProperties.Name="{Binding Display.ChangeDescription}">
+                                        <!-- 増えたら緑の上向き、減ったら灰色の下向き（減ったことを赤で責めない）。同じなら矢印なし -->
+                                        <Viewbox Width="11" Height="11" Margin="0,0,3,0" RenderTransformOrigin="0.5,0.5">
+                                            <Viewbox.Style>
+                                                <Style TargetType="Viewbox">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Display.Change}" Value="{x:Static local:ChangeDirection.Down}">
+                                                            <Setter Property="RenderTransform">
+                                                                <Setter.Value>
+                                                                    <RotateTransform Angle="180" />
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Display.Change}" Value="{x:Static local:ChangeDirection.Flat}">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Viewbox.Style>
+                                            <Path StrokeThickness="2" Data="{StaticResource IconArrowUp}">
+                                                <Path.Style>
+                                                    <Style TargetType="Path" BasedOn="{StaticResource IconPathStyle}">
+                                                        <Setter Property="Stroke" Value="{DynamicResource TextSecondaryBrush}" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Display.Change}" Value="{x:Static local:ChangeDirection.Up}">
+                                                                <Setter Property="Stroke" Value="{DynamicResource StateSuccessBrush}" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Path.Style>
+                                            </Path>
+                                        </Viewbox>
+                                        <TextBlock FontSize="{StaticResource TypeCaptionSize}"
+                                                   FontWeight="SemiBold"
+                                                   Typography.NumeralAlignment="Tabular"
+                                                   AutomationProperties.AutomationId="ChangeValue"
+                                                   Text="{Binding Display.ChangeText}">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock" BasedOn="{StaticResource TextBaseStyle}">
+                                                    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Display.Change}" Value="{x:Static local:ChangeDirection.Up}">
+                                                            <Setter Property="Foreground" Value="{DynamicResource StateSuccessBrush}" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                        <StackPanel.Style>
+                                            <Style TargetType="StackPanel">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Display.Change}" Value="{x:Static local:ChangeDirection.None}">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </StackPanel.Style>
+                                    </StackPanel>
+                                </DockPanel>
+                                <TextBlock Style="{StaticResource CardNoteStyle}" Margin="0,4,0,0"
+                                           AutomationProperties.AutomationId="PreviousText"
+                                           Text="{Binding Display.PreviousText}" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- 期限内完了率（F-163。分母と分子も） -->
+                        <Border x:Name="OnTimeCard" Grid.Column="1" Style="{StaticResource StatsCardStyle}" Margin="0,0,12,0">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource CardLabelStyle}" Text="期限内に終えた割合" />
+                                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                    <TextBlock Style="{StaticResource KpiNumberStyle}" AutomationProperties.AutomationId="OnTimePercent" Text="{Binding Display.OnTimePercent}" />
+                                    <TextBlock Style="{StaticResource KpiUnitStyle}" Text="%" />
+                                </StackPanel>
+                                <Grid Height="5" Margin="0,9,0,0">
+                                    <Border CornerRadius="3" Background="{DynamicResource AccentDefaultBrush}" Opacity="0.18" />
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="{Binding Display.OnTimeRatio, Converter={StaticResource Star}}" />
+                                            <ColumnDefinition Width="{Binding Display.OnTimeRatio, Converter={StaticResource Star}, ConverterParameter=rest}" />
+                                        </Grid.ColumnDefinitions>
+                                        <Border CornerRadius="3" Background="{DynamicResource AccentDefaultBrush}" />
+                                    </Grid>
+                                </Grid>
+                                <TextBlock Style="{StaticResource CardNoteStyle}" Margin="0,6,0,0" AutomationProperties.AutomationId="OnTimeDetail" Text="{Binding Display.OnTimeDetail}" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- 連続日数と自己最長（F-164） -->
+                        <Border x:Name="StreakCard" Grid.Column="2" Style="{StaticResource StatsCardStyle}" Margin="0,0,12,0">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource CardLabelStyle}" Text="連続で片付けた日数" />
+                                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                    <TextBlock Style="{StaticResource KpiNumberStyle}" AutomationProperties.AutomationId="StreakDays" Text="{Binding Display.StreakDays}" />
+                                    <TextBlock Style="{StaticResource KpiUnitStyle}" Text="日" />
+                                </StackPanel>
+                                <ItemsControl Height="22" Margin="0,9,0,0" Focusable="False"
+                                              ItemsSource="{Binding Display.StreakBars}"
+                                              ItemsPanel="{StaticResource RowPanel}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type local:StatsBar}">
+                                            <Grid ToolTip="{Binding ToolTip}" Background="Transparent">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="{Binding Rest, Converter={StaticResource Star}}" />
+                                                    <RowDefinition Height="{Binding Ratio, Converter={StaticResource Star}}" />
+                                                </Grid.RowDefinitions>
+                                                <Border Grid.Row="1" Margin="1,0" CornerRadius="2,2,0,0" Background="{DynamicResource AccentDefaultBrush}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock Style="{StaticResource CardNoteStyle}" Margin="0,6,0,0" AutomationProperties.AutomationId="StreakDetail" Text="{Binding Display.StreakDetail}" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- 平均リードタイム（F-165） -->
+                        <Border x:Name="LeadCard" Grid.Column="3" Style="{StaticResource StatsCardStyle}">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource CardLabelStyle}" Text="作ってから終えるまで" />
+                                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                    <TextBlock Style="{StaticResource KpiNumberStyle}" AutomationProperties.AutomationId="LeadDays" Text="{Binding Display.LeadDays}" />
+                                    <TextBlock Style="{StaticResource KpiUnitStyle}" Text="日" />
+                                </StackPanel>
+                                <TextBlock Style="{StaticResource CardNoteStyle}" Margin="0,9,0,0" LineHeight="17" AutomationProperties.AutomationId="LeadDetail" Text="{Binding Display.LeadDetail}" />
+                                <TextBlock Style="{StaticResource CardNoteStyle}" LineHeight="17" Text="短いほど溜め込んでいない" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- 2段目: 推移と、内訳・曜日 -->
+                    <Grid x:Name="MiddleGrid" Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition x:Name="SideColumn" Width="300" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <!-- 完了数の推移（F-162）。軸はきりのいい値、直接ラベルは最大値だけ、グリッド線は 1px の実線 -->
+                        <Border x:Name="TrendCard" Style="{StaticResource StatsCardStyle}" Padding="18,14,18,12" Margin="0,0,12,0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" MinHeight="230" />
+                                </Grid.RowDefinitions>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                                    <TextBlock Style="{StaticResource CardTitleStyle}" Text="{Binding Display.TrendTitle}" />
+                                    <TextBlock Style="{StaticResource CardNoteStyle}" VerticalAlignment="Bottom" Margin="8,0,0,1" Text="{Binding Display.TrendCaption}" />
+                                </StackPanel>
+
+                                <Grid Grid.Row="1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="30" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <!-- 軸の数値の領域とは別に、日付の欄を 20px とる -->
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="20" />
+                                    </Grid.RowDefinitions>
+
+                                    <!-- 軸の数値（線の高さにそろえる。上の 18px は直接ラベルの置き場） -->
+                                    <ItemsControl Focusable="False" Margin="0,18,0,0" ItemsSource="{Binding Display.TrendGridTicks}" ItemsPanel="{StaticResource ColumnPanel}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Style="{StaticResource AxisTextStyle}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-7,7,0" Text="{Binding}" />
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <TextBlock Style="{StaticResource AxisTextStyle}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,7,-6" Text="0" />
+
+                                    <!-- グリッド線（Stroke.Subtle の実線）とベースライン -->
+                                    <ItemsControl Grid.Column="1" Focusable="False" Margin="0,18,0,0" ItemsSource="{Binding Display.TrendGridTicks}" ItemsPanel="{StaticResource ColumnPanel}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border BorderBrush="{DynamicResource StrokeSubtleBrush}" BorderThickness="0,1,0,0" SnapsToDevicePixels="True" />
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <Border Grid.Column="1" Height="1" VerticalAlignment="Bottom" Background="{DynamicResource StrokeControlBrush}" SnapsToDevicePixels="True" />
+
+                                    <!-- 棒（棒の間は 2px の地） -->
+                                    <ItemsControl Grid.Column="1" Focusable="False"
+                                                  AutomationProperties.Name="{Binding Display.TrendTitle}"
+                                                  ItemsSource="{Binding Display.Trend}"
+                                                  ItemsPanel="{StaticResource RowPanel}"
+                                                  ItemTemplate="{StaticResource TrendBarTemplate}" />
+
+                                    <!-- 日付 -->
+                                    <ItemsControl Grid.Row="1" Grid.Column="1" Focusable="False" Padding="0,5,0,0"
+                                                  ItemsSource="{Binding Display.Trend}"
+                                                  ItemsPanel="{StaticResource RowPanel}"
+                                                  ItemTemplate="{StaticResource TrendLabelTemplate}" />
+
+                                    <!-- 0件のとき: 軸だけ描いて、空の状態の文言を出す -->
+                                    <TextBlock Grid.Column="1"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               MaxWidth="320" TextAlignment="Center"
+                                               Style="{StaticResource CardNoteStyle}"
+                                               FontSize="{StaticResource TypeCaptionSize}"
+                                               AutomationProperties.AutomationId="EmptyText"
+                                               Text="{Binding Display.EmptyText}"
+                                               Visibility="{Binding Display.IsEmpty, Converter={StaticResource Visible}}" />
+                                </Grid>
+                            </Grid>
+                        </Border>
+
+                        <!-- 何に時間を使ったか（F-166）と終わりやすい曜日（F-167） -->
+                        <Border x:Name="SideCard" Grid.Column="1" Style="{StaticResource StatsCardStyle}" Padding="18,14">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource CardTitleStyle}" Margin="0,0,0,4" Text="何に時間を使ったか" />
+                                <TextBlock Style="{StaticResource CardNoteStyle}" Margin="0,0,0,14" Text="{Binding Display.SharesCaption}" />
+                                <local:StatsShareBar Height="12" Margin="0,0,0,14"
+                                                     Items="{Binding Display.Shares}"
+                                                     NoProjectBrush="{DynamicResource StrokeControlStrongBrush}"
+                                                     OtherBrush="{DynamicResource TextDisabledBrush}"
+                                                     Visibility="{Binding Display.IsEmpty, Converter={StaticResource Visible}, ConverterParameter=invert}" />
+                                <ItemsControl Focusable="False" ItemsSource="{Binding Display.Shares}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type local:StatsShare}">
+                                            <DockPanel Margin="0,0,0,9" AutomationProperties.Name="{Binding AutomationName}">
+                                                <Border x:Name="Chip" DockPanel.Dock="Left" Width="10" Height="10" CornerRadius="3" Margin="0,0,9,0"
+                                                        Background="{Binding ColorHex, Converter={StaticResource HexBrush}}" />
+                                                <TextBlock DockPanel.Dock="Right" Width="38" TextAlignment="Right"
+                                                           Style="{StaticResource TextBaseStyle}" FontSize="{StaticResource TypeCaptionSize}" FontWeight="SemiBold"
+                                                           Typography.NumeralAlignment="Tabular" Text="{Binding PercentText}" />
+                                                <TextBlock DockPanel.Dock="Right" Margin="8,0,0,0"
+                                                           Style="{StaticResource TabularCaptionStyle}" Text="{Binding CountText}" />
+                                                <TextBlock x:Name="ShareName" Style="{StaticResource TextBaseStyle}" FontSize="{StaticResource TypeCaptionSize}"
+                                                           TextTrimming="CharacterEllipsis" Text="{Binding Name}" />
+                                            </DockPanel>
+                                            <DataTemplate.Triggers>
+                                                <DataTrigger Binding="{Binding Kind}" Value="{x:Static local:ShareKind.NoProject}">
+                                                    <Setter TargetName="Chip" Property="Background" Value="{DynamicResource StrokeControlStrongBrush}" />
+                                                    <Setter TargetName="ShareName" Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Kind}" Value="{x:Static local:ShareKind.Other}">
+                                                    <Setter TargetName="Chip" Property="Background" Value="{DynamicResource TextDisabledBrush}" />
+                                                    <Setter TargetName="ShareName" Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+                                                </DataTrigger>
+                                            </DataTemplate.Triggers>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock Style="{StaticResource CardNoteStyle}" Text="まだ内訳はありません"
+                                           Visibility="{Binding Display.IsEmpty, Converter={StaticResource Visible}}" />
+
+                                <Border Height="1" Margin="0,14,0,12" Background="{DynamicResource StrokeSubtleBrush}" />
+
+                                <TextBlock Style="{StaticResource CardTitleStyle}" Margin="0,0,0,10" Text="終わりやすい曜日" />
+                                <ItemsControl Height="58" Focusable="False" ItemsSource="{Binding Display.Weekdays}" ItemsPanel="{StaticResource RowPanel}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type local:StatsWeekday}">
+                                            <Grid ToolTip="{Binding ToolTip}" AutomationProperties.Name="{Binding ToolTip}" Background="Transparent">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="{Binding Rest, Converter={StaticResource Star}}" />
+                                                    <RowDefinition Height="{Binding Ratio, Converter={StaticResource Star}}" />
+                                                </Grid.RowDefinitions>
+                                                <Border Grid.Row="1" MaxWidth="20" Margin="2,0" CornerRadius="3,3,0,0" Background="{DynamicResource AccentDefaultBrush}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <Border Height="1" Background="{DynamicResource StrokeControlBrush}" />
+                                <ItemsControl Margin="0,5,0,0" Focusable="False" ItemsSource="{Binding Display.Weekdays}" ItemsPanel="{StaticResource RowPanel}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type local:StatsWeekday}">
+                                            <TextBlock x:Name="Day" HorizontalAlignment="Center" Style="{StaticResource AxisTextStyle}" Text="{Binding Label}" />
+                                            <DataTemplate.Triggers>
+                                                <DataTrigger Binding="{Binding IsWeekend}" Value="True">
+                                                    <Setter TargetName="Day" Property="Foreground" Value="{DynamicResource TextDisabledBrush}" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding HasPassed}" Value="False">
+                                                    <Setter TargetName="Day" Property="Foreground" Value="{DynamicResource TextDisabledBrush}" />
+                                                </DataTrigger>
+                                            </DataTemplate.Triggers>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock Style="{StaticResource CardNoteStyle}" Margin="0,8,0,0" LineHeight="17"
+                                           AutomationProperties.AutomationId="WeekdaySummary"
+                                           Text="{Binding Display.WeekdaySummary}" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- 3段目: この半年（F-168。1日1マス、単色4段階、直近26週） -->
+                    <Border Style="{StaticResource StatsCardStyle}" Padding="18,14" Margin="0,12,0,0">
+                        <StackPanel>
+                            <DockPanel Margin="0,0,0,12">
+                                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Style="{StaticResource AxisTextStyle}" VerticalAlignment="Center" Margin="0,0,5,0" Text="少" />
+                                    <Border Width="11" Height="11" CornerRadius="2" Margin="0,0,3,0" BorderThickness="1" BorderBrush="{DynamicResource StrokeDividerBrush}" />
+                                    <Border Width="11" Height="11" CornerRadius="2" Margin="0,0,3,0" Background="{DynamicResource HeatLevel1Brush}" />
+                                    <Border Width="11" Height="11" CornerRadius="2" Margin="0,0,3,0" Background="{DynamicResource HeatLevel2Brush}" />
+                                    <Border Width="11" Height="11" CornerRadius="2" Margin="0,0,3,0" Background="{DynamicResource HeatLevel3Brush}" />
+                                    <Border Width="11" Height="11" CornerRadius="2" Margin="0,0,5,0" Background="{DynamicResource HeatLevel4Brush}" />
+                                    <TextBlock Style="{StaticResource AxisTextStyle}" VerticalAlignment="Center" Text="多" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Style="{StaticResource CardTitleStyle}" Text="この半年" />
+                                    <TextBlock Style="{StaticResource CardNoteStyle}" VerticalAlignment="Bottom" Margin="8,0,0,1" Text="1 日 1 マス・色が濃いほど多く片付けた日" />
+                                </StackPanel>
+                            </DockPanel>
+                            <!-- マスは高さ 11px、幅はカードの幅に合わせて伸ばす（モックアップと同じ） -->
+                            <DockPanel>
+                                <ItemsControl DockPanel.Dock="Left" Focusable="False" Margin="0,0,8,0" ItemsSource="{Binding Display.HeatRowLabels}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Height="11" Margin="0,0,0,3" LineHeight="11" LineStackingStrategy="BlockLineHeight"
+                                                       Style="{StaticResource AxisTextStyle}" FontSize="9" Text="{Binding}" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <ItemsControl Focusable="False" AutomationProperties.Name="この半年のヒートマップ" ItemsSource="{Binding Display.Heatmap}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <UniformGrid Rows="7" Columns="26" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type local:StatsHeatCell}">
+                                            <Border x:Name="Cell" Height="11" Margin="0,0,3,3" CornerRadius="2"
+                                                    BorderThickness="1" BorderBrush="{DynamicResource StrokeDividerBrush}" Background="Transparent"
+                                                    ToolTip="{Binding ToolTip}" />
+                                            <DataTemplate.Triggers>
+                                                <DataTrigger Binding="{Binding Level}" Value="1">
+                                                    <Setter TargetName="Cell" Property="Background" Value="{DynamicResource HeatLevel1Brush}" />
+                                                    <Setter TargetName="Cell" Property="BorderThickness" Value="0" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Level}" Value="2">
+                                                    <Setter TargetName="Cell" Property="Background" Value="{DynamicResource HeatLevel2Brush}" />
+                                                    <Setter TargetName="Cell" Property="BorderThickness" Value="0" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Level}" Value="3">
+                                                    <Setter TargetName="Cell" Property="Background" Value="{DynamicResource HeatLevel3Brush}" />
+                                                    <Setter TargetName="Cell" Property="BorderThickness" Value="0" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Level}" Value="4">
+                                                    <Setter TargetName="Cell" Property="Background" Value="{DynamicResource HeatLevel4Brush}" />
+                                                    <Setter TargetName="Cell" Property="BorderThickness" Value="0" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsPlaceholder}" Value="True">
+                                                    <Setter TargetName="Cell" Property="Visibility" Value="Hidden" />
+                                                </DataTrigger>
+                                            </DataTemplate.Triggers>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </DockPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- 表で見る（F-169。色に頼らずすべての数値を読めるように） -->
+                <StackPanel x:Name="TablePanel"
+                            Grid.IsSharedSizeScope="True"
+                            Visibility="{Binding IsTableMode, Converter={StaticResource Visible}}">
+                    <TextBlock Style="{StaticResource CardNoteStyle}" Margin="0,0,0,12" FontSize="{StaticResource TypeCaptionSize}"
+                               Text="{Binding Display.RangeText, StringFormat='{}{0} の数値です。グラフに出ている値をすべて表にしています'}" />
+                    <ItemsControl Focusable="False" ItemsSource="{Binding Display.Table}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type local:StatsTableSection}">
+                                <StackPanel Margin="0,0,0,18">
+                                    <TextBlock Style="{StaticResource CardTitleStyle}" Margin="0,0,0,6" Text="{Binding Title}" />
+                                    <Border BorderBrush="{DynamicResource StrokeDividerBrush}" BorderThickness="1" CornerRadius="{StaticResource RadiusRow}">
+                                        <ItemsControl Focusable="False" ItemsSource="{Binding Rows}" ItemTemplate="{StaticResource TableRowTemplate}" />
+                                    </Border>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <TextBlock Style="{StaticResource CardTitleStyle}" Margin="0,0,0,6" Text="この半年（週ごとの完了数。新しい週が上）" />
+                    <Border BorderBrush="{DynamicResource StrokeDividerBrush}" BorderThickness="1" CornerRadius="{StaticResource RadiusRow}">
+                        <StackPanel>
+                            <!-- 見出し -->
+                            <Border BorderBrush="{DynamicResource StrokeDividerBrush}" BorderThickness="0,0,0,1" Padding="12,6" Background="{DynamicResource SurfaceSubtleBrush}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" MinWidth="160" SharedSizeGroup="HeatWeek" />
+                                        <ColumnDefinition Width="44" /><ColumnDefinition Width="44" /><ColumnDefinition Width="44" /><ColumnDefinition Width="44" />
+                                        <ColumnDefinition Width="44" /><ColumnDefinition Width="44" /><ColumnDefinition Width="44" />
+                                        <ColumnDefinition Width="56" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Style="{StaticResource TextCaptionStyle}" Text="週" />
+                                    <ItemsControl Grid.Column="1" Grid.ColumnSpan="7" Focusable="False" ItemsSource="{Binding Display.HeatTableHeader}" ItemsPanel="{StaticResource RowPanel}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Style="{StaticResource TextCaptionStyle}" TextAlignment="Right" Margin="0,0,10,0" Text="{Binding}" />
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <TextBlock Grid.Column="8" Style="{StaticResource TextCaptionStyle}" TextAlignment="Right" Text="計" />
+                                </Grid>
+                            </Border>
+                            <ItemsControl Focusable="False" ItemsSource="{Binding Display.HeatTable}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type local:StatsHeatWeek}">
+                                        <Border BorderBrush="{DynamicResource StrokeSubtleBrush}" BorderThickness="0,0,0,1" Padding="12,4">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" MinWidth="160" SharedSizeGroup="HeatWeek" />
+                                                    <ColumnDefinition Width="308" />
+                                                    <ColumnDefinition Width="56" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Style="{StaticResource TextBodySmallStyle}" Foreground="{DynamicResource TextSecondaryBrush}" Text="{Binding WeekLabel}" />
+                                                <ItemsControl Grid.Column="1" Focusable="False" ItemsSource="{Binding Days}" ItemsPanel="{StaticResource RowPanel}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <TextBlock Style="{StaticResource TabularBodyStyle}" FontSize="{StaticResource TypeBodySmallSize}" TextAlignment="Right" Margin="0,0,10,0" Text="{Binding}" />
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                                <TextBlock Grid.Column="2" Style="{StaticResource TabularBodyStyle}" FontSize="{StaticResource TypeBodySmallSize}" FontWeight="SemiBold" TextAlignment="Right" Text="{Binding Total}" />
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

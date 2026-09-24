@@ -1,0 +1,173 @@
+<ui:FluentWindow x:Class="TaskDeck.App.Views.Scratch.ScratchWindow"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                 xmlns:input="clr-namespace:TaskDeck.App.Input"
+                 xmlns:local="clr-namespace:TaskDeck.App.Views.Scratch"
+                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                 mc:Ignorable="d"
+                 d:DataContext="{d:DesignInstance local:ScratchWindowViewModel}"
+                 Title="{Binding WindowTitle}"
+                 Width="340" Height="460"
+                 MinWidth="300" MinHeight="260"
+                 ExtendsContentIntoTitleBar="True"
+                 WindowBackdropType="None"
+                 WindowCornerPreference="Round"
+                 WindowStartupLocation="CenterScreen"
+                 Topmost="{Binding IsPinned}"
+                 Background="{DynamicResource SurfaceContentBrush}">
+    <!--
+        使い捨てリストの小窓（ダイアログではない常駐の窓。ShellService.ShowToolWindow で出す）。
+        見出し: 名前（その場で変えられる）▾（ほかのリストに切り替え・新しいリスト） … メイン画面に戻す・📌 手前に固定・×
+        中身はメイン画面の中央と同じ ScratchView。
+    -->
+    <ui:FluentWindow.Resources>
+        <!-- 手前に固定（画びょう） -->
+        <StreamGeometry x:Key="ScratchIconPin">M5.5 2.5 h5 M6.5 2.5 v4 L4.5 9 h7 L9.5 6.5 V2.5 M8 9 v4.5</StreamGeometry>
+
+        <!-- ピン: 押している間は地を敷いてアクセント色 -->
+        <Style x:Key="PinToggleStyle" TargetType="ToggleButton">
+            <Setter Property="Width" Value="32" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{StaticResource AppFocusVisualStyle}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="Root" Background="{TemplateBinding Background}" CornerRadius="{StaticResource RadiusButton}">
+                            <Path x:Name="Icon"
+                                  Style="{StaticResource IconPathStyle}"
+                                  Data="{StaticResource ScratchIconPin}"
+                                  Stroke="{DynamicResource TextSecondaryBrush}"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="{DynamicResource SurfaceSelectedBrush}" />
+                                <Setter TargetName="Icon" Property="Stroke" Value="{DynamicResource AccentDefaultBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="TitleIconButtonStyle" TargetType="Button" BasedOn="{StaticResource IconButtonStyle}">
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+        </Style>
+    </ui:FluentWindow.Resources>
+
+    <!-- 地は画面側で持つ（FluentWindow の Background はテーマ切替で差し替えられることがあるため） -->
+    <Grid Background="{DynamicResource SurfaceContentBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- 操作部品は TitleBar の Header / TrailingContent に入れる（それ以外はドラッグ領域になって押せない） -->
+        <ui:TitleBar Height="40" ShowMinimize="False" ShowMaximize="False">
+            <ui:TitleBar.Header>
+                <StackPanel Orientation="Horizontal" Margin="10,0,0,0" VerticalAlignment="Center" DataContext="{Binding List}">
+                    <TextBox x:Name="NameBox"
+                             Style="{StaticResource InlineTextBoxStyle}"
+                             FontWeight="SemiBold"
+                             MinWidth="30"
+                             MaxWidth="150"
+                             MaxLength="100"
+                             Padding="2,0"
+                             input:ImeGuard.IsEnabled="True"
+                             Text="{Binding NameText, UpdateSourceTrigger=PropertyChanged}"
+                             ToolTip="名前を変える"
+                             PreviewKeyDown="OnNameKeyDown"
+                             LostKeyboardFocus="OnNameLostFocus"
+                             AutomationProperties.AutomationId="ScratchWindowNameBox"
+                             AutomationProperties.Name="リストの名前" />
+                    <Button x:Name="SwitchButton"
+                            Style="{StaticResource TitleIconButtonStyle}"
+                            Width="26" Height="26"
+                            Margin="2,0,0,0"
+                            ToolTip="ほかのリストに切り替える"
+                            Click="OnSwitchClick"
+                            AutomationProperties.AutomationId="ScratchSwitchButton"
+                            AutomationProperties.Name="リストを切り替える">
+                        <Viewbox Width="11" Height="11">
+                            <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconChevronDown}" Stroke="{DynamicResource TextSecondaryBrush}" StrokeThickness="1.8" />
+                        </Viewbox>
+                    </Button>
+                </StackPanel>
+            </ui:TitleBar.Header>
+            <ui:TitleBar.TrailingContent>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,2,0">
+                    <Button Style="{StaticResource TitleIconButtonStyle}"
+                            Command="{Binding DockToMainCommand}"
+                            ToolTip="メイン画面に戻す"
+                            AutomationProperties.AutomationId="ScratchDockButton"
+                            AutomationProperties.Name="メイン画面に戻す">
+                        <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconSidebar}" Stroke="{DynamicResource TextSecondaryBrush}" />
+                    </Button>
+                    <ToggleButton Style="{StaticResource PinToggleStyle}"
+                                  Margin="2,0,0,0"
+                                  IsChecked="{Binding IsPinned}"
+                                  ToolTip="常に手前に固定"
+                                  AutomationProperties.AutomationId="ScratchPinButton"
+                                  AutomationProperties.Name="常に手前に固定" />
+                </StackPanel>
+            </ui:TitleBar.TrailingContent>
+        </ui:TitleBar>
+
+        <Border Grid.Row="1" BorderBrush="{DynamicResource StrokeDividerBrush}" BorderThickness="0,1,0,0">
+            <local:ScratchView x:Name="ListContent" DataContext="{Binding List}" />
+        </Border>
+
+        <!-- 名前 ▾: ほかのリストに切り替える・新しいリスト -->
+        <Popup x:Name="SwitchPopup"
+               PlacementTarget="{Binding ElementName=SwitchButton}"
+               Placement="Bottom"
+               StaysOpen="False"
+               AllowsTransparency="True"
+               PopupAnimation="None"
+               HorizontalOffset="-10"
+               VerticalOffset="-4">
+            <Border Style="{StaticResource PopupShadowStyle}">
+                <Border Style="{StaticResource PopupSurfaceStyle}" Width="230" Padding="4">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource TextLabelStyle}" Margin="8,4,0,4" Text="使い捨てリスト" />
+                        <ItemsControl ItemsSource="{Binding Choices}" Focusable="False" AutomationProperties.AutomationId="ScratchChoices">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type local:ScratchListChoice}">
+                                    <Button Style="{StaticResource MenuChoiceButtonStyle}"
+                                            Command="{Binding DataContext.SwitchToCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}"
+                                            Click="OnChoiceClick"
+                                            AutomationProperties.Name="{Binding Name}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Path Style="{StaticResource MenuCheckMarkStyle}" />
+                                            <TextBlock Style="{StaticResource TextBodySmallStyle}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="170" Text="{Binding Name}" />
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Border Height="1" Margin="4" Background="{DynamicResource StrokeSubtleBrush}" />
+                        <Button Style="{StaticResource MenuChoiceButtonStyle}"
+                                Command="{Binding NewListCommand}"
+                                Click="OnChoiceClick"
+                                AutomationProperties.AutomationId="ScratchNewListButton"
+                                AutomationProperties.Name="新しいリスト">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconAdd}" Stroke="{DynamicResource AccentDefaultBrush}" Margin="0,0,8,0" />
+                                <TextBlock Style="{StaticResource TextBodySmallStyle}" VerticalAlignment="Center" Foreground="{DynamicResource AccentDefaultBrush}" Text="新しいリスト" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Border>
+            </Border>
+        </Popup>
+    </Grid>
+</ui:FluentWindow>

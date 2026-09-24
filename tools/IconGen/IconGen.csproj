@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    アプリのアイコン（src/TaskDeck.App/Assets/TaskDeck.ico と PNG）を書き出す道具。このプロジェクトを dotnet run で動かす。
+    ソリューションには入れない。
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>TaskDeck.Tools.IconGen</RootNamespace>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,452 @@
+<ui:FluentWindow x:Class="TaskDeck.App.Views.Startup.FirstRunWindow"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                 xmlns:conv="clr-namespace:TaskDeck.App.Converters"
+                 xmlns:input="clr-namespace:TaskDeck.App.Input"
+                 xmlns:local="clr-namespace:TaskDeck.App.Views.Startup"
+                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                 mc:Ignorable="d"
+                 d:DataContext="{d:DesignInstance local:FirstRunViewModel}"
+                 Title="TaskDeck へようこそ"
+                 Width="460" Height="520"
+                 ResizeMode="CanMinimize"
+                 ExtendsContentIntoTitleBar="True"
+                 WindowBackdropType="None"
+                 WindowCornerPreference="Round"
+                 WindowStartupLocation="CenterScreen"
+                 FontFamily="{StaticResource AppFontFamily}"
+                 Foreground="{DynamicResource TextPrimaryBrush}"
+                 PreviewKeyDown="OnWindowKeyDown"
+                 AutomationProperties.AutomationId="FirstRunWindow">
+    <!--
+        初回起動（S-15、UI 設計書 24、モックアップ Onboarding.dc.html）。3画面とも「読ませずに手を動かさせる」。
+        上に本文（縦の中央）、下に主ボタン（高さ36・幅いっぱい）と一言、いちばん下に 3点のステップ表示（高さ34、現在地は幅18の棒）。
+        ① ようこそ ② ホットキーを押す（押されるまで次へ進めない）③ 日付を書いて Enter。スキップは全画面から（①はボタンの下、②③は下の帯の右）
+    -->
+    <ui:FluentWindow.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolVisibility" />
+        <conv:InverseBooleanToVisibilityConverter x:Key="InverseBoolVisibility" />
+
+        <!-- 見出し 18px SemiBold（①だけ 20px） -->
+        <Style x:Key="HeadingStyle" TargetType="TextBlock" BasedOn="{StaticResource TextBaseStyle}">
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="TextAlignment" Value="Center" />
+        </Style>
+
+        <!-- 見出しの下の説明 13px・行間 1.7 -->
+        <Style x:Key="LeadStyle" TargetType="TextBlock" BasedOn="{StaticResource TextBaseStyle}">
+            <Setter Property="FontSize" Value="{StaticResource TypeBodySmallSize}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+            <Setter Property="LineHeight" Value="22" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+
+        <!-- 主ボタン（高さ36・幅いっぱい）。無効のときは薄くせず、地 Surface.Subtle・文字 Text.Disabled（UI 設計書 24.2） -->
+        <Style x:Key="ActionButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+            <Setter Property="Height" Value="36" />
+            <Setter Property="FontSize" Value="{StaticResource TypeBodySize}" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="1" />
+                    <Setter Property="Background" Value="{DynamicResource SurfaceSubtleBrush}" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource StrokeDividerBrush}" />
+                    <Setter Property="Foreground" Value="{DynamicResource TextDisabledBrush}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- ②の主ボタン: 押されたら緑のチェック（State.Success） -->
+        <Style x:Key="HotkeyButtonStyle" TargetType="Button" BasedOn="{StaticResource ActionButtonStyle}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding KeyPressed}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource StateSuccessBrush}" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource StateSuccessBrush}" />
+                    <Setter Property="Foreground" Value="{DynamicResource TextOnAccentBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- ボタンの下の一言（12px の文字だけのボタン） -->
+        <Style x:Key="LinkButtonStyle" TargetType="Button" BasedOn="{StaticResource TextButtonStyle}">
+            <Setter Property="FontSize" Value="{StaticResource TypeCaptionSize}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="Padding" Value="8,3" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+
+        <!-- ③の入力欄（枠なし。枠と地は外側の Border が持つ） -->
+        <Style x:Key="FirstRunInputStyle" TargetType="TextBox">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
+            <Setter Property="FontSize" Value="{StaticResource TypeBodySize}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+            <Setter Property="CaretBrush" Value="{DynamicResource TextPrimaryBrush}" />
+            <Setter Property="SelectionBrush" Value="{DynamicResource AccentDefaultBrush}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <ScrollViewer x:Name="PART_ContentHost"
+                                      Style="{x:Null}"
+                                      Background="Transparent"
+                                      Focusable="False"
+                                      VerticalAlignment="Center"
+                                      HorizontalScrollBarVisibility="Hidden"
+                                      VerticalScrollBarVisibility="Hidden" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </ui:FluentWindow.Resources>
+
+    <Grid Background="{DynamicResource SurfaceContentBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="34" />
+        </Grid.RowDefinitions>
+
+        <ui:TitleBar Grid.Row="0" ShowMaximize="False" />
+
+        <!-- ① TaskDeck へようこそ -->
+        <StackPanel Grid.Row="1"
+                    Margin="28,0"
+                    VerticalAlignment="Center"
+                    Visibility="{Binding IsWelcome, Converter={StaticResource BoolVisibility}}">
+            <Image Width="72" Height="72" Source="{StaticResource AppIconImage}" />
+            <TextBlock Margin="0,16,0,0" Style="{StaticResource HeadingStyle}" FontSize="20" Text="TaskDeck へようこそ" />
+            <TextBlock Margin="0,8,0,0" Style="{StaticResource LeadStyle}" LineHeight="23">
+                設定することはありません。<LineBreak />30 秒だけ、2 つの操作を試してください。
+            </TextBlock>
+        </StackPanel>
+        <StackPanel Grid.Row="2"
+                    Margin="24,0,24,22"
+                    Visibility="{Binding IsWelcome, Converter={StaticResource BoolVisibility}}">
+            <Button x:Name="BeginButton"
+                    Style="{StaticResource ActionButtonStyle}"
+                    Content="はじめる"
+                    IsDefault="{Binding IsWelcome}"
+                    Click="OnBeginClick"
+                    AutomationProperties.AutomationId="FirstRunBegin" />
+            <Button Margin="0,12,0,0"
+                    Style="{StaticResource LinkButtonStyle}"
+                    Content="スキップして使い始める"
+                    Click="OnSkipClick"
+                    AutomationProperties.AutomationId="FirstRunSkipWelcome" />
+        </StackPanel>
+
+        <!-- ② 覚えるのは、これ 1 つだけ -->
+        <StackPanel Grid.Row="1"
+                    Margin="28,0"
+                    VerticalAlignment="Center"
+                    Visibility="{Binding IsHotkey, Converter={StaticResource BoolVisibility}}">
+            <TextBlock Style="{StaticResource HeadingStyle}" Text="覚えるのは、これ 1 つだけ" />
+            <TextBlock Margin="0,7,0,0" Style="{StaticResource LeadStyle}">
+                どのアプリを使っていても、<LineBreak />この <Run Text="{Binding KeyCount, Mode=OneWay}" /> キーでタスクを足せます。
+            </TextBlock>
+
+            <!-- キー（高さ40・角丸7・下辺3pxでキートップの厚み。Space は広め）。「+」は枠なし -->
+            <ItemsControl Margin="0,18,0,0"
+                          HorizontalAlignment="Center"
+                          Focusable="False"
+                          ItemsSource="{Binding KeyCaps}"
+                          AutomationProperties.AutomationId="FirstRunKeys">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid VerticalAlignment="Center">
+                            <Border x:Name="Cap"
+                                    Height="40"
+                                    MinWidth="40"
+                                    Padding="13,0"
+                                    CornerRadius="7"
+                                    BorderThickness="1,1,1,3"
+                                    Background="{DynamicResource SurfaceSubtleBrush}"
+                                    BorderBrush="{DynamicResource StrokeControlBrush}"
+                                    SnapsToDevicePixels="True">
+                                <TextBlock Style="{StaticResource TextBaseStyle}"
+                                           FontFamily="{StaticResource KeyCapFontFamily}"
+                                           FontSize="{StaticResource TypeBodySize}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Text="{Binding}" />
+                            </Border>
+                            <TextBlock x:Name="Plus"
+                                       Margin="7,0"
+                                       Style="{StaticResource TextBaseStyle}"
+                                       FontSize="{StaticResource TypeCaptionSize}"
+                                       Foreground="{DynamicResource TextDisabledBrush}"
+                                       VerticalAlignment="Center"
+                                       Text="+"
+                                       Visibility="Collapsed" />
+                        </Grid>
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding}" Value="+">
+                                <Setter TargetName="Cap" Property="Visibility" Value="Collapsed" />
+                                <Setter TargetName="Plus" Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding}" Value="Space">
+                                <Setter TargetName="Cap" Property="Padding" Value="20,0" />
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- 待っている印（押されたら消す。高さは残して、ボタンの位置を動かさない）／キーが登録できていないときの説明 -->
+            <Grid Margin="0,18,0,0" MinHeight="34">
+                <Border Height="34"
+                        Padding="16,0"
+                        HorizontalAlignment="Center"
+                        CornerRadius="17"
+                        BorderThickness="1"
+                        Background="{DynamicResource SurfaceSelectedBrush}"
+                        BorderBrush="{DynamicResource SurfaceSelectedStrokeBrush}"
+                        Visibility="{Binding ShowWaiting, Converter={StaticResource BoolVisibility}}">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Ellipse Width="8" Height="8" VerticalAlignment="Center" Fill="{DynamicResource AccentDefaultBrush}" />
+                        <TextBlock Margin="9,0,0,0"
+                                   Style="{StaticResource TextBaseStyle}"
+                                   FontSize="{StaticResource TypeCaptionSize}"
+                                   FontWeight="Medium"
+                                   Foreground="{DynamicResource AccentDefaultBrush}"
+                                   VerticalAlignment="Center"
+                                   Text="いま押してみてください" />
+                    </StackPanel>
+                </Border>
+                <TextBlock FontSize="{StaticResource TypeCaptionSize}"
+                           LineHeight="19"
+                           TextAlignment="Center"
+                           TextWrapping="Wrap"
+                           VerticalAlignment="Center"
+                           Text="{Binding HotkeyNote}"
+                           Visibility="{Binding ShowHotkeyNote, Converter={StaticResource BoolVisibility}}"
+                           AutomationProperties.AutomationId="FirstRunHotkeyNote">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource TextBaseStyle}">
+                            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HotkeyNoteIsProblem}" Value="True">
+                                    <Setter Property="Foreground" Value="{DynamicResource StateOverdueBrush}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
+        </StackPanel>
+        <StackPanel Grid.Row="2"
+                    Margin="24,0,24,22"
+                    Visibility="{Binding IsHotkey, Converter={StaticResource BoolVisibility}}">
+            <Button Style="{StaticResource HotkeyButtonStyle}"
+                    IsEnabled="{Binding KeyPressed}"
+                    IsDefault="{Binding IsHotkey}"
+                    Click="OnNextClick"
+                    AutomationProperties.AutomationId="FirstRunNext">
+                <Grid>
+                    <TextBlock Text="押されるまで待っています"
+                               Visibility="{Binding KeyPressed, Converter={StaticResource InverseBoolVisibility}}" />
+                    <StackPanel Orientation="Horizontal"
+                                Visibility="{Binding KeyPressed, Converter={StaticResource BoolVisibility}}">
+                        <Path Width="14" Height="14"
+                              Margin="0,0,7,0"
+                              VerticalAlignment="Center"
+                              Stretch="Uniform"
+                              StrokeThickness="2"
+                              StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                              Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                              Data="{StaticResource IconCheck}" />
+                        <TextBlock VerticalAlignment="Center" Text="押せました" />
+                    </StackPanel>
+                </Grid>
+            </Button>
+            <Button Margin="0,12,0,0"
+                    Style="{StaticResource LinkButtonStyle}"
+                    Content="キーが効かない・別のキーにしたい"
+                    Click="OnKeyHelpClick"
+                    AutomationProperties.AutomationId="FirstRunKeyHelp" />
+        </StackPanel>
+
+        <!-- ③ 日付も、そのまま書けます -->
+        <StackPanel Grid.Row="1"
+                    Margin="24,0"
+                    VerticalAlignment="Center"
+                    Visibility="{Binding IsParse, Converter={StaticResource BoolVisibility}}">
+            <TextBlock Style="{StaticResource HeadingStyle}" Text="日付も、そのまま書けます" />
+            <TextBlock Margin="0,7,0,0" Style="{StaticResource LeadStyle}">
+                「明日」「来週月曜」のように書くと、<LineBreak />期限として読み取ります。
+            </TextBlock>
+
+            <!-- 入力欄（44）＋読み取った日付の行（38）。クイック入力と同じ形 -->
+            <Border Margin="0,16,0,0"
+                    CornerRadius="8"
+                    BorderThickness="1"
+                    Background="{DynamicResource SurfaceContentBrush}"
+                    BorderBrush="{DynamicResource StrokeControlBrush}"
+                    SnapsToDevicePixels="True">
+                <StackPanel>
+                    <DockPanel Height="44" Margin="13,0">
+                        <Path DockPanel.Dock="Left"
+                              Width="16" Height="16"
+                              Margin="0,0,9,0"
+                              VerticalAlignment="Center"
+                              Stretch="Uniform"
+                              StrokeThickness="1.7"
+                              StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                              Stroke="{DynamicResource AccentDefaultBrush}"
+                              Data="{StaticResource IconPlus}" />
+                        <Grid>
+                            <TextBlock x:Name="Placeholder"
+                                       Margin="2,0,0,0"
+                                       Style="{StaticResource TextBaseStyle}"
+                                       FontSize="{StaticResource TypeBodySize}"
+                                       Foreground="{DynamicResource TextTertiaryBrush}"
+                                       VerticalAlignment="Center"
+                                       IsHitTestVisible="False"
+                                       Text="例: ゴミを出す 明日" />
+                            <TextBox x:Name="InputBox"
+                                     Style="{StaticResource FirstRunInputStyle}"
+                                     input:ImeGuard.IsEnabled="True"
+                                     Text="{Binding Text, UpdateSourceTrigger=PropertyChanged}"
+                                     PreviewKeyDown="OnInputKeyDown"
+                                     TextChanged="OnInputChanged"
+                                     AutomationProperties.AutomationId="FirstRunInput"
+                                     AutomationProperties.Name="やること" />
+                            <!-- 読み取った日付の語をアクセント色で上から描く（位置は入力欄から文字ごとに取る） -->
+                            <Canvas x:Name="HighlightLayer" IsHitTestVisible="False" ClipToBounds="True" />
+                        </Grid>
+                    </DockPanel>
+                    <Border Height="1" Background="{DynamicResource StrokeDividerBrush}" />
+                    <Border Height="38" Padding="13,0" CornerRadius="0,0,7,7" Background="{DynamicResource SurfaceSubtleBrush}">
+                        <Grid VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal"
+                                        Visibility="{Binding HasDue, Converter={StaticResource BoolVisibility}}"
+                                        AutomationProperties.AutomationId="FirstRunDue">
+                                <Border Height="24"
+                                        Padding="9,0"
+                                        CornerRadius="12"
+                                        BorderThickness="1"
+                                        Background="{DynamicResource SurfaceContentBrush}"
+                                        BorderBrush="{DynamicResource StrokeControlBrush}">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Path Width="12" Height="12"
+                                              Margin="0,0,5,0"
+                                              VerticalAlignment="Center"
+                                              Stretch="Uniform"
+                                              StrokeThickness="1.5"
+                                              StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                              Stroke="{DynamicResource TextSecondaryBrush}"
+                                              Data="{StaticResource IconCalendar}" />
+                                        <TextBlock Style="{StaticResource TextBaseStyle}"
+                                                   FontSize="{StaticResource TypeLabelSize}"
+                                                   Typography.NumeralAlignment="Tabular"
+                                                   VerticalAlignment="Center"
+                                                   Text="{Binding DueLabel}" />
+                                    </StackPanel>
+                                </Border>
+                                <TextBlock Margin="7,0,0,0"
+                                           Style="{StaticResource TextBaseStyle}"
+                                           FontSize="{StaticResource TypeLabelSize}"
+                                           Foreground="{DynamicResource TextTertiaryBrush}"
+                                           VerticalAlignment="Center"
+                                           Text="と読み取りました" />
+                            </StackPanel>
+                            <TextBlock Style="{StaticResource TextBaseStyle}"
+                                       FontSize="{StaticResource TypeLabelSize}"
+                                       Foreground="{DynamicResource TextTertiaryBrush}"
+                                       VerticalAlignment="Center"
+                                       Text="日付を書くと、読み取った日付がここに出ます"
+                                       Visibility="{Binding HasDue, Converter={StaticResource InverseBoolVisibility}}" />
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Margin="0,16,0,0"
+                       Style="{StaticResource TextBaseStyle}"
+                       FontSize="{StaticResource TypeLabelSize}"
+                       Foreground="{DynamicResource TextTertiaryBrush}"
+                       LineHeight="19"
+                       HorizontalAlignment="Center"
+                       TextAlignment="Center"
+                       TextWrapping="Wrap">
+                読み取れなくても、<Run FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" Text="入力が消えることはありません" />。<LineBreak />そのままタイトルになります。
+            </TextBlock>
+        </StackPanel>
+        <StackPanel Grid.Row="2"
+                    Margin="24,0,24,22"
+                    Visibility="{Binding IsParse, Converter={StaticResource BoolVisibility}}">
+            <Button Style="{StaticResource ActionButtonStyle}"
+                    Content="Enter で登録して、使い始める"
+                    IsEnabled="{Binding CanSubmit}"
+                    Click="OnSubmitClick"
+                    AutomationProperties.AutomationId="FirstRunSubmit" />
+            <TextBlock Margin="0,12,0,0"
+                       Style="{StaticResource TextBaseStyle}"
+                       FontSize="{StaticResource TypeCaptionSize}"
+                       Foreground="{DynamicResource TextTertiaryBrush}"
+                       HorizontalAlignment="Center">
+                あとで見返すときは <Run FontFamily="{StaticResource KeyCapFontFamily}" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" Text="?" /> キー
+            </TextBlock>
+        </StackPanel>
+
+        <!-- ステップ表示（3点、現在地は幅18の棒）。②③のスキップは右端に -->
+        <Border Grid.Row="3"
+                Background="{DynamicResource SurfaceSubtleBrush}"
+                BorderBrush="{DynamicResource StrokeSubtleBrush}"
+                BorderThickness="0,1,0,0">
+            <Grid>
+                <ItemsControl HorizontalAlignment="Center"
+                              VerticalAlignment="Center"
+                              Focusable="False"
+                              ItemsSource="{Binding Dots}"
+                              AutomationProperties.Name="{Binding StepName}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border x:Name="Dot"
+                                    Width="5" Height="5"
+                                    Margin="3.5,0"
+                                    CornerRadius="2.5"
+                                    Background="{DynamicResource StrokeControlBrush}" />
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding}" Value="True">
+                                    <Setter TargetName="Dot" Property="Width" Value="18" />
+                                    <Setter TargetName="Dot" Property="Background" Value="{DynamicResource AccentDefaultBrush}" />
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <Button Margin="0,0,10,0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Style="{StaticResource LinkButtonStyle}"
+                        Foreground="{DynamicResource TextTertiaryBrush}"
+                        Content="スキップ"
+                        Click="OnSkipClick"
+                        Visibility="{Binding IsWelcome, Converter={StaticResource InverseBoolVisibility}}"
+                        AutomationProperties.AutomationId="FirstRunSkip" />
+            </Grid>
+        </Border>
+    </Grid>
+</ui:FluentWindow>

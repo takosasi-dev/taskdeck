@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>TaskDeck 通知とトレイ</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body { margin: 0; font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; }
+</style>
+</helmet>
+<div style="width: 900px; height: 760px; box-sizing: border-box; padding: 32px; display: flex; gap: 24px; background: #5f656d;">
+
+  <div style="width: 364px; flex-shrink: 0; display: flex; flex-direction: column; gap: 14px;">
+    <div style="font-size: 11px; font-weight: 600; color: #ffffff; opacity: 0.9; letter-spacing: 0.03em;">WINDOWS トースト通知</div>
+
+    <div style="border-radius: 8px; background: #f9f9f9; border: 1px solid rgba(0,0,0,0.10); box-shadow: 0 8px 28px rgba(0,0,0,0.38); overflow: hidden;">
+      <div style="display: flex; gap: 12px; padding: 14px 14px 10px 14px;">
+        <div style="width: 40px; height: 40px; flex-shrink: 0; border-radius: 6px; background: #0067c0; display: flex; align-items: center; justify-content: center;">
+          <svg width="22" height="22" viewBox="0 0 16 16" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5 6.2 11.5 13 4.8"/></svg>
+        </div>
+        <div style="flex-grow: 1; min-width: 0;">
+          <div style="font-size: 11px; color: #5d5d5d; margin-bottom: 3px;">TaskDeck</div>
+          <div style="font-size: 14px; font-weight: 600; margin-bottom: 2px;">会議資料まとめる</div>
+          <div style="font-size: 12px; color: #5d5d5d;">15:00 まで・あと 1 時間</div>
+        </div>
+        <button type="button" aria-label="通知を閉じる" style="width: 20px; height: 20px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; color: #5d5d5d;"><svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M0 0l10 10M10 0L0 10"/></svg></button>
+      </div>
+      <div style="display: flex; gap: 8px; padding: 0 14px 14px 66px;">
+        <button type="button" style="flex-grow: 1; height: 30px; font-size: 12px; font-family: inherit; color: #1a1a1a; background: #ffffff; border: 1px solid #d6d6d6; border-radius: 4px; cursor: pointer;">完了にする</button>
+        <button type="button" style="flex-grow: 1; height: 30px; font-size: 12px; font-family: inherit; color: #1a1a1a; background: #ffffff; border: 1px solid #d6d6d6; border-radius: 4px; cursor: pointer;">30分後に再通知</button>
+      </div>
+    </div>
+
+    <div style="border-radius: 8px; background: #f9f9f9; border: 1px solid rgba(0,0,0,0.10); box-shadow: 0 8px 28px rgba(0,0,0,0.38); overflow: hidden;">
+      <div style="display: flex; gap: 12px; padding: 14px;">
+        <div style="width: 40px; height: 40px; flex-shrink: 0; border-radius: 6px; background: #0067c0; display: flex; align-items: center; justify-content: center;">
+          <svg width="22" height="22" viewBox="0 0 16 16" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5 6.2 11.5 13 4.8"/></svg>
+        </div>
+        <div style="flex-grow: 1; min-width: 0;">
+          <div style="font-size: 11px; color: #5d5d5d; margin-bottom: 3px;">TaskDeck</div>
+          <div style="font-size: 14px; font-weight: 600; margin-bottom: 4px;">4 件のタスクが期限です</div>
+          <div style="font-size: 12px; color: #5d5d5d; line-height: 1.55;">会議資料まとめる、AWS課題 EFS編、<br>週次の買い出し、ほか 1 件</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="border-radius: 8px; background: #f9f9f9; border: 1px solid rgba(0,0,0,0.10); box-shadow: 0 8px 28px rgba(0,0,0,0.38); overflow: hidden;">
+      <div style="display: flex; gap: 12px; padding: 14px;">
+        <div style="width: 40px; height: 40px; flex-shrink: 0; border-radius: 6px; background: #0067c0; display: flex; align-items: center; justify-content: center;">
+          <svg width="22" height="22" viewBox="0 0 16 16" fill="none" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round"><path d="M8 4.5V8l2.2 1.4"/><circle cx="8" cy="8" r="6"/></svg>
+        </div>
+        <div style="flex-grow: 1; min-width: 0;">
+          <div style="font-size: 11px; color: #5d5d5d; margin-bottom: 3px;">TaskDeck ・ 8:00</div>
+          <div style="font-size: 14px; font-weight: 600; margin-bottom: 4px;">今日は 7 件です</div>
+          <div style="font-size: 12px; color: #5d5d5d; line-height: 1.55;">うち期限切れ 2 件、時刻ありが 3 件。<br>最初の予定は 10:00 の定例ミーティング。</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding: 10px 12px; border-radius: 6px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.22);">
+      <div style="font-size: 11px; color: #ffffff; line-height: 1.7; opacity: 0.94;">アプリ停止中に到来した通知は、起動時に <strong style="font-weight: 600;">まとめて 1 件</strong> で出す。溜まった数だけ通知が並ぶのを避ける。</div>
+    </div>
+  </div>
+
+  <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 14px; min-width: 0;">
+
+    <div style="font-size: 11px; font-weight: 600; color: #ffffff; opacity: 0.9; letter-spacing: 0.03em;">アプリ内トースト（取り消し）</div>
+
+    <div style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 8px 0 14px; border-radius: 6px; background: #323232; box-shadow: 0 6px 20px rgba(0,0,0,0.35);">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M2.6 4.2h10.8M6.4 4.2V2.8h3.2v1.4M4 4.2l.7 9.1h6.6l.7-9.1"/></svg>
+      <span style="flex-grow: 1; font-size: 13px; color: #ffffff;">「歯医者に電話」を削除しました</span>
+      <button type="button" style="height: 28px; padding: 0 12px; font-size: 12px; font-weight: 600; font-family: inherit; color: #4cc2ff; background: transparent; border: none; border-radius: 4px; cursor: pointer;">元に戻す</button>
+      <button type="button" aria-label="閉じる" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; color: #c8c8c8;"><svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M0 0l10 10M10 0L0 10"/></svg></button>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 8px 0 14px; border-radius: 6px; background: #323232; box-shadow: 0 6px 20px rgba(0,0,0,0.35);">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#3fd0b4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M3 8.5 6.2 11.5 13 4.8"/></svg>
+      <span style="flex-grow: 1; font-size: 13px; color: #ffffff;">完了しました・次回は 9月29日（月）</span>
+      <button type="button" style="height: 28px; padding: 0 12px; font-size: 12px; font-weight: 600; font-family: inherit; color: #4cc2ff; background: transparent; border: none; border-radius: 4px; cursor: pointer;">元に戻す</button>
+      <button type="button" aria-label="閉じる" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; color: #c8c8c8;"><svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M0 0l10 10M10 0L0 10"/></svg></button>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 8px 0 14px; border-radius: 6px; background: #323232; box-shadow: 0 6px 20px rgba(0,0,0,0.35);">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#ffc83d" stroke-width="1.5" stroke-linecap="round" style="flex-shrink: 0;"><path d="M8 2.2 14.6 13.4H1.4L8 2.2Z"/><path d="M8 6.4v3M8 11.4h.01"/></svg>
+      <span style="flex-grow: 1; font-size: 13px; color: #ffffff;">同期に失敗しました・次回に再送します</span>
+      <button type="button" style="height: 28px; padding: 0 12px; font-size: 12px; font-weight: 600; font-family: inherit; color: #4cc2ff; background: transparent; border: none; border-radius: 4px; cursor: pointer;">今すぐ再試行</button>
+      <button type="button" aria-label="閉じる" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; color: #c8c8c8;"><svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M0 0l10 10M10 0L0 10"/></svg></button>
+    </div>
+
+    <div style="padding: 10px 12px; border-radius: 6px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.22);">
+      <div style="font-size: 11px; color: #ffffff; line-height: 1.7; opacity: 0.94;">確認ダイアログを出さない代わりに、<strong style="font-weight: 600;">操作したあとに取り消せる</strong>ようにする。表示は 6 秒、ウィンドウ下端中央。Ctrl+Z でも同じことができる。</div>
+    </div>
+
+    <div style="font-size: 11px; font-weight: 600; color: #ffffff; opacity: 0.9; letter-spacing: 0.03em; margin-top: 4px;">タスクトレイ</div>
+
+    <div style="display: flex; gap: 14px; align-items: flex-start;">
+
+      <div style="width: 150px; flex-shrink: 0; border-radius: 6px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.22); padding: 14px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+        <div style="position: relative;">
+          <div style="width: 44px; height: 44px; border-radius: 8px; background: #0067c0; display: flex; align-items: center; justify-content: center;">
+            <svg width="24" height="24" viewBox="0 0 16 16" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5 6.2 11.5 13 4.8"/></svg>
+          </div>
+          <span style="position: absolute; top: -5px; right: -6px; display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: #c42b1c; color: #ffffff; font-size: 11px; font-weight: 700; border: 2px solid #5f656d; box-sizing: content-box;">7</span>
+        </div>
+        <div style="font-size: 10px; color: #ffffff; text-align: center; line-height: 1.6; opacity: 0.9;">未完了の件数をバッジで出す。0 件のときは出さない</div>
+      </div>
+
+      <div style="flex-grow: 1; border-radius: 8px; background: #f9f9f9; border: 1px solid rgba(0,0,0,0.12); box-shadow: 0 8px 24px rgba(0,0,0,0.34); padding: 4px; min-width: 0;">
+        <div style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 10px; border-radius: 4px;">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="12" height="10" rx="1.6"/></svg>
+          <span style="flex-grow: 1; font-size: 13px;">TaskDeck を開く</span>
+          <span style="font-size: 11px; color: #6e6e6e; font-family: Consolas, monospace;">Ctrl+Shift+T</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 10px; border-radius: 4px; background: #e8e8e8;">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#0067c0" stroke-width="1.6" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg>
+          <span style="flex-grow: 1; font-size: 13px; font-weight: 500;">クイック追加</span>
+          <span style="font-size: 11px; color: #6e6e6e; font-family: Consolas, monospace;">Ctrl+Shift+Space</span>
+        </div>
+        <div style="height: 1px; background: #e5e5e5; margin: 4px 8px;"></div>
+        <div style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 10px; border-radius: 4px;">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 7a5.5 5.5 0 0 0-9.9-3.3M2.5 9a5.5 5.5 0 0 0 9.9 3.3"/><path d="M13.5 2.8V6H10.4M2.5 13.2V10h3.1"/></svg>
+          <span style="flex-grow: 1; font-size: 13px;">今すぐ同期</span>
+          <span style="font-size: 11px; color: #6e6e6e;">11:18</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 10px; border-radius: 4px;">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"><path d="M4 6.6a4 4 0 0 1 8 0c0 3 1 4 1 4H3s1-1 1-4Z"/><path d="M6.8 13.2a1.6 1.6 0 0 0 2.4 0"/></svg>
+          <span style="flex-grow: 1; font-size: 13px;">通知を 1 時間止める</span>
+        </div>
+        <div style="height: 1px; background: #e5e5e5; margin: 4px 8px;"></div>
+        <div style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 10px; border-radius: 4px;">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#1a1a1a" stroke-width="1.5"><circle cx="8" cy="8" r="2.2"/><path d="M8 1.6v1.6M8 12.8v1.6M14.4 8h-1.6M3.2 8H1.6M12.5 3.5l-1.1 1.1M4.6 11.4l-1.1 1.1M12.5 12.5l-1.1-1.1M4.6 4.6 3.5 3.5" stroke-linecap="round"/></svg>
+          <span style="flex-grow: 1; font-size: 13px;">設定</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 10px; border-radius: 4px;">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"><path d="M6 13.4H3.6a1.2 1.2 0 0 1-1.2-1.2V3.8a1.2 1.2 0 0 1 1.2-1.2H6M10.4 11.2 13.6 8l-3.2-3.2M13.6 8H6.2"/></svg>
+          <span style="flex-grow: 1; font-size: 13px;">終了</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":900,"height":760}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

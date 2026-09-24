@@ -1,0 +1,673 @@
+<UserControl x:Class="TaskDeck.App.Views.Calendar.CalendarView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:conv="clr-namespace:TaskDeck.App.Converters"
+             xmlns:core="clr-namespace:TaskDeck.Core;assembly=TaskDeck.Core"
+             xmlns:local="clr-namespace:TaskDeck.App.Views.Calendar"
+             mc:Ignorable="d"
+             d:DesignWidth="900" d:DesignHeight="640">
+    <!--
+        カレンダー（S-04、UI 設計書 5.3・16、モックアップ Calendar.dc.html / WeekView.dc.html）。担当: 波3-I。
+        DataContext は Root に CalendarViewModel を入れる（UserControl 自身の DataContext はメイン画面の SelectedTaskId の結び付けに使う）。
+    -->
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolVisibility" />
+        <conv:HexToBrushConverter x:Key="HexBrush" />
+
+        <!-- 天気のアイコン（Icons.xaml に無いもの。16×16・線幅 1.5） -->
+        <StreamGeometry x:Key="CalendarIconPartlyCloudy">M4.2,6.4 A2.3,2.3 0 1 1 8.6,5.2 M6 1.4 v1 M1.4 6 h1 M2.8 2.8 l0.7 0.7 M9.2 2.8 l-0.7 0.7 M5.6 13.6 a2.4,2.4 0 0 1 -0.3,-4.8 3.2,3.2 0 0 1 6.2,-0.4 2.5,2.5 0 0 1 0.6,5.2 Z</StreamGeometry>
+        <StreamGeometry x:Key="CalendarIconFog">M2.5 5 h11 M1.8 8 h12.4 M3.5 11 h9</StreamGeometry>
+        <StreamGeometry x:Key="CalendarIconThunder">M4.6 10 a2.8,2.8 0 0 1 -0.4,-5.6 3.8,3.8 0 0 1 7.4,-0.4 2.9,2.9 0 0 1 0.6,5.7 M8.6 9 l-1.8 2.6 h2.4 l-1.8 2.6</StreamGeometry>
+
+        <!-- 文字 -->
+        <Style x:Key="CalendarChipTextStyle" TargetType="TextBlock" BasedOn="{StaticResource TextBaseStyle}">
+            <Setter Property="FontSize" Value="{StaticResource TypeLabelSize}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
+        </Style>
+        <Style x:Key="CalendarSmallTextStyle" TargetType="TextBlock" BasedOn="{StaticResource TextBaseStyle}">
+            <Setter Property="FontSize" Value="10" />
+            <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
+        </Style>
+
+        <!-- 月表示の曜日の見出し（日曜は休日の色、土曜はアクセント） -->
+        <Style x:Key="CalendarWeekdayHeaderStyle" TargetType="TextBlock" BasedOn="{StaticResource TextLabelStyle}">
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="0,6" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsSaturday}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource AccentDefaultBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsSunday}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource StateOverdueBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- 日付の数字（DataContext は CalendarCell）。休日は日曜と同じ赤（State.Overdue と同じ色。設計書 4.7.3） -->
+        <Style x:Key="CalendarDayNumberStyle" TargetType="TextBlock" BasedOn="{StaticResource TextBaseStyle}">
+            <Setter Property="FontSize" Value="{StaticResource TypeCaptionSize}" />
+            <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Day.IsSaturdayColor}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource AccentDefaultBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Day.IsHolidayColor}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource StateOverdueBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Day.IsOtherMonth}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource TextDisabledBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Day.IsToday}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource TextOnAccentBrush}" />
+                    <Setter Property="FontSize" Value="{StaticResource TypeLabelSize}" />
+                    <Setter Property="FontWeight" Value="SemiBold" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- 週表示の曜日（10px）と日付（16px） -->
+        <Style x:Key="CalendarWeekWeekdayStyle" TargetType="TextBlock" BasedOn="{StaticResource CalendarSmallTextStyle}">
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Day.IsSaturdayColor}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource AccentDefaultBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Day.IsHolidayColor}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource StateOverdueBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Day.IsToday}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource AccentDefaultBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="CalendarWeekDayNumberStyle" TargetType="TextBlock" BasedOn="{StaticResource CalendarDayNumberStyle}">
+            <Setter Property="FontSize" Value="16" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Day.IsToday}" Value="True">
+                    <Setter Property="FontSize" Value="15" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- 天気のアイコン（DataContext は WeatherLook） -->
+        <Style x:Key="CalendarWeatherIconStyle" TargetType="Path" BasedOn="{StaticResource IconPathStyle}">
+            <Setter Property="Data" Value="{StaticResource IconCloud}" />
+            <Setter Property="Stroke" Value="{DynamicResource TextSecondaryBrush}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Kind}" Value="{x:Static local:WeatherKind.Clear}">
+                    <Setter Property="Data" Value="{StaticResource IconSun}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Kind}" Value="{x:Static local:WeatherKind.PartlyCloudy}">
+                    <Setter Property="Data" Value="{StaticResource CalendarIconPartlyCloudy}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Kind}" Value="{x:Static local:WeatherKind.Fog}">
+                    <Setter Property="Data" Value="{StaticResource CalendarIconFog}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Kind}" Value="{x:Static local:WeatherKind.Rain}">
+                    <Setter Property="Data" Value="{StaticResource IconRain}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Kind}" Value="{x:Static local:WeatherKind.Snow}">
+                    <Setter Property="Data" Value="{StaticResource IconSnow}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Kind}" Value="{x:Static local:WeatherKind.Thunder}">
+                    <Setter Property="Data" Value="{StaticResource CalendarIconThunder}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- 見出しのボタン（前へ・次へ・今日）。枠だけの標準ボタン -->
+        <Style x:Key="CalendarNavButtonStyle" TargetType="Button" BasedOn="{StaticResource StandardButtonStyle}">
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="Height" Value="28" />
+            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="{DynamicResource StrokeControlBrush}" />
+        </Style>
+        <Style x:Key="CalendarIconNavButtonStyle" TargetType="Button" BasedOn="{StaticResource CalendarNavButtonStyle}">
+            <Setter Property="Width" Value="28" />
+            <Setter Property="Padding" Value="0" />
+        </Style>
+
+        <!-- 月／週の切替（選んでいる方は面の色で浮かせる） -->
+        <Style x:Key="CalendarModeButtonStyle" TargetType="Button" BasedOn="{StaticResource TextButtonStyle}">
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="Padding" Value="14,0" />
+            <Setter Property="FontSize" Value="{StaticResource TypeCaptionSize}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource SurfaceContentBrush}" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource StrokeDividerBrush}" />
+                    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- 「他 N 件」 -->
+        <Style x:Key="CalendarMoreButtonStyle" TargetType="Button" BasedOn="{StaticResource TextButtonStyle}">
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="Height" Value="16" />
+            <Setter Property="Padding" Value="5,0" />
+            <Setter Property="Margin" Value="0,2,0,0" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="FontSize" Value="{StaticResource TypeLabelSize}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+        </Style>
+
+        <!--
+            タスクのチップ（月表示のセル・週表示の終日帯・「他 N 件」の一覧。DataContext は CalendarEntry）。UI 設計書 5.3 の状態ごとの表現:
+            地はプロジェクト色の薄い版＋左に 4×10 の色バー（プロジェクトなしはアクセント）、時刻ありは時刻を太字で先頭に、
+            期限切れは State.Overdue の地と文字、完了・中止は薄く＋取り消し線、繰り返しの仮表示は地なしの破線。優先度は記号と色で添える。
+            押す（UI Automation の Invoke を含む）とタスクを選ぶ。ドラッグは CalendarView.Drag.cs が受ける。
+            セルの中では3つの枠として置き、中身（DataContext）が無い枠は畳む（畳んだ枠は見た目を作らない）。
+        -->
+        <Style x:Key="CalendarChipStyle" TargetType="Button">
+            <Setter Property="Height" Value="{StaticResource CalendarChipHeight}" />
+            <Setter Property="Margin" Value="0,2,0,0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{StaticResource AppFocusVisualStyle}" />
+            <Setter Property="AutomationProperties.Name" Value="{Binding AutomationName}" />
+            <Setter Property="ToolTip" Value="{Binding Title}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid x:Name="Root" Background="Transparent">
+                            <Border x:Name="Fill" CornerRadius="3" Background="{DynamicResource SurfaceSelectedBrush}" />
+                            <Rectangle x:Name="Dashed" RadiusX="3" RadiusY="3" StrokeThickness="1" StrokeDashArray="3 2"
+                                       Stroke="{DynamicResource TextDisabledBrush}" Visibility="Collapsed" SnapsToDevicePixels="True" />
+                            <Border x:Name="Ring" CornerRadius="3" BorderThickness="1.5" BorderBrush="{DynamicResource AccentDefaultBrush}" Visibility="Collapsed" />
+                            <DockPanel Margin="5,0" VerticalAlignment="Center">
+                                <Border x:Name="Bar" DockPanel.Dock="Left" Width="4" Height="10" CornerRadius="2" Margin="0,0,4,0"
+                                        Background="{DynamicResource AccentDefaultBrush}" />
+                                <TextBlock x:Name="Time" DockPanel.Dock="Left" Style="{StaticResource CalendarChipTextStyle}" FontWeight="SemiBold"
+                                           Margin="0,0,4,0" Text="{Binding TimeText}" />
+                                <TextBlock x:Name="Mark" DockPanel.Dock="Left" Style="{StaticResource CalendarChipTextStyle}" FontWeight="Bold"
+                                           Margin="0,0,3,0" Text="{Binding PrioritySymbol}" />
+                                <TextBlock x:Name="Title" Style="{StaticResource CalendarChipTextStyle}" TextTrimming="CharacterEllipsis" Text="{Binding Title}" />
+                            </DockPanel>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <DataTrigger Binding="{Binding HasTime}" Value="False">
+                                <Setter TargetName="Time" Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding HasPriority}" Value="False">
+                                <Setter TargetName="Mark" Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Priority}" Value="{x:Static core:Priority.Low}">
+                                <Setter TargetName="Mark" Property="Foreground" Value="{DynamicResource PriorityLowBrush}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Priority}" Value="{x:Static core:Priority.Medium}">
+                                <Setter TargetName="Mark" Property="Foreground" Value="{DynamicResource PriorityMediumBrush}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Priority}" Value="{x:Static core:Priority.High}">
+                                <Setter TargetName="Mark" Property="Foreground" Value="{DynamicResource PriorityHighBrush}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Priority}" Value="{x:Static core:Priority.Urgent}">
+                                <Setter TargetName="Mark" Property="Foreground" Value="{DynamicResource PriorityUrgentBrush}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding HasProjectColor}" Value="True">
+                                <Setter TargetName="Fill" Property="Background" Value="{Binding TintHex, Converter={StaticResource HexBrush}}" />
+                                <Setter TargetName="Bar" Property="Background" Value="{Binding ColorHex, Converter={StaticResource HexBrush}}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsOverdue}" Value="True">
+                                <Setter TargetName="Fill" Property="Background" Value="{DynamicResource StateOverdueBgBrush}" />
+                                <Setter TargetName="Bar" Property="Background" Value="{DynamicResource StateOverdueBrush}" />
+                                <Setter TargetName="Time" Property="Foreground" Value="{DynamicResource StateOverdueBrush}" />
+                                <Setter TargetName="Title" Property="Foreground" Value="{DynamicResource StateOverdueBrush}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsClosed}" Value="True">
+                                <Setter TargetName="Root" Property="Opacity" Value="0.5" />
+                                <Setter TargetName="Title" Property="TextDecorations" Value="Strikethrough" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsGhost}" Value="True">
+                                <Setter TargetName="Fill" Property="Background" Value="Transparent" />
+                                <Setter TargetName="Dashed" Property="Visibility" Value="Visible" />
+                                <Setter TargetName="Bar" Property="Visibility" Value="Collapsed" />
+                                <Setter TargetName="Time" Property="Foreground" Value="{DynamicResource TextTertiaryBrush}" />
+                                <Setter TargetName="Title" Property="Foreground" Value="{DynamicResource TextTertiaryBrush}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                <Setter TargetName="Ring" Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!--
+            週表示の時間軸のブロック（DataContext は CalendarEntry）。左に 3px のプロジェクト色、地は薄い同系色、時刻を太字で先頭に（UI 設計書 16）。
+            45分より短いものは時刻と題名を1行に詰める。上下端（5px）を引くと所要時間が変わる（動かせるものだけ）。
+        -->
+        <Style x:Key="CalendarBlockStyle" TargetType="Button">
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{StaticResource AppFocusVisualStyle}" />
+            <Setter Property="AutomationProperties.Name" Value="{Binding AutomationName}" />
+            <Setter Property="ToolTip" Value="{Binding Title}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid x:Name="Root" Background="Transparent" ClipToBounds="True">
+                            <Border x:Name="Fill" CornerRadius="4" Background="{DynamicResource SurfaceSelectedBrush}" />
+                            <Border x:Name="Bar" Width="3" HorizontalAlignment="Left" CornerRadius="4,0,0,4" Background="{DynamicResource AccentDefaultBrush}" />
+                            <Rectangle x:Name="Dashed" RadiusX="4" RadiusY="4" StrokeThickness="1" StrokeDashArray="3 2"
+                                       Stroke="{DynamicResource TextDisabledBrush}" Visibility="Collapsed" SnapsToDevicePixels="True" />
+                            <Border x:Name="Ring" CornerRadius="4" BorderThickness="1.5" BorderBrush="{DynamicResource AccentDefaultBrush}" Visibility="Collapsed" />
+                            <StackPanel x:Name="Tall" Margin="7,3,5,2">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock x:Name="Time" Style="{StaticResource CalendarSmallTextStyle}" FontWeight="SemiBold"
+                                               Foreground="{DynamicResource TextSecondaryBrush}" Text="{Binding TimeText}" />
+                                    <TextBlock x:Name="Mark" Style="{StaticResource CalendarSmallTextStyle}" FontWeight="Bold" Margin="4,0,0,0" Text="{Binding PrioritySymbol}" />
+                                </StackPanel>
+                                <TextBlock x:Name="Title" Style="{StaticResource CalendarChipTextStyle}" TextTrimming="CharacterEllipsis" Text="{Binding Title}" />
+                                <TextBlock x:Name="Duration" Style="{StaticResource CalendarSmallTextStyle}" Margin="0,1,0,0" Text="{Binding DurationText}" />
+                            </StackPanel>
+                            <DockPanel x:Name="Short" Margin="7,1,5,0" VerticalAlignment="Top" Visibility="Collapsed">
+                                <TextBlock x:Name="ShortTime" DockPanel.Dock="Left" Style="{StaticResource CalendarSmallTextStyle}" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,4,0" Text="{Binding TimeText}" />
+                                <TextBlock x:Name="ShortTitle" Style="{StaticResource CalendarChipTextStyle}" TextTrimming="CharacterEllipsis" Text="{Binding Title}" />
+                            </DockPanel>
+                            <Border x:Name="TopHandle" Tag="ResizeTop" Height="5" VerticalAlignment="Top" Background="Transparent" Cursor="SizeNS" />
+                            <Border x:Name="BottomHandle" Tag="ResizeBottom" Height="5" VerticalAlignment="Bottom" Background="Transparent" Cursor="SizeNS" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <DataTrigger Binding="{Binding IsCompact}" Value="True">
+                                <Setter TargetName="Tall" Property="Visibility" Value="Collapsed" />
+                                <Setter TargetName="Short" Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding HasPriority}" Value="False">
+                                <Setter TargetName="Mark" Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Priority}" Value="{x:Static core:Priority.Low}">
+                                <Setter TargetName="Mark" Property="Foreground" Value="{DynamicResource PriorityLowBrush}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Priority}" Value="{x:Static core:Priority.Medium}">
+                                <Setter TargetName="Mark" Property="Foreground" Value="{DynamicResource PriorityMediumBrush}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Priority}" Value="{x:Static core:Priority.High}">
+                                <Setter TargetName="Mark" Property="Foreground" Value="{DynamicResource PriorityHighBrush}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Priority}" Value="{x:Static core:Priority.Urgent}">
+                                <Setter TargetName="Mark" Property="Foreground" Value="{DynamicResource PriorityUrgentBrush}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding HasDurationText}" Value="False">
+                                <Setter TargetName="Duration" Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding HasProjectColor}" Value="True">
+                                <Setter TargetName="Fill" Property="Background" Value="{Binding TintHex, Converter={StaticResource HexBrush}}" />
+                                <Setter TargetName="Bar" Property="Background" Value="{Binding ColorHex, Converter={StaticResource HexBrush}}" />
+                                <Setter TargetName="Time" Property="Foreground" Value="{Binding ColorHex, Converter={StaticResource HexBrush}}" />
+                                <Setter TargetName="ShortTime" Property="Foreground" Value="{Binding ColorHex, Converter={StaticResource HexBrush}}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsOverdue}" Value="True">
+                                <Setter TargetName="Fill" Property="Background" Value="{DynamicResource StateOverdueBgBrush}" />
+                                <Setter TargetName="Bar" Property="Background" Value="{DynamicResource StateOverdueBrush}" />
+                                <Setter TargetName="Time" Property="Foreground" Value="{DynamicResource StateOverdueBrush}" />
+                                <Setter TargetName="ShortTime" Property="Foreground" Value="{DynamicResource StateOverdueBrush}" />
+                                <Setter TargetName="Title" Property="Foreground" Value="{DynamicResource StateOverdueBrush}" />
+                                <Setter TargetName="ShortTitle" Property="Foreground" Value="{DynamicResource StateOverdueBrush}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsClosed}" Value="True">
+                                <Setter TargetName="Root" Property="Opacity" Value="0.5" />
+                                <Setter TargetName="Title" Property="TextDecorations" Value="Strikethrough" />
+                                <Setter TargetName="ShortTitle" Property="TextDecorations" Value="Strikethrough" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsGhost}" Value="True">
+                                <Setter TargetName="Fill" Property="Background" Value="Transparent" />
+                                <Setter TargetName="Dashed" Property="Visibility" Value="Visible" />
+                                <Setter TargetName="Bar" Property="Visibility" Value="Collapsed" />
+                                <Setter TargetName="Time" Property="Foreground" Value="{DynamicResource TextTertiaryBrush}" />
+                                <Setter TargetName="ShortTime" Property="Foreground" Value="{DynamicResource TextTertiaryBrush}" />
+                                <Setter TargetName="Title" Property="Foreground" Value="{DynamicResource TextTertiaryBrush}" />
+                                <Setter TargetName="ShortTitle" Property="Foreground" Value="{DynamicResource TextTertiaryBrush}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding CanDrag}" Value="False">
+                                <Setter TargetName="TopHandle" Property="Visibility" Value="Collapsed" />
+                                <Setter TargetName="BottomHandle" Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                <Setter TargetName="Ring" Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!--
+            月表示の1日のセル（DataContext は CalendarCell。セルのパディング 4/5、当日は薄い地＋1.5px のアクセント枠＋丸いアクセント地の日付）。
+            チップは3つの固定の枠（Day.Chip1〜3）。月を切り替えても見た目を作り直さず、中身だけが入れ替わる。
+        -->
+        <DataTemplate x:Key="MonthCellTemplate" DataType="{x:Type local:CalendarCell}">
+            <Border x:Name="Cell" Background="Transparent" BorderBrush="{DynamicResource StrokeSubtleBrush}" BorderThickness="0,0,1,1" ClipToBounds="True">
+                <Grid>
+                    <Border x:Name="TodayRing" BorderThickness="1.5" BorderBrush="{DynamicResource AccentDefaultBrush}" Visibility="Collapsed" IsHitTestVisible="False" />
+                    <StackPanel Margin="5,4,5,4">
+                        <DockPanel Height="19" LastChildFill="True">
+                            <StackPanel x:Name="Weather" DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center"
+                                        DataContext="{Binding Day.Weather, FallbackValue={x:Null}}" ToolTip="{Binding Description}">
+                                <Viewbox Width="13" Height="13">
+                                    <Path Style="{StaticResource CalendarWeatherIconStyle}" />
+                                </Viewbox>
+                                <TextBlock Style="{StaticResource CalendarSmallTextStyle}" Margin="3,0,0,0" Text="{Binding TemperatureText}" />
+                            </StackPanel>
+                            <Grid DockPanel.Dock="Left" MinWidth="19" Height="19">
+                                <Ellipse x:Name="TodayDot" Width="19" Height="19" Fill="{DynamicResource AccentDefaultBrush}" Visibility="Collapsed" />
+                                <TextBlock Style="{StaticResource CalendarDayNumberStyle}" Text="{Binding Day.DayText}" />
+                            </Grid>
+                            <TextBlock x:Name="Holiday" Style="{StaticResource CalendarSmallTextStyle}" Foreground="{DynamicResource StateOverdueBrush}"
+                                       Margin="4,0,4,0" TextTrimming="CharacterEllipsis" Text="{Binding Day.HolidayName}" ToolTip="{Binding Day.HolidayName}" />
+                        </DockPanel>
+                        <Button Style="{StaticResource CalendarChipStyle}" DataContext="{Binding Day.Chip1, FallbackValue={x:Null}}" />
+                        <Button Style="{StaticResource CalendarChipStyle}" DataContext="{Binding Day.Chip2, FallbackValue={x:Null}}" />
+                        <Button Style="{StaticResource CalendarChipStyle}" DataContext="{Binding Day.Chip3, FallbackValue={x:Null}}" />
+                        <Button Style="{StaticResource CalendarMoreButtonStyle}" Content="{Binding Day.MoreText}"
+                                AutomationProperties.Name="{Binding Day.MoreAutomationName}"
+                                Visibility="{Binding Day.HasMore, Converter={StaticResource BoolVisibility}, FallbackValue=Collapsed}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding Day.IsOtherMonth}" Value="True">
+                    <Setter TargetName="Cell" Property="Background" Value="{DynamicResource SurfaceSubtleBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Day.IsToday}" Value="True">
+                    <Setter TargetName="Cell" Property="Background" Value="{DynamicResource AnchorBandBrush}" />
+                    <Setter TargetName="TodayRing" Property="Visibility" Value="Visible" />
+                    <Setter TargetName="TodayDot" Property="Visibility" Value="Visible" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Day.Weather}" Value="{x:Null}">
+                    <Setter TargetName="Weather" Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Day.HasHoliday}" Value="False">
+                    <Setter TargetName="Holiday" Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+        <!-- 週表示: 曜日と日付の見出し（祝日名・天気の最高/最低気温を下に。DataContext は CalendarCell） -->
+        <DataTemplate x:Key="WeekHeaderTemplate" DataType="{x:Type local:CalendarCell}">
+            <Border x:Name="Head" Padding="2,5,2,6" Background="Transparent">
+                <StackPanel HorizontalAlignment="Center">
+                    <TextBlock Style="{StaticResource CalendarWeekWeekdayStyle}" Text="{Binding Day.WeekdayText}" />
+                    <Grid Width="26" Height="26" HorizontalAlignment="Center">
+                        <Ellipse x:Name="TodayDot" Fill="{DynamicResource AccentDefaultBrush}" Visibility="Collapsed" />
+                        <TextBlock Style="{StaticResource CalendarWeekDayNumberStyle}" Text="{Binding Day.DayText}" />
+                    </Grid>
+                    <TextBlock x:Name="Holiday" Style="{StaticResource CalendarSmallTextStyle}" Foreground="{DynamicResource StateOverdueBrush}"
+                               HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" Text="{Binding Day.HolidayName}" />
+                    <StackPanel x:Name="Weather" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,1,0,0"
+                                DataContext="{Binding Day.Weather, FallbackValue={x:Null}}" ToolTip="{Binding Description}">
+                        <Viewbox Width="13" Height="13">
+                            <Path Style="{StaticResource CalendarWeatherIconStyle}" />
+                        </Viewbox>
+                        <TextBlock Style="{StaticResource CalendarSmallTextStyle}" Margin="3,0,0,0" Text="{Binding TemperatureText}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding Day.IsToday}" Value="True">
+                    <Setter TargetName="Head" Property="Background" Value="{DynamicResource AnchorBandBrush}" />
+                    <Setter TargetName="TodayDot" Property="Visibility" Value="Visible" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Day.Weather}" Value="{x:Null}">
+                    <Setter TargetName="Weather" Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Day.HasHoliday}" Value="False">
+                    <Setter TargetName="Holiday" Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+        <!-- 週表示: 終日帯の1日（3件＋他 N 件。DataContext は CalendarCell） -->
+        <DataTemplate x:Key="WeekAllDayTemplate" DataType="{x:Type local:CalendarCell}">
+            <StackPanel Margin="3,1,3,5">
+                <Button Style="{StaticResource CalendarChipStyle}" Height="20" DataContext="{Binding Day.Chip1, FallbackValue={x:Null}}" />
+                <Button Style="{StaticResource CalendarChipStyle}" Height="20" DataContext="{Binding Day.Chip2, FallbackValue={x:Null}}" />
+                <Button Style="{StaticResource CalendarChipStyle}" Height="20" DataContext="{Binding Day.Chip3, FallbackValue={x:Null}}" />
+                <Button Style="{StaticResource CalendarMoreButtonStyle}" Content="{Binding Day.MoreText}"
+                        AutomationProperties.Name="{Binding Day.MoreAutomationName}"
+                        Visibility="{Binding Day.HasMore, Converter={StaticResource BoolVisibility}, FallbackValue=Collapsed}" />
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- 週表示: 時間軸の1日の列（今日の列にだけ色を乗せる。1時間ごとの線が透けるよう薄く重ねる。DataContext は CalendarCell） -->
+        <DataTemplate x:Key="WeekTimeColumnTemplate" DataType="{x:Type local:CalendarCell}">
+            <Border BorderThickness="1,0,0,0" BorderBrush="{DynamicResource StrokeSubtleBrush}" Background="Transparent">
+                <Grid>
+                    <Rectangle x:Name="TodayTint" Fill="{DynamicResource AccentDefaultBrush}" Opacity="0.04" Visibility="Collapsed" IsHitTestVisible="False" />
+                    <ItemsControl ItemsSource="{Binding Day.Blocks}" Focusable="False">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <local:WeekDayPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button DataContext="{Binding Entry}" Style="{StaticResource CalendarBlockStyle}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Grid>
+            </Border>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding Day.IsToday}" Value="True">
+                    <Setter TargetName="TodayTint" Property="Visibility" Value="Visible" />
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+        <ItemsPanelTemplate x:Key="SevenColumnsPanel">
+            <UniformGrid Rows="1" Columns="7" />
+        </ItemsPanelTemplate>
+    </UserControl.Resources>
+
+    <Grid x:Name="Root" Background="Transparent" ButtonBase.Click="OnRootClick">
+        <Grid.InputBindings>
+            <KeyBinding Key="PageUp" Command="{Binding PreviousCommand}" />
+            <KeyBinding Key="PageDown" Command="{Binding NextCommand}" />
+        </Grid.InputBindings>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- 見出し: 表示中の年月（週）・前へ／次へ・今日、右に月／週の切替 -->
+        <Grid Grid.Row="0" Margin="20,16,20,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Style="{StaticResource TextTitleStyle}" Typography.NumeralAlignment="Tabular" VerticalAlignment="Center"
+                           AutomationProperties.AutomationId="CalendarTitle" Text="{Binding Title}" />
+                <Button Style="{StaticResource CalendarIconNavButtonStyle}" Margin="12,0,0,0"
+                        AutomationProperties.AutomationId="CalendarPrevious" AutomationProperties.Name="{Binding PreviousLabel}"
+                        ToolTip="{Binding PreviousLabel}" Command="{Binding PreviousCommand}">
+                    <Viewbox Width="12" Height="12">
+                        <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconChevronLeft}" />
+                    </Viewbox>
+                </Button>
+                <Button Style="{StaticResource CalendarIconNavButtonStyle}" Margin="4,0,0,0"
+                        AutomationProperties.AutomationId="CalendarNext" AutomationProperties.Name="{Binding NextLabel}"
+                        ToolTip="{Binding NextLabel}" Command="{Binding NextCommand}">
+                    <Viewbox Width="12" Height="12">
+                        <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconChevronRight}" />
+                    </Viewbox>
+                </Button>
+                <Button Style="{StaticResource CalendarNavButtonStyle}" Margin="4,0,0,0" Content="今日"
+                        AutomationProperties.AutomationId="CalendarToday" AutomationProperties.Name="今日へ移動"
+                        Command="{Binding TodayCommand}" />
+            </StackPanel>
+            <Border HorizontalAlignment="Right" VerticalAlignment="Center" Padding="2" CornerRadius="6" Background="{DynamicResource StrokeSubtleBrush}">
+                <StackPanel Orientation="Horizontal">
+                    <Button Style="{StaticResource CalendarModeButtonStyle}" Content="月" Tag="{Binding IsMonth}"
+                            AutomationProperties.AutomationId="CalendarMonthMode" AutomationProperties.Name="月表示"
+                            Command="{Binding ShowMonthCommand}" />
+                    <Button Style="{StaticResource CalendarModeButtonStyle}" Content="週" Tag="{Binding IsWeek}" Margin="2,0,0,0"
+                            AutomationProperties.AutomationId="CalendarWeekMode" AutomationProperties.Name="週表示"
+                            Command="{Binding ShowWeekCommand}" />
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- 月表示（6週×7日） -->
+        <Grid x:Name="MonthPanel" Grid.Row="1" Visibility="{Binding IsMonth, Converter={StaticResource BoolVisibility}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <ItemsControl Grid.Row="0" ItemsSource="{Binding Weekdays}" ItemsPanel="{StaticResource SevenColumnsPanel}" Focusable="False">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type local:CalendarWeekday}">
+                        <TextBlock Style="{StaticResource CalendarWeekdayHeaderStyle}" Text="{Binding Name}" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <Border Grid.Row="0" Height="1" VerticalAlignment="Bottom" Background="{DynamicResource StrokeDividerBrush}" />
+            <ItemsControl x:Name="MonthGrid" Grid.Row="1" ItemsSource="{Binding MonthCells}" ItemTemplate="{StaticResource MonthCellTemplate}"
+                          AutomationProperties.AutomationId="CalendarMonthGrid" Focusable="False">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Rows="6" Columns="7" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+            <Canvas Grid.Row="1" IsHitTestVisible="False">
+                <Border x:Name="MonthDropHighlight" Visibility="Collapsed" BorderThickness="1.5" BorderBrush="{DynamicResource AccentDefaultBrush}" />
+            </Canvas>
+        </Grid>
+
+        <!-- 週表示（時間軸・終日帯・現在時刻の線） -->
+        <Grid x:Name="WeekPanel" Grid.Row="1" Visibility="{Binding IsWeek, Converter={StaticResource BoolVisibility}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="56" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ItemsControl x:Name="WeekHeaderList" Grid.Row="0" Grid.Column="1" ItemsSource="{Binding WeekCells}"
+                          ItemsPanel="{StaticResource SevenColumnsPanel}" ItemTemplate="{StaticResource WeekHeaderTemplate}" Focusable="False" />
+            <Border Grid.Row="0" Grid.ColumnSpan="2" Height="1" VerticalAlignment="Bottom" Background="{DynamicResource StrokeDividerBrush}" />
+
+            <Border Grid.Row="1" Grid.ColumnSpan="2" MinHeight="44" Background="{DynamicResource SurfaceSubtleBrush}" />
+            <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource CalendarSmallTextStyle}" HorizontalAlignment="Right" Margin="0,0,8,0" Text="終日" />
+            <Grid x:Name="AllDayArea" Grid.Row="1" Grid.Column="1">
+                <ItemsControl ItemsSource="{Binding WeekCells}" ItemsPanel="{StaticResource SevenColumnsPanel}"
+                              ItemTemplate="{StaticResource WeekAllDayTemplate}" Focusable="False" />
+                <Canvas IsHitTestVisible="False">
+                    <Border x:Name="AllDayDropHighlight" Visibility="Collapsed" CornerRadius="3" BorderThickness="1.5" BorderBrush="{DynamicResource AccentDefaultBrush}" />
+                </Canvas>
+            </Grid>
+            <Border Grid.Row="1" Grid.ColumnSpan="2" Height="1" VerticalAlignment="Bottom" Background="{DynamicResource StrokeDividerBrush}" />
+
+            <!--
+                時間軸（1時間 52px × 24 = 1248px）。ScrollViewer の中の ItemsControl は1週間の時刻ありのタスクと24時間の線だけで、
+                件数が小さいので仮想化は要らない（CLAUDE.md 1.3 の注意は1万件の一覧のため）。
+            -->
+            <ScrollViewer x:Name="TimeScroller" Grid.Row="2" Grid.ColumnSpan="2" Focusable="False"
+                          VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" ScrollChanged="OnTimeScrollChanged">
+                <Grid Height="1248">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="56" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <ItemsControl Grid.Column="0" ItemsSource="{x:Static local:CalendarView.HourLabels}" Focusable="False" IsHitTestVisible="False">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Height="52">
+                                    <TextBlock Style="{StaticResource CalendarSmallTextStyle}" VerticalAlignment="Top" HorizontalAlignment="Right"
+                                               Margin="0,-7,8,0" Text="{Binding}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Grid x:Name="TimeGrid" Grid.Column="1" Background="Transparent">
+                        <ItemsControl ItemsSource="{x:Static local:CalendarView.HourLabels}" Focusable="False" IsHitTestVisible="False">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Height="52" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource StrokeSubtleBrush}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <ItemsControl ItemsSource="{Binding WeekCells}" ItemsPanel="{StaticResource SevenColumnsPanel}"
+                                      ItemTemplate="{StaticResource WeekTimeColumnTemplate}" Focusable="False" />
+                        <Grid x:Name="NowLine" Height="7" VerticalAlignment="Top" IsHitTestVisible="False"
+                              Visibility="{Binding IsTodayInWeek, Converter={StaticResource BoolVisibility}}">
+                            <Rectangle Height="1.5" VerticalAlignment="Center" Fill="{DynamicResource StateOverdueBrush}" />
+                            <Ellipse Width="7" Height="7" HorizontalAlignment="Left" Margin="-3,0,0,0" Fill="{DynamicResource StateOverdueBrush}" />
+                        </Grid>
+                        <Canvas IsHitTestVisible="False">
+                            <Border x:Name="TimeDropPreview" Visibility="Collapsed" CornerRadius="4" BorderThickness="1.5" Opacity="0.85"
+                                    BorderBrush="{DynamicResource AccentDefaultBrush}" Background="{DynamicResource SurfaceSelectedBrush}" />
+                        </Canvas>
+                    </Grid>
+                </Grid>
+            </ScrollViewer>
+        </Grid>
+
+        <!-- ドラッグ中の置き先の日付（UI 設計書 15.5 の吹き出し）。テーマに関わらず暗い面 -->
+        <Canvas Grid.Row="0" Grid.RowSpan="2" IsHitTestVisible="False">
+            <Border x:Name="DropBubble" Visibility="Collapsed" CornerRadius="4" Padding="8,3" Background="{DynamicResource ToastBackgroundBrush}">
+                <TextBlock x:Name="DropBubbleText" Style="{StaticResource TextBaseStyle}" FontSize="{StaticResource TypeLabelSize}"
+                           Typography.NumeralAlignment="Tabular" Foreground="{DynamicResource ToastForegroundBrush}" />
+            </Border>
+        </Canvas>
+
+        <!-- 「他 N 件」を押すと、その日の全部を出す -->
+        <Popup x:Name="MorePopup" AllowsTransparency="True" StaysOpen="False" Placement="Bottom"
+               HorizontalOffset="-10" VerticalOffset="-8" PopupAnimation="None">
+            <Border Style="{StaticResource PopupShadowStyle}">
+                <Border Style="{StaticResource PopupSurfaceStyle}" Width="264">
+                    <StackPanel x:Name="MoreRoot">
+                        <DockPanel Margin="14,12,14,10">
+                            <TextBlock DockPanel.Dock="Right" Style="{StaticResource TabularCaptionStyle}" VerticalAlignment="Center"
+                                       Text="{Binding Entries.Count, StringFormat={}{0} 件}" />
+                            <TextBlock Style="{StaticResource TextBodySmallStyle}" FontWeight="SemiBold" VerticalAlignment="Center" Text="{Binding DateText}" />
+                        </DockPanel>
+                        <Border Style="{StaticResource PopupSeparatorStyle}" />
+                        <ItemsControl x:Name="MoreList" ItemsSource="{Binding Entries}" MaxHeight="320" Margin="10,4,10,10" Focusable="False"
+                                      AutomationProperties.AutomationId="CalendarMoreList"
+                                      VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.ScrollUnit="Pixel"
+                                      ButtonBase.Click="OnMoreEntryClick">
+                            <ItemsControl.Template>
+                                <ControlTemplate TargetType="ItemsControl">
+                                    <ScrollViewer Focusable="False" CanContentScroll="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                        <ItemsPresenter />
+                                    </ScrollViewer>
+                                </ControlTemplate>
+                            </ItemsControl.Template>
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Style="{StaticResource CalendarChipStyle}" Height="22" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+            </Border>
+        </Popup>
+    </Grid>
+</UserControl>

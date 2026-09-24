@@ -1,0 +1,32 @@
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{cs,xaml}]
+indent_size = 4
+
+[*.{csproj,props,targets,xml,json,slnx,config,manifest}]
+indent_size = 2
+
+[*.cs]
+# 例外を握りつぶさない（CLAUDE.md 1.2）
+dotnet_diagnostic.CA1031.severity = warning
+# 禁止API（BannedSymbols.txt）
+dotnet_diagnostic.RS0030.severity = error
+# WPF アプリなので ConfigureAwait(false) は強制しない
+dotnet_diagnostic.CA2007.severity = none
+# ログは可読性優先で拡張メソッドを使う
+dotnet_diagnostic.CA1848.severity = none
+dotnet_diagnostic.CA1873.severity = none
+
+csharp_style_namespace_declarations = file_scoped:suggestion
+csharp_style_var_for_built_in_types = true:silent
+csharp_style_var_when_type_is_apparent = true:silent
+dotnet_sort_system_directives_first = true
+
+[**/Migrations/*.cs]
+generated_code = true

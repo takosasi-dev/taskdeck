@@ -1,0 +1,64 @@
+<UserControl x:Class="TaskDeck.App.Settings.Pages.GeneralPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:settings="clr-namespace:TaskDeck.App.Settings">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Settings/SettingsResources.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <BooleanToVisibilityConverter x:Key="BoolVisibility" />
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <StackPanel>
+        <TextBlock Style="{StaticResource SettingsTitleStyle}" Text="全般" />
+
+        <TextBlock Style="{StaticResource SettingsSectionStyle}" Margin="0,4,0,8" Text="起動" />
+
+        <settings:SettingsCard Icon="{StaticResource IconToday}"
+                               Title="起動時に開くビュー"
+                               Description="TaskDeck を開いたときに最初に出る一覧です">
+            <ComboBox Style="{StaticResource SettingsComboBoxStyle}"
+                      Width="170"
+                      ItemsSource="{Binding StartViewNames}"
+                      SelectedIndex="{Binding StartViewIndex}"
+                      AutomationProperties.Name="起動時に開くビュー" />
+        </settings:SettingsCard>
+
+        <settings:SettingsCard Icon="{StaticResource IconSignOut}"
+                               Title="Windows にログオンしたら自動で起動する"
+                               Description="ウィンドウは出さずにトレイに常駐して、ホットキーと通知を受け取ります">
+            <ui:ToggleSwitch IsChecked="{Binding LaunchAtLogin}"
+                             AutomationProperties.Name="Windows にログオンしたら自動で起動する" />
+            <settings:SettingsCard.Expanded>
+                <TextBlock Style="{StaticResource SettingsNoticeTextStyle}"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           Text="{Binding LaunchAtLoginNote}"
+                           Visibility="{Binding HasLaunchAtLoginNote, Converter={StaticResource BoolVisibility}}" />
+            </settings:SettingsCard.Expanded>
+        </settings:SettingsCard>
+
+        <TextBlock Style="{StaticResource SettingsSectionStyle}" Text="カレンダー" />
+
+        <settings:SettingsCard Icon="{StaticResource IconCalendar}"
+                               Title="週の始まり"
+                               Description="日付ピッカーとカレンダーの左端の曜日です">
+            <ComboBox Style="{StaticResource SettingsComboBoxStyle}"
+                      Width="170"
+                      ItemsSource="{Binding WeekStartChoices}"
+                      SelectedIndex="{Binding WeekStartIndex}"
+                      AutomationProperties.Name="週の始まり" />
+        </settings:SettingsCard>
+
+        <TextBlock Style="{StaticResource SettingsSectionStyle}" Text="記録" />
+
+        <settings:SettingsCard Icon="{StaticResource IconNote}"
+                               Title="詳しいログを残す"
+                               Description="不具合を調べるときだけ使います。次の起動から反映されます">
+            <ui:ToggleSwitch IsChecked="{Binding VerboseLogging}"
+                             AutomationProperties.Name="詳しいログを残す" />
+        </settings:SettingsCard>
+    </StackPanel>
+</UserControl>

@@ -1,0 +1,101 @@
+<UserControl x:Class="TaskDeck.App.Settings.Pages.DataPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:settings="clr-namespace:TaskDeck.App.Settings"
+             xmlns:pk="clr-namespace:TaskDeck.App.Controls.Pickers"
+             xmlns:dt="clr-namespace:TaskDeck.App.Views.DataTools">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Settings/SettingsResources.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <pk:EqualsToVisibilityConverter x:Key="EqualsToVisibility" />
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <StackPanel>
+        <TextBlock Style="{StaticResource SettingsTitleStyle}" Text="データ" />
+
+        <TextBlock Style="{StaticResource SettingsSectionStyle}" Margin="0,4,0,8" Text="保存先" />
+
+        <settings:SettingsCard Icon="{StaticResource IconDatabase}"
+                               Title="データベースの場所"
+                               Description="タスク・プロジェクト・タグはこの1ファイルに入っています">
+            <Button Style="{StaticResource SettingsButtonStyle}" Click="OnOpenDataFolder" Content="フォルダを開く"
+                    AutomationProperties.Name="データベースのフォルダを開く" />
+        </settings:SettingsCard>
+
+        <TextBlock x:Name="DatabasePathText" Style="{StaticResource SettingsMonoStyle}" Margin="4,6,0,0" />
+
+        <TextBlock Style="{StaticResource SettingsSectionStyle}" Text="バックアップ" />
+
+        <settings:SettingsCard Icon="{StaticResource IconExport}"
+                               Title="今すぐバックアップ"
+                               Description="任意の場所に、そのときの内容を1ファイルで書き出します">
+            <Button Style="{StaticResource SettingsButtonStyle}" Click="OnBackupNow" Content="書き出す"
+                    AutomationProperties.Name="今すぐバックアップを書き出す" />
+        </settings:SettingsCard>
+
+        <settings:SettingsCard Icon="{StaticResource IconCopy}"
+                               Title="起動時のバックアップ"
+                               Description="起動のたびに自動で作り、新しい5件を残しています">
+            <Button Style="{StaticResource SettingsButtonStyle}" Click="OnOpenBackupFolder" Content="フォルダを開く"
+                    AutomationProperties.Name="起動時のバックアップのフォルダを開く" />
+        </settings:SettingsCard>
+
+        <!-- 世代の一覧（5件までなので ItemsControl で十分。ここは仮想化が要らない） -->
+        <ItemsControl ItemsSource="{Binding Backups}" Margin="0,4,0,0">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Background="{DynamicResource SurfaceSubtleBrush}"
+                            BorderBrush="{DynamicResource StrokeDividerBrush}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource RadiusRow}"
+                            Margin="0,0,0,4"
+                            Padding="16,10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Style="{StaticResource TabularBodyStyle}"
+                                       FontSize="{StaticResource TypeBodySmallSize}"
+                                       VerticalAlignment="Center"
+                                       Text="{Binding When}" />
+                            <TextBlock Grid.Column="1" Margin="12,0,0,0"
+                                       Style="{StaticResource TabularCaptionStyle}"
+                                       VerticalAlignment="Center"
+                                       Text="{Binding Size}" />
+                            <Button Grid.Column="2"
+                                    Style="{StaticResource SettingsButtonStyle}"
+                                    Click="OnRestore"
+                                    Tag="{Binding}"
+                                    AutomationProperties.Name="{Binding When, StringFormat='{}{0} のバックアップから復元'}"
+                                    Content="このバックアップから復元" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <TextBlock Margin="4,2,0,0"
+                   Style="{StaticResource TextCaptionStyle}"
+                   Text="起動時のバックアップはまだありません（次に TaskDeck を起動したときに作られます）"
+                   Visibility="{Binding HasBackups, Converter={StaticResource EqualsToVisibility}, ConverterParameter=False}" />
+
+        <TextBlock Margin="4,6,0,0"
+                   Style="{StaticResource TextCaptionStyle}"
+                   TextWrapping="Wrap"
+                   Text="{Binding Status}" />
+
+        <Border Style="{StaticResource SettingsNoticeStyle}">
+            <TextBlock Style="{StaticResource SettingsNoticeTextStyle}"
+                       Text="復元すると、今のデータはバックアップの内容で置き換わります（置き換える前の状態も backups に退避します）。復元したら TaskDeck を終了するので、もう一度起動してください。" />
+        </Border>
+
+        <!-- インポート／エクスポート（F-104〜F-106）は波2-G の部品。ViewModel は部品が DI から取る -->
+        <TextBlock Style="{StaticResource SettingsSectionStyle}" Text="インポート／エクスポート" />
+        <dt:ImportExportPanel />
+    </StackPanel>
+</UserControl>

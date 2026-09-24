@@ -1,0 +1,1287 @@
+<ui:FluentWindow x:Class="TaskDeck.App.Views.Templates.TemplatesWindow"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                 xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                 xmlns:input="clr-namespace:TaskDeck.App.Input"
+                 xmlns:pickers="clr-namespace:TaskDeck.App.Controls.Pickers"
+                 xmlns:local="clr-namespace:TaskDeck.App.Views.Templates"
+                 mc:Ignorable="d"
+                 d:DataContext="{d:DesignInstance local:TemplatesViewModel}"
+                 Title="テンプレート"
+                 Width="1200" Height="760"
+                 MinWidth="960" MinHeight="600"
+                 ExtendsContentIntoTitleBar="True"
+                 WindowBackdropType="None"
+                 WindowStartupLocation="CenterOwner"
+                 Background="{DynamicResource SurfaceContentBrush}">
+    <!--
+        テンプレート（S-11、UI 設計書 20章、モックアップ Templates.dc.html）。
+        左 340: 一覧（よく使う／すべて）・探す・「新しいテンプレート」「選択中のタスクから作る」
+        右: 展開プレビュー（基準日の帯・作られる内容・過去日の警告）／編集／「選択中のタスクから作る」
+    -->
+    <ui:FluentWindow.Resources>
+        <sys:Double x:Key="ListPaneWidth">340</sys:Double>
+        <sys:Double x:Key="DialogBarHeight">56</sys:Double>
+        <sys:Double x:Key="FieldHeight">34</sys:Double>
+        <!-- UI 設計書 20.4 は幅106。「今日」「過去」と時刻が並ぶと切れるので広げる -->
+        <sys:Double x:Key="DateColumnWidth">130</sys:Double>
+        <sys:Double x:Key="ItemDetailWidth">280</sys:Double>
+        <pickers:EnumMatchConverter x:Key="Is" />
+        <local:HasValueToVisibilityConverter x:Key="HasValue" />
+        <local:IconKeyToGeometryConverter x:Key="IconGeometry" />
+        <local:HexToBrushConverter x:Key="HexBrush" />
+
+        <CollectionViewSource x:Key="GroupedTemplates" Source="{Binding Items}">
+            <CollectionViewSource.GroupDescriptions>
+                <PropertyGroupDescription PropertyName="Group" />
+            </CollectionViewSource.GroupDescriptions>
+        </CollectionViewSource>
+
+        <Style x:Key="DividerStyle" TargetType="Border">
+            <Setter Property="Height" Value="1" />
+            <Setter Property="Background" Value="{DynamicResource StrokeSubtleBrush}" />
+        </Style>
+
+        <!-- 補足の字。空なら詰める -->
+        <Style x:Key="NoteStyle" TargetType="TextBlock" BasedOn="{StaticResource TextCaptionStyle}">
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Style.Triggers>
+                <Trigger Property="Text" Value="">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </Trigger>
+                <Trigger Property="Text" Value="{x:Null}">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="FieldLabelStyle" TargetType="TextBlock" BasedOn="{StaticResource TextLabelStyle}">
+            <Setter Property="Margin" Value="0,0,0,4" />
+        </Style>
+
+        <Style x:Key="PaneTitleStyle" TargetType="TextBlock" BasedOn="{StaticResource TextSubtitleStyle}">
+            <Setter Property="TextWrapping" Value="NoWrap" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+
+        <Style x:Key="FormTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource InputTextBoxStyle}">
+            <Setter Property="input:ImeGuard.IsEnabled" Value="True" />
+        </Style>
+
+        <Style x:Key="ChevronStyle" TargetType="Viewbox">
+            <Setter Property="Width" Value="11" />
+            <Setter Property="Height" Value="11" />
+            <Setter Property="Margin" Value="9,0,0,0" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <!-- 基準日・入れる先・タグの欄（押すとポップアップ） -->
+        <Style x:Key="FieldButtonStyle" TargetType="Button">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
+            <Setter Property="FontSize" Value="{StaticResource TypeBodySmallSize}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+            <Setter Property="Background" Value="{DynamicResource SurfaceContentBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ControlElevationBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Height" Value="{StaticResource FieldHeight}" />
+            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{StaticResource AppFocusVisualStyle}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Box"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{StaticResource RadiusRow}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Box" Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 左下の「新しいテンプレート」などの行ボタン -->
+        <Style x:Key="PaneActionButtonStyle" TargetType="Button">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
+            <Setter Property="FontSize" Value="{StaticResource TypeBodySmallSize}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="Padding" Value="10,0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{StaticResource AppFocusVisualStyle}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Box"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="{StaticResource RadiusRow}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Box" Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SmallOutlineButtonStyle" TargetType="Button" BasedOn="{StaticResource StandardButtonStyle}">
+            <Setter Property="MinHeight" Value="26" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="Padding" Value="9,0" />
+            <Setter Property="FontSize" Value="{StaticResource TypeLabelSize}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+
+        <Style x:Key="ToolButtonStyle" TargetType="Button" BasedOn="{StaticResource IconButtonStyle}">
+            <Setter Property="Width" Value="28" />
+            <Setter Property="Height" Value="28" />
+        </Style>
+
+        <Style x:Key="DialogBarStyle" TargetType="Border">
+            <Setter Property="Height" Value="{StaticResource DialogBarHeight}" />
+            <Setter Property="Padding" Value="22,0" />
+            <Setter Property="Background" Value="{DynamicResource SettingsCardBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource StrokeDividerBrush}" />
+            <Setter Property="BorderThickness" Value="0,1,0,0" />
+        </Style>
+
+        <!-- 優先度の記号（色と ! の数を併用） -->
+        <Style x:Key="PriorityMarksStyle" TargetType="TextBlock" BasedOn="{StaticResource TextBaseStyle}">
+            <Setter Property="FontSize" Value="{StaticResource TypeLabelSize}" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Priority}" Value="Urgent">
+                    <Setter Property="Foreground" Value="{DynamicResource PriorityUrgentBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Priority}" Value="High">
+                    <Setter Property="Foreground" Value="{DynamicResource PriorityHighBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Priority}" Value="Medium">
+                    <Setter Property="Foreground" Value="{DynamicResource PriorityMediumBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Priority}" Value="Low">
+                    <Setter Property="Foreground" Value="{DynamicResource PriorityLowBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Priority}" Value="None">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- 文字つきの小さなチェック（14px の箱、12px の字。過去日の警告とタグの一覧。設定画面用の LabeledCheckBoxStyle より詰めたもの） -->
+        <Style x:Key="CompactCheckBoxStyle" TargetType="CheckBox">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
+            <Setter Property="FontSize" Value="{StaticResource TypeCaptionSize}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{StaticResource AppFocusVisualStyle}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Grid Background="{TemplateBinding Background}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border x:Name="Box"
+                                    Width="14" Height="14"
+                                    VerticalAlignment="Center"
+                                    Background="Transparent"
+                                    BorderBrush="{DynamicResource StrokeControlStrongBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource RadiusCheckBox}">
+                                <Path x:Name="Mark"
+                                      Data="{StaticResource IconCheck}"
+                                      Stretch="Uniform"
+                                      Margin="2"
+                                      Stroke="{DynamicResource TextOnAccentBrush}"
+                                      StrokeThickness="2"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round"
+                                      StrokeLineJoin="Round"
+                                      Visibility="Collapsed" />
+                            </Border>
+                            <ContentPresenter Grid.Column="1" Margin="7,0,0,0" VerticalAlignment="Center" RecognizesAccessKey="False" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource TextSecondaryBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Box" Property="Background" Value="{DynamicResource AccentDefaultBrush}" />
+                                <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource AccentDefaultBrush}" />
+                                <Setter TargetName="Mark" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 左の一覧の行（選ぶと Surface.Selected ＋左に3pxのアクセントバー、UI 設計書 20.2） -->
+        <Style x:Key="TemplateItemStyle" TargetType="ListBoxItem">
+            <Setter Property="AutomationProperties.Name" Value="{Binding Name}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+            <Setter Property="Padding" Value="10,0" />
+            <Setter Property="Margin" Value="0,0,0,2" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{StaticResource AppFocusVisualStyle}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Grid>
+                            <Border x:Name="Back"
+                                    Background="Transparent"
+                                    BorderBrush="Transparent"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource RadiusRow}"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter />
+                            </Border>
+                            <Border x:Name="Bar"
+                                    Width="3" Height="20"
+                                    HorizontalAlignment="Left"
+                                    CornerRadius="2"
+                                    Background="{DynamicResource AccentDefaultBrush}"
+                                    Visibility="Collapsed" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Back" Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Back" Property="Background" Value="{DynamicResource SurfaceSelectedBrush}" />
+                                <Setter TargetName="Back" Property="BorderBrush" Value="{DynamicResource SurfaceSelectedStrokeBrush}" />
+                                <Setter TargetName="Bar" Property="Visibility" Value="Visible" />
+                                <Setter Property="FontWeight" Value="SemiBold" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 仮想化したまま、中でスクロールする一覧（ScrollViewer で ItemsControl を包まない） -->
+        <Style x:Key="VirtualListStyle" TargetType="ItemsControl">
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True" />
+            <Setter Property="VirtualizingPanel.ScrollUnit" Value="Pixel" />
+            <Setter Property="ScrollViewer.CanContentScroll" Value="True" />
+            <Setter Property="ItemsPanel">
+                <Setter.Value>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel />
+                    </ItemsPanelTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ItemsControl">
+                        <ScrollViewer Focusable="False" CanContentScroll="True" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                            <ItemsPresenter />
+                        </ScrollViewer>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- アイコンと色の小さなタイル -->
+        <Style x:Key="TileItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Width" Value="30" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Margin" Value="0,0,4,4" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{StaticResource AppFocusVisualStyle}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="Tile"
+                                Background="Transparent"
+                                BorderBrush="Transparent"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource RadiusRow}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Tile" Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Tile" Property="Background" Value="{DynamicResource SurfaceSelectedBrush}" />
+                                <Setter TargetName="Tile" Property="BorderBrush" Value="{DynamicResource AccentDefaultBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="TileListStyle" TargetType="ListBox">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled" />
+            <Setter Property="ItemContainerStyle" Value="{StaticResource TileItemStyle}" />
+            <Setter Property="ItemsPanel">
+                <Setter.Value>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 編集中の項目の行（タイトル欄に直接打つ。行そのものにはフォーカスを置かない） -->
+        <Style x:Key="EditorItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Padding" Value="8,0" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="Row" Background="Transparent" CornerRadius="{StaticResource RadiusRow}" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Row" Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Row" Property="Background" Value="{DynamicResource SurfaceSelectedBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </ui:FluentWindow.Resources>
+
+    <!-- 地は画面側で持つ（FluentWindow の Background はテーマ切替で差し替えられることがあるため） -->
+    <Grid Background="{DynamicResource SurfaceContentBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="{Binding Source={StaticResource DialogBarHeight}}" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- 見出し（Ctrl+T の表示と閉じる） -->
+        <ui:TitleBar Height="{StaticResource DialogBarHeight}" ShowMinimize="False" ShowMaximize="False">
+            <ui:TitleBar.Header>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0,0,0">
+                    <Viewbox Width="19" Height="19" VerticalAlignment="Center">
+                        <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconTemplate}" StrokeThickness="1.4" />
+                    </Viewbox>
+                    <TextBlock Style="{StaticResource PaneTitleStyle}" Margin="14,0,0,0" VerticalAlignment="Center" Text="テンプレートから作る" />
+                </StackPanel>
+            </ui:TitleBar.Header>
+            <ui:TitleBar.TrailingContent>
+                <Border VerticalAlignment="Center" Margin="0,0,10,0" Padding="8,3" CornerRadius="{StaticResource RadiusButton}" Background="{DynamicResource SurfaceSubtleBrush}">
+                    <TextBlock Style="{StaticResource TextBaseStyle}"
+                               FontFamily="{StaticResource KeyCapFontFamily}"
+                               FontSize="{StaticResource TypeLabelSize}"
+                               Foreground="{DynamicResource TextTertiaryBrush}"
+                               Text="Ctrl+T" />
+                </Border>
+            </ui:TitleBar.TrailingContent>
+        </ui:TitleBar>
+
+        <Border Grid.Row="1" BorderBrush="{DynamicResource StrokeDividerBrush}" BorderThickness="0,1,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="{Binding Source={StaticResource ListPaneWidth}}" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- ============ 左: 一覧 ============ -->
+                <Border Background="{DynamicResource SettingsCardBrush}" BorderBrush="{DynamicResource StrokeDividerBrush}" BorderThickness="0,0,1,0">
+                    <Grid IsEnabled="{Binding IsListEnabled}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <!-- 探す（変換中は絞り込まない） -->
+                        <Grid Margin="14,12,14,10">
+                            <TextBox x:Name="SearchBox"
+                                     Style="{StaticResource InputTextBoxStyle}"
+                                     MinHeight="30"
+                                     Padding="28,0,8,0"
+                                     FontSize="{StaticResource TypeCaptionSize}"
+                                     input:ImeGuard.IsEnabled="True"
+                                     input:ImeGuard.CompositionCompleted="OnSearchCompositionCompleted"
+                                     Text="{Binding SearchText, UpdateSourceTrigger=Explicit}"
+                                     TextChanged="OnSearchTextChanged"
+                                     AutomationProperties.AutomationId="SearchBox"
+                                     AutomationProperties.Name="テンプレートを探す" />
+                            <Viewbox Width="13" Height="13" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" IsHitTestVisible="False">
+                                <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconSearch}" Stroke="{DynamicResource TextTertiaryBrush}" />
+                            </Viewbox>
+                            <TextBlock Margin="29,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False" Text="テンプレートを探す">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock" BasedOn="{StaticResource TextCaptionStyle}">
+                                        <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}" />
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Text, ElementName=SearchBox}" Value="">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+
+                        <!-- よく使う／すべて -->
+                        <ListBox x:Name="TemplateList"
+                                 Grid.Row="1"
+                                 Margin="8,0,8,4"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 ItemsSource="{Binding Source={StaticResource GroupedTemplates}}"
+                                 SelectedItem="{Binding Selected}"
+                                 IsSynchronizedWithCurrentItem="False"
+                                 ItemContainerStyle="{StaticResource TemplateItemStyle}"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                 VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                                 AutomationProperties.AutomationId="TemplateList"
+                                 AutomationProperties.Name="テンプレートの一覧">
+                            <ListBox.GroupStyle>
+                                <GroupStyle>
+                                    <GroupStyle.HeaderTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Style="{StaticResource TextLabelStyle}" Margin="6,8,6,6" Text="{Binding Name}" />
+                                        </DataTemplate>
+                                    </GroupStyle.HeaderTemplate>
+                                </GroupStyle>
+                            </ListBox.GroupStyle>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate DataType="{x:Type local:TemplateListItem}">
+                                    <Grid Height="46">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Viewbox Width="17" Height="17" VerticalAlignment="Center">
+                                            <Path Style="{StaticResource IconPathStyle}"
+                                                  Data="{Binding IconKey, Converter={StaticResource IconGeometry}}"
+                                                  Stroke="{Binding ColorHex, Converter={StaticResource HexBrush}}" />
+                                        </Viewbox>
+                                        <StackPanel Grid.Column="1" Margin="11,0,8,0" VerticalAlignment="Center">
+                                            <TextBlock Style="{StaticResource TextBodySmallStyle}" TextTrimming="CharacterEllipsis" Text="{Binding Name}" />
+                                            <TextBlock Style="{StaticResource TextCaptionStyle}"
+                                                       FontSize="{StaticResource TypeLabelSize}"
+                                                       FontWeight="Normal"
+                                                       Foreground="{DynamicResource TextTertiaryBrush}"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       Text="{Binding Summary}" />
+                                        </StackPanel>
+                                        <Border Grid.Column="2"
+                                                VerticalAlignment="Center"
+                                                Padding="6,1"
+                                                CornerRadius="8"
+                                                Background="{DynamicResource SurfaceSubtleBrush}"
+                                                Visibility="{Binding UseCountText, Converter={StaticResource HasValue}}">
+                                            <TextBlock Style="{StaticResource TabularCaptionStyle}" FontSize="{StaticResource TypeLabelSize}" FontWeight="Normal" Text="{Binding UseCountText}" />
+                                        </Border>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                        <TextBlock Grid.Row="2"
+                                   Style="{StaticResource NoteStyle}"
+                                   Margin="16,4,16,8"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                   Text="{Binding Notice}"
+                                   AutomationProperties.AutomationId="Notice" />
+
+                        <Border Grid.Row="3" Padding="12,8,12,10" BorderBrush="{DynamicResource StrokeDividerBrush}" BorderThickness="0,1,0,0">
+                            <StackPanel>
+                                <Button Style="{StaticResource PaneActionButtonStyle}"
+                                        Foreground="{DynamicResource AccentDefaultBrush}"
+                                        Command="{Binding NewTemplateCommand}"
+                                        AutomationProperties.AutomationId="NewTemplate"
+                                        AutomationProperties.Name="新しいテンプレート">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Viewbox Width="15" Height="15">
+                                            <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconAdd}" Stroke="{DynamicResource AccentDefaultBrush}" />
+                                        </Viewbox>
+                                        <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" Text="新しいテンプレート" />
+                                    </StackPanel>
+                                </Button>
+                                <Button Style="{StaticResource PaneActionButtonStyle}"
+                                        Foreground="{DynamicResource TextSecondaryBrush}"
+                                        Command="{Binding StartFromTasksCommand}"
+                                        AutomationProperties.AutomationId="FromSelection"
+                                        AutomationProperties.Name="選択中のタスクから作る">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Viewbox Width="15" Height="15">
+                                            <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconCheck}" Stroke="{DynamicResource TextSecondaryBrush}" />
+                                        </Viewbox>
+                                        <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" Text="選択中のタスクから作る" />
+                                    </StackPanel>
+                                </Button>
+                                <!-- 使い捨てリスト（タスクは作らない。最後に使った方＝メイン画面か小窓かで開く） -->
+                                <Button Style="{StaticResource PaneActionButtonStyle}"
+                                        Foreground="{DynamicResource TextSecondaryBrush}"
+                                        Command="{Binding NewScratchCommand}"
+                                        ToolTip="チェックと文字だけの使い捨てのリストを作ります（タスクは作りません）"
+                                        AutomationProperties.AutomationId="NewScratch"
+                                        AutomationProperties.Name="新しい使い捨てリスト">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Viewbox Width="15" Height="15">
+                                            <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconList}" Stroke="{DynamicResource TextSecondaryBrush}" />
+                                        </Viewbox>
+                                        <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" Text="新しい使い捨てリスト" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- 確認用（開発用データフォルダ＋TASKDECK_DEV_TEMPLATES のときだけ出る） -->
+                        <StackPanel Grid.Row="4" Margin="14,0,14,12" Visibility="{Binding IsDevToolsVisible, Converter={StaticResource HasValue}}">
+                            <TextBlock Style="{StaticResource TextLabelStyle}" Margin="0,4,0,6" Text="確認用（開発用データフォルダだけ）" />
+                            <Button Style="{StaticResource StandardButtonStyle}"
+                                    Margin="0,0,0,6"
+                                    HorizontalAlignment="Stretch"
+                                    Content="繰り返しピッカーの確認"
+                                    Click="OnOpenRecurrenceCheck"
+                                    AutomationProperties.AutomationId="DevRecurrence" />
+                            <Button Style="{StaticResource StandardButtonStyle}"
+                                    HorizontalAlignment="Stretch"
+                                    Content="メイン画面の選択を入れる（確認用）"
+                                    Command="{Binding DevSelectSampleTasksCommand}"
+                                    AutomationProperties.AutomationId="DevSelect" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- ============ 右 ============ -->
+                <Grid Grid.Column="1">
+
+                    <!-- 空 -->
+                    <StackPanel HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                MaxWidth="360"
+                                Visibility="{Binding Mode, Converter={StaticResource Is}, ConverterParameter=Empty}">
+                        <TextBlock Style="{StaticResource TextSubtitleStyle}" HorizontalAlignment="Center" Text="テンプレートがありません" />
+                        <TextBlock Style="{StaticResource TextCaptionStyle}"
+                                   Margin="0,8,0,0"
+                                   TextAlignment="Center"
+                                   TextWrapping="Wrap"
+                                   Text="左下の「新しいテンプレート」から作るか、メイン画面で選んだタスクからそのまま作れます。" />
+                    </StackPanel>
+
+                    <!-- 展開プレビュー -->
+                    <Grid Visibility="{Binding Mode, Converter={StaticResource Is}, ConverterParameter=Preview}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <Border Padding="22,16,22,12" BorderBrush="{DynamicResource StrokeSubtleBrush}" BorderThickness="0,0,0,1">
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Style="{StaticResource PaneTitleStyle}" MaxWidth="460" Text="{Binding TemplateName}" AutomationProperties.AutomationId="TemplateTitle" />
+                                    <Button Grid.Column="1"
+                                            Style="{StaticResource SmallOutlineButtonStyle}"
+                                            Margin="10,0,0,0"
+                                            VerticalAlignment="Center"
+                                            Command="{Binding EditCommand}"
+                                            AutomationProperties.AutomationId="EditTemplate"
+                                            AutomationProperties.Name="中身を編集">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Viewbox Width="11" Height="11">
+                                                <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconEdit}" Stroke="{DynamicResource TextSecondaryBrush}" />
+                                            </Viewbox>
+                                            <TextBlock Margin="5,0,0,0" VerticalAlignment="Center" Text="中身を編集" />
+                                        </StackPanel>
+                                    </Button>
+                                    <TextBlock Grid.Column="3"
+                                               Style="{StaticResource TabularCaptionStyle}"
+                                               FontSize="{StaticResource TypeLabelSize}"
+                                               Foreground="{DynamicResource TextTertiaryBrush}"
+                                               VerticalAlignment="Center"
+                                               Text="{Binding LastUsedText}" />
+                                </Grid>
+                                <TextBlock Style="{StaticResource NoteStyle}" Margin="0,4,0,0" Text="{Binding TemplateDescription}" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- 基準日の帯（この帯だけ地を変える、UI 設計書 20.3） -->
+                        <Border Grid.Row="1"
+                                Padding="22,14"
+                                Background="{DynamicResource AnchorBandBrush}"
+                                BorderBrush="{DynamicResource SurfaceSelectedStrokeBrush}"
+                                BorderThickness="0,0,0,1">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource FieldLabelStyle}" Foreground="{DynamicResource AccentDefaultBrush}" Text="{Binding AnchorCaption}" />
+                                    <Button x:Name="AnchorButton"
+                                            Style="{StaticResource FieldButtonStyle}"
+                                            BorderBrush="{DynamicResource AccentDefaultBrush}"
+                                            Click="OnAnchorClick"
+                                            AutomationProperties.AutomationId="AnchorButton"
+                                            AutomationProperties.Name="基準日を選ぶ">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Viewbox Width="14" Height="14" VerticalAlignment="Center">
+                                                <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconCalendar}" Stroke="{DynamicResource AccentDefaultBrush}" />
+                                            </Viewbox>
+                                            <TextBlock Style="{StaticResource TabularBodyStyle}"
+                                                       FontSize="{StaticResource TypeBodySmallSize}"
+                                                       FontWeight="SemiBold"
+                                                       Margin="9,0,0,0"
+                                                       VerticalAlignment="Center"
+                                                       Text="{Binding AnchorDateText}"
+                                                       AutomationProperties.AutomationId="AnchorDateText" />
+                                            <Viewbox Style="{StaticResource ChevronStyle}">
+                                                <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconChevronDown}" Stroke="{DynamicResource TextSecondaryBrush}" />
+                                            </Viewbox>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="14,0,0,0">
+                                    <TextBlock Style="{StaticResource FieldLabelStyle}" Foreground="{DynamicResource TextSecondaryBrush}" Text="まとめて入れる先" />
+                                    <Button x:Name="ProjectButton"
+                                            Style="{StaticResource FieldButtonStyle}"
+                                            Click="OnProjectClick"
+                                            AutomationProperties.AutomationId="ProjectButton"
+                                            AutomationProperties.Name="まとめて入れる先を選ぶ">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Ellipse Width="9" Height="9" Margin="0,0,9,0" VerticalAlignment="Center"
+                                                     Fill="{Binding ProjectColor, Converter={StaticResource HexBrush}}"
+                                                     Visibility="{Binding ProjectColor, Converter={StaticResource HasValue}}" />
+                                            <TextBlock VerticalAlignment="Center" Text="{Binding ProjectName}" />
+                                            <Viewbox Style="{StaticResource ChevronStyle}">
+                                                <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconChevronDown}" Stroke="{DynamicResource TextSecondaryBrush}" />
+                                            </Viewbox>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Margin="14,0,0,0">
+                                    <TextBlock Style="{StaticResource FieldLabelStyle}" Foreground="{DynamicResource TextSecondaryBrush}" Text="付けるタグ" />
+                                    <Button x:Name="TagsButton"
+                                            Style="{StaticResource FieldButtonStyle}"
+                                            Click="OnTagsClick"
+                                            AutomationProperties.AutomationId="TagsButton"
+                                            AutomationProperties.Name="付けるタグを選ぶ">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock MaxWidth="190" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Text="{Binding TagsSummary}" />
+                                            <Viewbox Style="{StaticResource ChevronStyle}">
+                                                <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconChevronDown}" Stroke="{DynamicResource TextSecondaryBrush}" />
+                                            </Viewbox>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                                <StackPanel Grid.Column="4" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                    <TextBlock Style="{StaticResource TextCaptionStyle}" FontSize="{StaticResource TypeLabelSize}" HorizontalAlignment="Right" Text="作られるタスク" />
+                                    <TextBlock Style="{StaticResource TextBaseStyle}" HorizontalAlignment="Right" AutomationProperties.AutomationId="CreateCount">
+                                        <Run FontSize="{StaticResource TypeTitleSize}" FontWeight="SemiBold" Typography.NumeralAlignment="Tabular" Text="{Binding CreateCount, Mode=OneWay}" />
+                                        <Run FontSize="{StaticResource TypeCaptionSize}" Foreground="{DynamicResource TextSecondaryBrush}" Text="件" />
+                                    </TextBlock>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- 作られる内容（相対日数 → 実日付、UI 設計書 20.4） -->
+                        <Grid Grid.Row="2" Margin="16,10,16,0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid Margin="6,2,6,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Style="{StaticResource TextLabelStyle}" Text="作られる内容" />
+                                <Border Grid.Column="1" Style="{StaticResource DividerStyle}" Margin="8,0" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="2" Style="{StaticResource TextCaptionStyle}" FontSize="{StaticResource TypeLabelSize}" Foreground="{DynamicResource TextTertiaryBrush}" Text="チェックを外すと除けます" />
+                            </Grid>
+                            <ItemsControl Grid.Row="1" Style="{StaticResource VirtualListStyle}" ItemsSource="{Binding Rows}" AutomationProperties.AutomationId="PreviewRows">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type local:ExpansionRow}">
+                                        <Border x:Name="RowBack" Height="34" Padding="6,0" CornerRadius="{StaticResource RadiusRow}" Background="Transparent">
+                                            <Grid x:Name="RowGrid">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <Border Width="{Binding Indent}" />
+                                                <CheckBox x:Name="Check"
+                                                          Grid.Column="1"
+                                                          Style="{StaticResource SubtaskCheckBoxStyle}"
+                                                          VerticalAlignment="Center"
+                                                          IsChecked="{Binding IsChecked}"
+                                                          AutomationProperties.Name="{Binding Title, StringFormat={}{0} を含める}" />
+                                                <TextBlock Grid.Column="2" Style="{StaticResource PriorityMarksStyle}" Margin="10,0,0,0" Text="{Binding PriorityMarks}" />
+                                                <TextBlock x:Name="TitleText"
+                                                           Grid.Column="3"
+                                                           Style="{StaticResource TextBodySmallStyle}"
+                                                           Margin="10,0"
+                                                           VerticalAlignment="Center"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           Text="{Binding Title}" />
+                                                <TextBlock x:Name="OffsetLabel"
+                                                           Grid.Column="4"
+                                                           Style="{StaticResource TextCaptionStyle}"
+                                                           FontSize="{StaticResource TypeLabelSize}"
+                                                           Foreground="{DynamicResource TextTertiaryBrush}"
+                                                           VerticalAlignment="Center"
+                                                           Text="{Binding OffsetText}" />
+                                                <Viewbox Grid.Column="5" Width="11" Height="11" Margin="10,0" VerticalAlignment="Center"
+                                                         Visibility="{Binding OffsetText, Converter={StaticResource HasValue}}">
+                                                    <Path x:Name="ArrowPath" Style="{StaticResource IconPathStyle}" Data="{StaticResource IconArrowRight}" Stroke="{DynamicResource TextDisabledBrush}" />
+                                                </Viewbox>
+                                                <TextBlock x:Name="DateLabel"
+                                                           Grid.Column="6"
+                                                           Width="{StaticResource DateColumnWidth}"
+                                                           Style="{StaticResource TabularCaptionStyle}"
+                                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                                           TextAlignment="Right"
+                                                           VerticalAlignment="Center"
+                                                           Text="{Binding DateText}" />
+                                            </Grid>
+                                        </Border>
+                                        <DataTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding IsSubtask}" Value="True">
+                                                <Setter TargetName="RowBack" Property="Height" Value="30" />
+                                                <Setter TargetName="TitleText" Property="FontSize" Value="{StaticResource TypeCaptionSize}" />
+                                                <Setter TargetName="TitleText" Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsToday}" Value="True">
+                                                <Setter TargetName="DateLabel" Property="Foreground" Value="{DynamicResource AccentDefaultBrush}" />
+                                                <Setter TargetName="DateLabel" Property="FontWeight" Value="SemiBold" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsPast}" Value="True">
+                                                <Setter TargetName="RowBack" Property="Background" Value="{DynamicResource PastWarnBackgroundBrush}" />
+                                                <Setter TargetName="OffsetLabel" Property="Foreground" Value="{DynamicResource PastWarnForegroundBrush}" />
+                                                <Setter TargetName="ArrowPath" Property="Stroke" Value="{DynamicResource PastWarnForegroundBrush}" />
+                                                <Setter TargetName="DateLabel" Property="Foreground" Value="{DynamicResource PastWarnForegroundBrush}" />
+                                                <Setter TargetName="DateLabel" Property="FontWeight" Value="SemiBold" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsChecked}" Value="False">
+                                                <Setter TargetName="RowGrid" Property="Opacity" Value="0.5" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsParentExcluded}" Value="True">
+                                                <Setter TargetName="Check" Property="IsEnabled" Value="False" />
+                                            </DataTrigger>
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Grid>
+
+                        <!-- 過去日の警告（エラーではないので赤は使わない、UI 設計書 20.5） -->
+                        <Border Grid.Row="3"
+                                Margin="22,8,22,10"
+                                Padding="11,9"
+                                CornerRadius="{StaticResource RadiusRow}"
+                                Background="{DynamicResource PastWarnBackgroundBrush}"
+                                BorderBrush="{DynamicResource PastWarnStrokeBrush}"
+                                BorderThickness="1"
+                                Visibility="{Binding HasPast, Converter={StaticResource HasValue}}"
+                                AutomationProperties.AutomationId="PastWarning">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Viewbox Width="15" Height="15" Margin="0,1,0,0" VerticalAlignment="Top">
+                                    <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconWarning}" Stroke="{DynamicResource PastWarnForegroundBrush}" />
+                                </Viewbox>
+                                <StackPanel Grid.Column="1" Margin="9,0,0,0">
+                                    <TextBlock Style="{StaticResource TextBaseStyle}"
+                                               FontSize="{StaticResource TypeCaptionSize}"
+                                               Margin="0,0,0,5"
+                                               TextWrapping="Wrap"
+                                               Text="{Binding PastWarningText}"
+                                               AutomationProperties.AutomationId="PastWarningText" />
+                                    <CheckBox Style="{StaticResource CompactCheckBoxStyle}"
+                                              IsChecked="{Binding PullPastToToday}"
+                                              Content="{Binding PullPastText}"
+                                              AutomationProperties.AutomationId="PullPastToToday" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <Border Grid.Row="4" Style="{StaticResource DialogBarStyle}">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <Button Style="{StaticResource StandardButtonStyle}" MinWidth="72" Content="やめる" Command="{Binding CloseCommand}" />
+                                <!-- タスクは作らず、項目の題名と階層だけの使い捨てリストとして開く（買い物リストなど） -->
+                                <Button Style="{StaticResource StandardButtonStyle}"
+                                        Margin="10,0,0,0"
+                                        Content="使い捨てで開く"
+                                        Command="{Binding OpenAsScratchCommand}"
+                                        ToolTip="タスクは作らず、チェックと文字だけの使い捨てのリストとして開きます"
+                                        AutomationProperties.AutomationId="OpenAsScratch" />
+                                <Button Style="{StaticResource PrimaryButtonStyle}"
+                                        MinWidth="96"
+                                        Margin="10,0,0,0"
+                                        Content="{Binding ExpandText}"
+                                        Command="{Binding ExpandCommand}"
+                                        IsDefault="{Binding Mode, Converter={StaticResource Is}, ConverterParameter=Preview}"
+                                        AutomationProperties.AutomationId="ExpandButton" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- 新規作成・編集 -->
+                    <Grid Visibility="{Binding Mode, Converter={StaticResource Is}, ConverterParameter=Editor}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid x:Name="EditorRoot" DataContext="{Binding Editor}" d:DataContext="{d:DesignInstance local:TemplateEditorViewModel}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <TextBlock Style="{StaticResource PaneTitleStyle}" Margin="22,16,22,12" Text="{Binding Heading}" />
+
+                            <!-- テンプレートの値 -->
+                            <Grid Grid.Row="1" Margin="22,0,22,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="20" />
+                                    <ColumnDefinition Width="300" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource FieldLabelStyle}" Text="名前" />
+                                    <TextBox x:Name="TemplateNameBox"
+                                             Style="{StaticResource FormTextBoxStyle}"
+                                             Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                                             AutomationProperties.AutomationId="TemplateNameBox"
+                                             AutomationProperties.Name="名前" />
+                                    <TextBlock Style="{StaticResource FieldLabelStyle}" Margin="0,10,0,4" Text="説明" />
+                                    <TextBox Style="{StaticResource FormTextBoxStyle}"
+                                             Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                                             AutomationProperties.AutomationId="DescriptionBox"
+                                             AutomationProperties.Name="説明" />
+                                    <TextBlock Style="{StaticResource FieldLabelStyle}" Margin="0,10,0,4" Text="基準日の呼び名（空なら「基準日」）" />
+                                    <TextBox Style="{StaticResource FormTextBoxStyle}"
+                                             Width="200"
+                                             HorizontalAlignment="Left"
+                                             Text="{Binding AnchorLabel, UpdateSourceTrigger=PropertyChanged}"
+                                             AutomationProperties.AutomationId="AnchorLabelBox"
+                                             AutomationProperties.Name="基準日の呼び名" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Style="{StaticResource FieldLabelStyle}" Text="アイコンと色" />
+                                    <ListBox Style="{StaticResource TileListStyle}"
+                                             ItemsSource="{x:Static local:TemplateEditorViewModel.IconChoices}"
+                                             SelectedItem="{Binding IconKey}"
+                                             AutomationProperties.Name="アイコン">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <Viewbox Width="16" Height="16">
+                                                    <Path Style="{StaticResource IconPathStyle}"
+                                                          Data="{Binding Converter={StaticResource IconGeometry}}"
+                                                          Stroke="{Binding DataContext.ColorHex, RelativeSource={RelativeSource AncestorType=ListBox}, Converter={StaticResource HexBrush}}" />
+                                                </Viewbox>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                    <ListBox x:Name="ColorChoiceList"
+                                             Style="{StaticResource TileListStyle}"
+                                             ItemsSource="{x:Static local:TemplateEditorViewModel.ColorChoices}"
+                                             SelectedItem="{Binding ColorHex}"
+                                             AutomationProperties.Name="色">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <Ellipse Width="16" Height="16" Fill="{Binding Converter={StaticResource HexBrush}}" />
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                    <Grid Margin="0,4,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="10" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel>
+                                            <TextBlock Style="{StaticResource FieldLabelStyle}" Text="既定の入れる先" />
+                                            <Button x:Name="EditorProjectButton"
+                                                    Style="{StaticResource FieldButtonStyle}"
+                                                    HorizontalAlignment="Stretch"
+                                                    Click="OnEditorProjectClick"
+                                                    AutomationProperties.Name="既定の入れる先を選ぶ">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Ellipse Width="9" Height="9" Margin="0,0,9,0" VerticalAlignment="Center"
+                                                             Fill="{Binding DefaultProjectColor, Converter={StaticResource HexBrush}}"
+                                                             Visibility="{Binding DefaultProjectColor, Converter={StaticResource HasValue}}" />
+                                                    <TextBlock VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Text="{Binding DefaultProjectName}" />
+                                                </StackPanel>
+                                            </Button>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2">
+                                            <TextBlock Style="{StaticResource FieldLabelStyle}" Text="既定のタグ" />
+                                            <Button x:Name="EditorTagsButton"
+                                                    Style="{StaticResource FieldButtonStyle}"
+                                                    HorizontalAlignment="Stretch"
+                                                    Click="OnEditorTagsClick"
+                                                    AutomationProperties.Name="既定のタグを選ぶ">
+                                                <TextBlock VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Text="{Binding DefaultTags.Summary}" />
+                                            </Button>
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- 項目（左）と選んだ項目の中身（右） -->
+                            <Grid Grid.Row="2" Margin="22,0,22,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="16" />
+                                    <ColumnDefinition Width="{Binding Source={StaticResource ItemDetailWidth}}" />
+                                </Grid.ColumnDefinitions>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+                                    <Grid Margin="0,0,0,4">
+                                        <TextBlock Style="{StaticResource TextLabelStyle}" VerticalAlignment="Center" Text="項目（Enter で次の項目、Alt+矢印で並べ替え・字下げ）" />
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                            <Button Style="{StaticResource ToolButtonStyle}" Command="{Binding AddItemCommand}" ToolTip="項目を足す" AutomationProperties.Name="項目を足す">
+                                                <Viewbox Width="14" Height="14"><Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconAdd}" /></Viewbox>
+                                            </Button>
+                                            <Button Style="{StaticResource ToolButtonStyle}" Command="{Binding AddChildCommand}" ToolTip="サブ項目を足す" AutomationProperties.Name="サブ項目を足す">
+                                                <Viewbox Width="14" Height="14"><Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconSubtask}" /></Viewbox>
+                                            </Button>
+                                            <Button Style="{StaticResource ToolButtonStyle}" Command="{Binding MoveUpCommand}" ToolTip="上へ（Alt+↑）" AutomationProperties.Name="上へ">
+                                                <Viewbox Width="14" Height="14"><Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconArrowUp}" /></Viewbox>
+                                            </Button>
+                                            <Button Style="{StaticResource ToolButtonStyle}" Command="{Binding MoveDownCommand}" ToolTip="下へ（Alt+↓）" AutomationProperties.Name="下へ">
+                                                <Viewbox Width="14" Height="14" RenderTransformOrigin="0.5,0.5">
+                                                    <Viewbox.RenderTransform>
+                                                        <RotateTransform Angle="180" />
+                                                    </Viewbox.RenderTransform>
+                                                    <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconArrowUp}" />
+                                                </Viewbox>
+                                            </Button>
+                                            <Button Style="{StaticResource ToolButtonStyle}" Command="{Binding OutdentCommand}" ToolTip="1段上げる（Alt+←）" AutomationProperties.Name="1段上げる">
+                                                <Viewbox Width="14" Height="14"><Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconChevronLeft}" /></Viewbox>
+                                            </Button>
+                                            <Button Style="{StaticResource ToolButtonStyle}" Command="{Binding IndentCommand}" ToolTip="1段下げる（Alt+→）" AutomationProperties.Name="1段下げる">
+                                                <Viewbox Width="14" Height="14"><Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconChevronRight}" /></Viewbox>
+                                            </Button>
+                                            <Button Style="{StaticResource ToolButtonStyle}" Command="{Binding RemoveCommand}" ToolTip="項目を消す" AutomationProperties.Name="項目を消す">
+                                                <Viewbox Width="14" Height="14"><Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconTrash}" /></Viewbox>
+                                            </Button>
+                                        </StackPanel>
+                                    </Grid>
+                                    <Border Grid.Row="1" Padding="4" BorderBrush="{DynamicResource StrokeDividerBrush}" BorderThickness="1" CornerRadius="{StaticResource RadiusRow}">
+                                        <ListBox x:Name="EditorItemList"
+                                                 Background="Transparent"
+                                                 BorderThickness="0"
+                                                 ItemsSource="{Binding Items}"
+                                                 SelectedItem="{Binding SelectedItem}"
+                                                 ItemContainerStyle="{StaticResource EditorItemStyle}"
+                                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                                 AutomationProperties.AutomationId="EditorItems"
+                                                 AutomationProperties.Name="項目">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate DataType="{x:Type local:EditorItem}">
+                                                    <Grid Height="32">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <Border Width="{Binding Indent}" />
+                                                        <Ellipse Grid.Column="1" Width="5" Height="5" Margin="2,0,8,0" VerticalAlignment="Center" Fill="{DynamicResource TextTertiaryBrush}" />
+                                                        <TextBox Grid.Column="2"
+                                                                 Style="{StaticResource InlineTextBoxStyle}"
+                                                                 FontSize="{StaticResource TypeBodySmallSize}"
+                                                                 VerticalAlignment="Center"
+                                                                 input:ImeGuard.IsEnabled="True"
+                                                                 Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}"
+                                                                 PreviewKeyDown="OnItemTitleKeyDown"
+                                                                 GotKeyboardFocus="OnItemTitleFocused"
+                                                                 AutomationProperties.Name="項目のタイトル" />
+                                                        <TextBlock Grid.Column="3" Style="{StaticResource TabularCaptionStyle}" FontSize="{StaticResource TypeLabelSize}" Margin="8,0,0,0" VerticalAlignment="Center" Text="{Binding DueSummary}" />
+                                                        <TextBlock Grid.Column="4" Style="{StaticResource PriorityMarksStyle}" Margin="8,0,0,0" Text="{Binding PriorityMarks}" />
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                    </Border>
+                                </Grid>
+
+                                <Border Grid.Column="2"
+                                        Padding="12"
+                                        CornerRadius="{StaticResource RadiusRow}"
+                                        Background="{DynamicResource SettingsCardBrush}"
+                                        BorderBrush="{DynamicResource StrokeSubtleBrush}"
+                                        BorderThickness="1"
+                                        Visibility="{Binding HasSelection, Converter={StaticResource HasValue}}">
+                                    <StackPanel DataContext="{Binding SelectedItem}">
+                                        <TextBlock Style="{StaticResource TextLabelStyle}" Margin="0,0,0,8" Text="選んだ項目" />
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="10" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <TextBlock Style="{StaticResource FieldLabelStyle}" Text="日数（-3 で3日前）" />
+                                                <TextBox Style="{StaticResource FormTextBoxStyle}"
+                                                         Typography.NumeralAlignment="Tabular"
+                                                         Text="{Binding OffsetText, UpdateSourceTrigger=PropertyChanged}"
+                                                         AutomationProperties.AutomationId="OffsetBox"
+                                                         AutomationProperties.Name="基準日からの日数" />
+                                                <TextBlock Margin="0,4,0,0" Text="{Binding OffsetHint}">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock" BasedOn="{StaticResource NoteStyle}">
+                                                            <Setter Property="FontSize" Value="{StaticResource TypeLabelSize}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding HasOffsetError}" Value="True">
+                                                                    <Setter Property="Foreground" Value="{DynamicResource StateOverdueBrush}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Style="{StaticResource FieldLabelStyle}" Text="時刻（空で終日）" />
+                                                <TextBox Style="{StaticResource FormTextBoxStyle}"
+                                                         Typography.NumeralAlignment="Tabular"
+                                                         Text="{Binding TimeText, UpdateSourceTrigger=PropertyChanged}"
+                                                         AutomationProperties.AutomationId="TimeBox"
+                                                         AutomationProperties.Name="時刻" />
+                                                <TextBlock Style="{StaticResource NoteStyle}" Margin="0,4,0,0" FontSize="{StaticResource TypeLabelSize}" Foreground="{DynamicResource StateOverdueBrush}" Text="{Binding TimeHint}" />
+                                            </StackPanel>
+                                        </Grid>
+                                        <TextBlock Style="{StaticResource FieldLabelStyle}" Margin="0,10,0,4" Text="優先度" />
+                                        <ComboBox Style="{StaticResource SettingsComboBoxStyle}"
+                                                  HorizontalAlignment="Left"
+                                                  MinWidth="130"
+                                                  ItemsSource="{x:Static local:TemplateEditorViewModel.PriorityOptions}"
+                                                  SelectedValuePath="Value"
+                                                  DisplayMemberPath="Label"
+                                                  SelectedValue="{Binding Priority}"
+                                                  AutomationProperties.Name="優先度" />
+                                        <TextBlock Style="{StaticResource FieldLabelStyle}" Margin="0,10,0,4" Text="タグ" />
+                                        <Button x:Name="ItemTagsButton"
+                                                Style="{StaticResource FieldButtonStyle}"
+                                                HorizontalAlignment="Stretch"
+                                                Click="OnItemTagsClick"
+                                                AutomationProperties.Name="項目のタグを選ぶ">
+                                            <TextBlock VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Text="{Binding DataContext.ItemTags.Summary, ElementName=EditorRoot}" />
+                                        </Button>
+                                        <TextBlock Style="{StaticResource FieldLabelStyle}" Margin="0,10,0,4" Text="メモ" />
+                                        <TextBox Style="{StaticResource NotesTextBoxStyle}"
+                                                 Height="60"
+                                                 input:ImeGuard.IsEnabled="True"
+                                                 VerticalScrollBarVisibility="Auto"
+                                                 Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
+                                                 AutomationProperties.Name="メモ" />
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </Grid>
+
+                        <Border Grid.Row="1" Style="{StaticResource DialogBarStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                                            Visibility="{Binding Editor.IsNew, Converter={StaticResource HasValue}, ConverterParameter=Not}">
+                                    <Button Style="{StaticResource TextButtonStyle}"
+                                            Foreground="{DynamicResource StateOverdueBrush}"
+                                            Content="テンプレートを削除"
+                                            Command="{Binding RequestDeleteCommand}"
+                                            Visibility="{Binding IsConfirmingDelete, Converter={StaticResource HasValue}, ConverterParameter=Not}"
+                                            AutomationProperties.AutomationId="DeleteTemplate" />
+                                    <StackPanel Orientation="Horizontal" Visibility="{Binding IsConfirmingDelete, Converter={StaticResource HasValue}}">
+                                        <TextBlock Style="{StaticResource TextCaptionStyle}" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}" Text="このテンプレートを削除します。元に戻せません。" />
+                                        <Button Style="{StaticResource DangerButtonStyle}" Margin="10,0,0,0" Content="削除する" Command="{Binding ConfirmDeleteCommand}" AutomationProperties.AutomationId="ConfirmDelete" />
+                                        <Button Style="{StaticResource StandardButtonStyle}" Margin="6,0,0,0" Content="やめる" Command="{Binding CancelDeleteCommand}" />
+                                    </StackPanel>
+                                </StackPanel>
+                                <TextBlock Grid.Column="1"
+                                           Style="{StaticResource NoteStyle}"
+                                           Margin="12,0"
+                                           VerticalAlignment="Center"
+                                           Foreground="{DynamicResource StateOverdueBrush}"
+                                           Text="{Binding Editor.Error}"
+                                           AutomationProperties.AutomationId="EditorError" />
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Button Style="{StaticResource StandardButtonStyle}" MinWidth="72" Content="やめる" Command="{Binding CancelEditCommand}" AutomationProperties.AutomationId="CancelEdit" />
+                                    <Button Style="{StaticResource PrimaryButtonStyle}" MinWidth="72" Margin="10,0,0,0" Content="保存" Command="{Binding SaveCommand}" AutomationProperties.AutomationId="SaveButton" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </Grid>
+
+                    <!-- 選択中のタスクから作る -->
+                    <Grid Visibility="{Binding Mode, Converter={StaticResource Is}, ConverterParameter=FromTasks}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Style="{StaticResource PaneTitleStyle}" Margin="22,16,22,12" Text="選択中のタスクから作る" />
+                        <StackPanel Grid.Row="1" Margin="22,0" MaxWidth="560" HorizontalAlignment="Left">
+                            <TextBlock Style="{StaticResource TextBodySmallStyle}" TextWrapping="Wrap" Text="{Binding FromTasksSummary}" AutomationProperties.AutomationId="FromTasksSummary" />
+                            <TextBlock Style="{StaticResource FieldLabelStyle}" Margin="0,16,0,4" Text="名前" />
+                            <TextBox Style="{StaticResource FormTextBoxStyle}"
+                                     Width="360"
+                                     HorizontalAlignment="Left"
+                                     Text="{Binding FromTasksName, UpdateSourceTrigger=PropertyChanged}"
+                                     AutomationProperties.AutomationId="FromTasksName"
+                                     AutomationProperties.Name="テンプレートの名前" />
+                            <TextBlock Style="{StaticResource FieldLabelStyle}" Margin="0,12,0,4" Text="基準日" />
+                            <Button x:Name="FromTasksAnchorButton"
+                                    Style="{StaticResource FieldButtonStyle}"
+                                    BorderBrush="{DynamicResource AccentDefaultBrush}"
+                                    Click="OnFromTasksAnchorClick"
+                                    AutomationProperties.Name="基準日を選ぶ">
+                                <StackPanel Orientation="Horizontal">
+                                    <Viewbox Width="14" Height="14" VerticalAlignment="Center">
+                                        <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconCalendar}" Stroke="{DynamicResource AccentDefaultBrush}" />
+                                    </Viewbox>
+                                    <TextBlock Style="{StaticResource TabularBodyStyle}" FontSize="{StaticResource TypeBodySmallSize}" FontWeight="SemiBold" Margin="9,0,0,0" VerticalAlignment="Center" Text="{Binding FromTasksAnchorText}" />
+                                    <Viewbox Style="{StaticResource ChevronStyle}">
+                                        <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconChevronDown}" Stroke="{DynamicResource TextSecondaryBrush}" />
+                                    </Viewbox>
+                                </StackPanel>
+                            </Button>
+                            <TextBlock Style="{StaticResource NoteStyle}"
+                                       Margin="0,8,0,0"
+                                       Text="タスクの期限は、この日からの日数（「3日前」「翌日」など）としてテンプレートに入ります。時刻はそのまま残ります。" />
+                            <TextBlock Style="{StaticResource NoteStyle}"
+                                       Margin="0,10,0,0"
+                                       Foreground="{DynamicResource StateOverdueBrush}"
+                                       Text="{Binding FromTasksError}"
+                                       AutomationProperties.AutomationId="FromTasksError" />
+                        </StackPanel>
+                        <Border Grid.Row="2" Style="{StaticResource DialogBarStyle}">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <Button Style="{StaticResource StandardButtonStyle}" MinWidth="72" Content="やめる" Command="{Binding CancelFromTasksCommand}" />
+                                <Button Style="{StaticResource PrimaryButtonStyle}"
+                                        Margin="10,0,0,0"
+                                        Content="テンプレートを作る"
+                                        Command="{Binding CreateFromTasksCommand}"
+                                        IsDefault="{Binding Mode, Converter={StaticResource Is}, ConverterParameter=FromTasks}"
+                                        AutomationProperties.AutomationId="CreateFromTasks" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!--
+            ============ ポップアップ（入力補助） ============
+            ピッカーは影と枠をパネル自身が持つので、Popup の直下に置く（INTERFACES 5.3）。影の余白（左右10・上8）の分だけずらす。
+            フォーカスはパネルが開いたとき（Loaded）に自分で取るので、ここでは横取りしない。
+            タグの一覧はこの画面で書いた中身なので、枠もここで付ける。
+        -->
+        <Popup x:Name="DatePopup" StaysOpen="False" AllowsTransparency="True" Placement="Bottom" HorizontalOffset="-10" VerticalOffset="-8">
+            <pickers:DatePickerPanel x:Name="DatePicker" />
+        </Popup>
+
+        <Popup x:Name="ProjectPopup" StaysOpen="False" AllowsTransparency="True" Placement="Bottom" HorizontalOffset="-10" VerticalOffset="-8">
+            <pickers:ProjectPickerPanel x:Name="ProjectPicker" />
+        </Popup>
+
+        <Popup x:Name="TagsPopup" StaysOpen="False" AllowsTransparency="True" Placement="Bottom" HorizontalOffset="-10" VerticalOffset="-8">
+            <Border Style="{StaticResource PopupShadowStyle}">
+                <Border Style="{StaticResource PopupSurfaceStyle}" Width="240">
+                    <StackPanel x:Name="TagsPanel" d:DataContext="{d:DesignInstance local:TagSelection}">
+                        <TextBlock x:Name="TagsHeader" Style="{StaticResource PopupHeaderStyle}" Text="付けるタグ" />
+                        <Border Style="{StaticResource PopupSeparatorStyle}" />
+                        <Button x:Name="ResetTagsButton"
+                                Style="{StaticResource PaneActionButtonStyle}"
+                                Margin="4,4,4,0"
+                                Foreground="{DynamicResource AccentDefaultBrush}"
+                                Content="テンプレートどおりにする"
+                                Click="OnResetTags" />
+                        <ItemsControl Style="{StaticResource VirtualListStyle}" MaxHeight="260" Margin="4" ItemsSource="{Binding Choices}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type local:TagChoice}">
+                                    <CheckBox Style="{StaticResource CompactCheckBoxStyle}"
+                                              Height="30"
+                                              Margin="8,0"
+                                              FontSize="{StaticResource TypeBodySmallSize}"
+                                              Foreground="{DynamicResource TextPrimaryBrush}"
+                                              Content="{Binding Label}"
+                                              IsChecked="{Binding IsSelected}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Style="{StaticResource NoteStyle}"
+                                   Margin="12,4,12,10"
+                                   Text="タグがありません。メイン画面でタスクに #タグ を付けると、ここに出ます。"
+                                   Visibility="{Binding IsEmpty, Converter={StaticResource HasValue}}" />
+                        <TextBlock x:Name="TagsNote" Style="{StaticResource NoteStyle}" Margin="12,0,12,10" FontSize="{StaticResource TypeLabelSize}" />
+                    </StackPanel>
+                </Border>
+            </Border>
+        </Popup>
+    </Grid>
+</ui:FluentWindow>

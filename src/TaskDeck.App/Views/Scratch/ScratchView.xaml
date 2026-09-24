@@ -1,0 +1,189 @@
+<UserControl x:Class="TaskDeck.App.Views.Scratch.ScratchView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:input="clr-namespace:TaskDeck.App.Input"
+             xmlns:local="clr-namespace:TaskDeck.App.Views.Scratch"
+             xmlns:templates="clr-namespace:TaskDeck.App.Views.Templates"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance local:ScratchListViewModel}">
+    <!--
+        使い捨てリストの中身（メイン画面の中央と小窓で同じ部品）。行はチェックと1行の入力欄だけ。
+        Enter で下に足す（変換確定の Enter では足さない）・Tab / Shift+Tab で字下げ・空の行で Backspace で消す・↑↓で行を移る・Ctrl+Enter でチェック。
+        末尾に「＋ 項目を追加…」、下に「テンプレートとして保存」「捨てる」（全部チェックすると主ボタンになる）。
+    -->
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolVisibility" />
+        <templates:HasValueToVisibilityConverter x:Key="HasValue" />
+        <local:BoolToStyleConverter x:Key="DiscardStyle"
+                                    TrueStyle="{StaticResource PrimaryButtonStyle}"
+                                    FalseStyle="{StaticResource StandardButtonStyle}" />
+
+        <!-- 行の入れ物（選択の見た目は出さない。入力欄に直接打つので行そのものにはフォーカスを置かない） -->
+        <Style x:Key="ScratchRowContainerStyle" TargetType="ListBoxItem">
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="IsTabStop" Value="False" />
+            <Setter Property="Padding" Value="0" />
+            <!-- 右の 8px はスクロールバーの通り道（WPF-UI のスクロールバーは中身の上に重なるため） -->
+            <Setter Property="Margin" Value="0,0,8,0" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="Root" Background="Transparent" CornerRadius="{StaticResource RadiusRow}" Padding="8,0">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 項目の行: [字下げ][☑ 17][10][文字]。チェックした項目は取り消し線と薄い文字でその場に残す -->
+        <DataTemplate DataType="{x:Type local:ScratchItemViewModel}">
+            <Grid Height="34" Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border Width="{Binding Indent}" />
+                <CheckBox Grid.Column="1"
+                          Style="{StaticResource TaskCheckBoxStyle}"
+                          VerticalAlignment="Center"
+                          IsChecked="{Binding IsChecked}"
+                          AutomationProperties.Name="{Binding CheckName}" />
+                <TextBox x:Name="Editor"
+                         Grid.Column="2"
+                         Margin="10,0,0,0"
+                         Style="{StaticResource InlineTextBoxStyle}"
+                         VerticalAlignment="Center"
+                         MaxLength="500"
+                         input:ImeGuard.IsEnabled="True"
+                         Text="{Binding Text, UpdateSourceTrigger=PropertyChanged}"
+                         PreviewKeyDown="OnItemKeyDown"
+                         AutomationProperties.Name="項目" />
+            </Grid>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding IsChecked}" Value="True">
+                    <Setter TargetName="Editor" Property="Foreground" Value="{DynamicResource TextTertiaryBrush}" />
+                    <Setter TargetName="Editor" Property="TextDecorations" Value="Strikethrough" />
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+        <!-- 末尾の「＋ 項目を追加…」。打って Enter（か「追加」）で末尾に足し、欄はそのまま次を打てる -->
+        <DataTemplate DataType="{x:Type local:ScratchAddRow}">
+            <DockPanel Height="40">
+                <Button DockPanel.Dock="Right"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        MinHeight="0" Height="26" Padding="12,0" Margin="8,0,0,0"
+                        VerticalAlignment="Center"
+                        Focusable="False"
+                        Content="追加"
+                        AutomationProperties.AutomationId="ScratchAddButton"
+                        AutomationProperties.Name="入力した項目を追加"
+                        Command="{Binding DataContext.AddFromBoxCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                        Visibility="{Binding DataContext.HasAddText, RelativeSource={RelativeSource AncestorType=ListBox}, Converter={StaticResource BoolVisibility}}" />
+                <Grid VerticalAlignment="Center" Margin="-8,0,0,0">
+                    <TextBox x:Name="AddBox"
+                             Style="{StaticResource AddRowTextBoxStyle}"
+                             MaxLength="500"
+                             input:ImeGuard.IsEnabled="True"
+                             Text="{Binding DataContext.AddText, RelativeSource={RelativeSource AncestorType=ListBox}, UpdateSourceTrigger=PropertyChanged}"
+                             PreviewKeyDown="OnAddKeyDown"
+                             AutomationProperties.AutomationId="ScratchAddBox"
+                             AutomationProperties.Name="項目を追加" />
+                    <Path Style="{StaticResource IconPathStyle}"
+                          Data="{StaticResource IconAdd}"
+                          Stroke="{DynamicResource TextTertiaryBrush}"
+                          HorizontalAlignment="Left"
+                          VerticalAlignment="Center"
+                          Margin="9,0,0,0"
+                          IsHitTestVisible="False" />
+                    <TextBlock Margin="34,0,0,0"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource TextTertiaryBrush}"
+                               IsHitTestVisible="False"
+                               Text="項目を追加…">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource TextBodySmallStyle}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Text, ElementName=AddBox}" Value="">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+            </DockPanel>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- 行と末尾の入力行（ItemsSource はコードで項目と入力行をつないで入れる）。仮想化したまま中でスクロールする -->
+        <ListBox x:Name="RowList"
+                 Margin="12,4,4,0"
+                 Background="Transparent"
+                 BorderThickness="0"
+                 Focusable="False"
+                 ItemContainerStyle="{StaticResource ScratchRowContainerStyle}"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 ScrollViewer.CanContentScroll="True"
+                 VirtualizingPanel.IsVirtualizing="True"
+                 VirtualizingPanel.ScrollUnit="Pixel"
+                 KeyboardNavigation.TabNavigation="Continue"
+                 AutomationProperties.AutomationId="ScratchItems"
+                 AutomationProperties.Name="使い捨てリストの項目" />
+
+        <Border Grid.Row="1"
+                Padding="16,8,16,10"
+                BorderBrush="{DynamicResource StrokeDividerBrush}"
+                BorderThickness="0,1,0,0">
+            <StackPanel>
+                <TextBlock Style="{StaticResource TextCaptionStyle}"
+                           Margin="2,0,0,6"
+                           TextWrapping="Wrap"
+                           Text="{Binding Notice}"
+                           Visibility="{Binding Notice, Converter={StaticResource HasValue}}"
+                           AutomationProperties.AutomationId="ScratchNotice" />
+                <DockPanel>
+                    <Button DockPanel.Dock="Right"
+                            MinWidth="72"
+                            Content="捨てる"
+                            Style="{Binding IsAllChecked, Converter={StaticResource DiscardStyle}}"
+                            Command="{Binding DiscardCommand}"
+                            ToolTip="リストを捨てる（完了済みにも振り返りにも残りません）"
+                            AutomationProperties.AutomationId="ScratchDiscardButton"
+                            AutomationProperties.Name="捨てる" />
+                    <Button Style="{StaticResource TextButtonStyle}"
+                            HorizontalAlignment="Left"
+                            Padding="8,0"
+                            Command="{Binding SaveAsTemplateCommand}"
+                            ToolTip="今の項目（題名と階層）を新しいテンプレートにします"
+                            AutomationProperties.AutomationId="ScratchSaveTemplateButton"
+                            AutomationProperties.Name="テンプレートとして保存">
+                        <StackPanel Orientation="Horizontal">
+                            <Viewbox Width="14" Height="14" VerticalAlignment="Center">
+                                <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconTemplate}" Stroke="{DynamicResource TextSecondaryBrush}" />
+                            </Viewbox>
+                            <TextBlock Margin="7,0,0,0" VerticalAlignment="Center" Text="テンプレートとして保存" />
+                        </StackPanel>
+                    </Button>
+                </DockPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

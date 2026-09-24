@@ -1,0 +1,11 @@
+P:System.DateTime.Now;IClock.UtcNow を使う（CLAUDE.md 1.1）
+P:System.DateTime.Today;IClock.LocalToday() を使う（CLAUDE.md 1.1）
+P:System.DateTime.UtcNow;IClock.UtcNow を使う。SystemClock だけが例外（CLAUDE.md 1.1）
+M:System.DateTime.ToLocalTime;IClock.ToLocal() を使う（CLAUDE.md 1.1）
+M:System.DateTime.ToUniversalTime;IClock.ToUtc() を使う（CLAUDE.md 1.1）
+P:System.DateTimeOffset.Now;DateTimeOffset を使わない。IClock.UtcNow を使う（CLAUDE.md 1.1）
+P:System.DateTimeOffset.UtcNow;DateTimeOffset を使わない。IClock.UtcNow を使う（CLAUDE.md 1.1）
+P:System.TimeZoneInfo.Local;IClock.LocalTimeZone を使う（CLAUDE.md 1.1）
+M:System.Net.Http.HttpClient.#ctor;IHttpClientFactory を使う（CLAUDE.md 1.6）
+M:System.Net.Http.HttpClient.#ctor(System.Net.Http.HttpMessageHandler);IHttpClientFactory を使う（CLAUDE.md 1.6）
+M:System.Net.Http.HttpClient.#ctor(System.Net.Http.HttpMessageHandler,System.Boolean);IHttpClientFactory を使う（CLAUDE.md 1.6）

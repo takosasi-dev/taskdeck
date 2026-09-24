@@ -1,0 +1,89 @@
+<UserControl x:Class="TaskDeck.App.Views.Main.ToastHost"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:conv="clr-namespace:TaskDeck.App.Converters"
+             xmlns:vm="clr-namespace:TaskDeck.App.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance vm:ToastViewModel}">
+    <UserControl.Resources>
+        <conv:IconKeyToGeometryConverter x:Key="IconGeometry" />
+        <BooleanToVisibilityConverter x:Key="BoolVisibility" />
+
+        <!-- トーストの上のボタン（テーマに関わらず暗い地なので、ホバーは地を敷かず濃さで示す） -->
+        <Style x:Key="ToastButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource ToastForegroundBrush}" />
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
+            <Setter Property="FontSize" Value="{StaticResource TypeCaptionSize}" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisualRowStyle}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Root" Background="Transparent" CornerRadius="{StaticResource RadiusButton}" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Root" Property="Opacity" Value="0.75" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <!-- 取り消しトースト（S-08、UI 設計書 13.1）。高さ44・最大幅480・地は暗色、文字は白、「元に戻す」はアクセントの明るい版 -->
+    <Border x:Name="ToastRoot"
+            Background="{DynamicResource ToastBackgroundBrush}"
+            CornerRadius="6"
+            Height="44"
+            MinWidth="260"
+            MaxWidth="{StaticResource ToastMaxWidth}"
+            Padding="14,0,8,0"
+            AutomationProperties.Name="{Binding Message}"
+            AutomationProperties.LiveSetting="Polite"
+            MouseEnter="OnMouseEnterToast"
+            MouseLeave="OnMouseLeaveToast"
+            Visibility="{Binding IsOpen, Converter={StaticResource BoolVisibility}}">
+        <DockPanel LastChildFill="True">
+            <Path DockPanel.Dock="Left"
+                  Style="{StaticResource IconPathStyle}"
+                  Margin="0,0,12,0"
+                  VerticalAlignment="Center"
+                  Data="{Binding IconKey, Converter={StaticResource IconGeometry}}"
+                  Stroke="{DynamicResource ToastForegroundBrush}" />
+            <Button DockPanel.Dock="Right"
+                    Style="{StaticResource ToastButtonStyle}"
+                    Width="28" Height="28"
+                    Margin="4,0,0,0"
+                    Opacity="0.8"
+                    AutomationProperties.Name="閉じる"
+                    Command="{Binding CloseCommand}">
+                <Viewbox Width="10" Height="10">
+                    <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconClose}" Stroke="{DynamicResource ToastForegroundBrush}" />
+                </Viewbox>
+            </Button>
+            <Button DockPanel.Dock="Right"
+                    Style="{StaticResource ToastButtonStyle}"
+                    Height="28"
+                    Padding="12,0"
+                    Margin="12,0,0,0"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource ToastActionBrush}"
+                    Content="{Binding ActionLabel}"
+                    AutomationProperties.Name="{Binding ActionLabel}"
+                    Command="{Binding InvokeActionCommand}"
+                    Visibility="{Binding HasAction, Converter={StaticResource BoolVisibility}}" />
+            <TextBlock Style="{StaticResource TextBodySmallStyle}"
+                       VerticalAlignment="Center"
+                       TextTrimming="CharacterEllipsis"
+                       Foreground="{DynamicResource ToastForegroundBrush}"
+                       ToolTip="{Binding Message}"
+                       Text="{Binding Message}" />
+        </DockPanel>
+    </Border>
+</UserControl>

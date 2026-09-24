@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>TaskDeck.App</RootNamespace>
+    <AssemblyName>TaskDeck</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- exe のアイコン（波4-M。tools/IconGen で書き出す）。窓は Icon を指定しなければ exe のアイコンを使う -->
+    <ApplicationIcon>Assets\TaskDeck.ico</ApplicationIcon>
+    <!-- 配布（dotnet publish -c Release -r win-x64）は ReadyToRun にして起動時の JIT を減らす（設計メモの変えた点 #23） -->
+    <PublishReadyToRun Condition="'$(Configuration)' == 'Release'">true</PublishReadyToRun>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="CommunityToolkit.WinUI.Notifications" />
+    <PackageReference Include="Hardcodet.NotifyIcon.Wpf" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="Microsoft.Extensions.Http" />
+    <PackageReference Include="Serilog.Extensions.Hosting" />
+    <PackageReference Include="Serilog.Sinks.File" />
+    <PackageReference Include="WPF-UI" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TaskDeck.Core\TaskDeck.Core.csproj" />
+    <ProjectReference Include="..\TaskDeck.Data\TaskDeck.Data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="TaskDeck.Tests" />
+  </ItemGroup>
+
+</Project>

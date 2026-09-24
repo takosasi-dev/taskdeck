@@ -1,0 +1,223 @@
+<Window x:Class="TaskDeck.App.Views.Shortcuts.ShortcutsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:conv="clr-namespace:TaskDeck.App.Converters"
+        xmlns:input="clr-namespace:TaskDeck.App.Input"
+        xmlns:shortcuts="clr-namespace:TaskDeck.App.Views.Shortcuts"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance shortcuts:ShortcutsViewModel}"
+        Title="ショートカット一覧"
+        SizeToContent="WidthAndHeight"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ShowInTaskbar="False" ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        FontFamily="{StaticResource AppFontFamily}"
+        UseLayoutRounding="True"
+        PreviewKeyDown="OnPreviewKeyDown">
+    <!-- ショートカット一覧（S-12、UI 設計書 21）。幅 820・角丸 10・2列でカテゴリごとに見出しと区切り線・行の高さ 29 -->
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolVisibility" />
+        <conv:InverseBooleanToVisibilityConverter x:Key="InverseBoolVisibility" />
+
+        <!-- キー1つの枠（下辺 2px でキートップの厚み。コマンドパレットと ? だけアクセント系） -->
+        <DataTemplate DataType="{x:Type shortcuts:KeyToken}">
+            <Grid VerticalAlignment="Center">
+                <Border x:Name="Cap"
+                        Height="21"
+                        MinWidth="21"
+                        Padding="6,0"
+                        CornerRadius="4"
+                        BorderThickness="1,1,1,2"
+                        Background="{DynamicResource SurfaceSubtleBrush}"
+                        BorderBrush="{DynamicResource StrokeControlBrush}"
+                        Visibility="{Binding IsCap, Converter={StaticResource BoolVisibility}}">
+                    <TextBlock x:Name="CapText"
+                               Style="{StaticResource TextBaseStyle}"
+                               FontFamily="{StaticResource KeyCapFontFamily}"
+                               FontSize="{StaticResource TypeLabelSize}"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Text="{Binding Text}" />
+                </Border>
+                <TextBlock Style="{StaticResource TextBaseStyle}"
+                           Margin="4,0"
+                           FontSize="10"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource TextDisabledBrush}"
+                           Text="{Binding Text}"
+                           Visibility="{Binding IsCap, Converter={StaticResource InverseBoolVisibility}}" />
+            </Grid>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding IsAccent}" Value="True">
+                    <Setter TargetName="Cap" Property="Background" Value="{DynamicResource SurfaceSelectedBrush}" />
+                    <Setter TargetName="Cap" Property="BorderBrush" Value="{DynamicResource SurfaceSelectedStrokeBrush}" />
+                    <Setter TargetName="CapText" Property="Foreground" Value="{DynamicResource AccentDefaultBrush}" />
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+        <!-- 1行（動作名は左、キーは右寄せ。設定で変えられるものは鉛筆を添える） -->
+        <DataTemplate DataType="{x:Type shortcuts:ShortcutRow}">
+            <DockPanel Height="29" Visibility="{Binding IsVisible, Converter={StaticResource BoolVisibility}}">
+                <ItemsControl DockPanel.Dock="Right" ItemsSource="{Binding Keys}" Focusable="False" VerticalAlignment="Center">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+                <Viewbox DockPanel.Dock="Right"
+                         Width="12" Height="12"
+                         Margin="0,0,8,0"
+                         VerticalAlignment="Center"
+                         Visibility="{Binding IsEditable, Converter={StaticResource BoolVisibility}}">
+                    <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconEdit}" Stroke="{DynamicResource TextDisabledBrush}" />
+                </Viewbox>
+                <TextBlock Style="{StaticResource TextBodySmallStyle}"
+                           VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis"
+                           Text="{Binding Action}" />
+            </DockPanel>
+        </DataTemplate>
+
+        <!-- カテゴリ（見出し＋区切り線＋行） -->
+        <DataTemplate DataType="{x:Type shortcuts:ShortcutCategory}">
+            <StackPanel Margin="0,0,0,16" Visibility="{Binding IsVisible, Converter={StaticResource BoolVisibility}}">
+                <DockPanel Margin="0,0,0,6">
+                    <TextBlock x:Name="Header"
+                               Style="{StaticResource TextLabelStyle}"
+                               Foreground="{DynamicResource TextTertiaryBrush}"
+                               Text="{Binding Title}" />
+                    <Border Height="1" Margin="7,0,0,0" VerticalAlignment="Center" Background="{DynamicResource StrokeDividerBrush}" />
+                </DockPanel>
+                <ItemsControl ItemsSource="{Binding Rows}" Focusable="False" />
+                <TextBlock Style="{StaticResource TextCaptionStyle}"
+                           Margin="0,4,0,0"
+                           FontSize="{StaticResource TypeLabelSize}"
+                           Foreground="{DynamicResource TextTertiaryBrush}"
+                           TextWrapping="Wrap"
+                           Text="{Binding Note}"
+                           Visibility="{Binding HasNote, Converter={StaticResource BoolVisibility}}" />
+            </StackPanel>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding IsAccent}" Value="True">
+                    <Setter TargetName="Header" Property="Foreground" Value="{DynamicResource AccentDefaultBrush}" />
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+        <!-- 右上の閉じる -->
+        <Style x:Key="CloseButtonStyle" TargetType="Button" BasedOn="{StaticResource IconButtonStyle}">
+            <Setter Property="Width" Value="30" />
+            <Setter Property="Height" Value="30" />
+        </Style>
+    </Window.Resources>
+
+    <Border Style="{StaticResource PopupShadowStyle}" CornerRadius="11">
+        <Border Style="{StaticResource PopupSurfaceStyle}" Width="820" CornerRadius="{StaticResource RadiusDialog}">
+            <DockPanel>
+                <!-- 見出し（アイコン・題名・探す欄・閉じる） -->
+                <Border DockPanel.Dock="Top" Height="60" BorderBrush="{DynamicResource StrokeDividerBrush}" BorderThickness="0,0,0,1">
+                    <DockPanel Margin="20,0,15,0">
+                        <Viewbox DockPanel.Dock="Left" Width="20" Height="20" VerticalAlignment="Center">
+                            <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconKeyboard}" />
+                        </Viewbox>
+                        <Button DockPanel.Dock="Right"
+                                Style="{StaticResource CloseButtonStyle}"
+                                Margin="14,0,0,0"
+                                VerticalAlignment="Center"
+                                AutomationProperties.Name="閉じる"
+                                Click="OnCloseClick">
+                            <Viewbox Width="11" Height="11">
+                                <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconClose}" Stroke="{DynamicResource TextSecondaryBrush}" />
+                            </Viewbox>
+                        </Button>
+                        <Grid DockPanel.Dock="Right" Width="200" Height="30" VerticalAlignment="Center">
+                            <TextBox x:Name="SearchBox"
+                                     Style="{StaticResource InputTextBoxStyle}"
+                                     MinHeight="0"
+                                     Height="30"
+                                     Padding="29,0,8,0"
+                                     FontSize="{StaticResource TypeCaptionSize}"
+                                     input:ImeGuard.IsEnabled="True"
+                                     AutomationProperties.AutomationId="ShortcutSearch"
+                                     AutomationProperties.Name="ショートカットを動作で絞り込む"
+                                     TextChanged="OnSearchTextChanged" />
+                            <Viewbox Width="13" Height="13" Margin="9,0,0,0" HorizontalAlignment="Left" IsHitTestVisible="False">
+                                <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconSearch}" Stroke="{DynamicResource TextTertiaryBrush}" />
+                            </Viewbox>
+                            <TextBlock x:Name="SearchPlaceholder"
+                                       Style="{StaticResource TextCaptionStyle}"
+                                       Margin="30,0,0,0"
+                                       VerticalAlignment="Center"
+                                       IsHitTestVisible="False"
+                                       Foreground="{DynamicResource TextTertiaryBrush}"
+                                       Text="動作で絞り込む" />
+                        </Grid>
+                        <TextBlock Style="{StaticResource TextSubtitleStyle}"
+                                   Margin="14,0,0,0"
+                                   VerticalAlignment="Center"
+                                   TextWrapping="NoWrap"
+                                   Text="キーボードショートカット" />
+                    </DockPanel>
+                </Border>
+
+                <!-- フッタ -->
+                <Border DockPanel.Dock="Bottom"
+                        Height="44"
+                        Background="{DynamicResource SurfaceSubtleBrush}"
+                        BorderBrush="{DynamicResource StrokeDividerBrush}"
+                        BorderThickness="0,1,0,0"
+                        CornerRadius="0,0,9,9">
+                    <DockPanel Margin="20,0">
+                        <TextBlock DockPanel.Dock="Right" Style="{StaticResource TextCaptionStyle}" FontSize="{StaticResource TypeLabelSize}" VerticalAlignment="Center">
+                            <Run Text="どこにいても " /><Run FontFamily="{StaticResource KeyCapFontFamily}" FontWeight="SemiBold" Text="?" /><Run Text=" でこの一覧が出ます" />
+                        </TextBlock>
+                        <Viewbox Width="13" Height="13" Margin="0,0,10,0" VerticalAlignment="Center">
+                            <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconEdit}" Stroke="{DynamicResource TextDisabledBrush}" />
+                        </Viewbox>
+                        <TextBlock Style="{StaticResource TextCaptionStyle}"
+                                   FontSize="{StaticResource TypeLabelSize}"
+                                   VerticalAlignment="Center"
+                                   Text="鉛筆のついたものは設定から変更できます" />
+                    </DockPanel>
+                </Border>
+
+                <!--
+                    本体（2列）。画面が低いときは窓の高さを作業領域で止めて、ここでスクロールする。
+                    ponytail: 中の一覧は合わせて 40 行ほどの固定の表なので、仮想化の要らない ScrollViewer で包む（件数が増える表ではない）
+                -->
+                <ScrollViewer x:Name="BodyScroll" Focusable="False" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                <Grid Margin="20,18,20,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <ItemsControl Grid.Column="0" ItemsSource="{Binding LeftColumn}" Focusable="False" AutomationProperties.AutomationId="ShortcutsLeft" />
+                    <Border Grid.Column="1"
+                            Width="1"
+                            Margin="14,0,14,16"
+                            Background="{DynamicResource StrokeDividerBrush}"
+                            Visibility="{Binding HasResults, Converter={StaticResource BoolVisibility}}" />
+                    <ItemsControl Grid.Column="2" ItemsSource="{Binding RightColumn}" Focusable="False" AutomationProperties.AutomationId="ShortcutsRight" />
+                    <StackPanel Grid.ColumnSpan="3"
+                                Margin="0,4,0,16"
+                                Visibility="{Binding HasResults, Converter={StaticResource InverseBoolVisibility}}">
+                        <TextBlock Style="{StaticResource TextBodySmallStyle}"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   AutomationProperties.AutomationId="ShortcutsEmpty"
+                                   Text="当たるショートカットはありません" />
+                        <TextBlock Style="{StaticResource TextCaptionStyle}"
+                                   Margin="0,4,0,0"
+                                   Foreground="{DynamicResource TextTertiaryBrush}"
+                                   Text="キーではなく、したいこと（「削除」「複製」「検索」など）で探せます" />
+                    </StackPanel>
+                </Grid>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+    </Border>
+</Window>

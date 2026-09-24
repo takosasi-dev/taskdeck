@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>TaskDeck 初回起動</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body { margin: 0; font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; background: #ffffff; }
+input[type="checkbox"] { accent-color: #0067c0; }
+</style>
+</helmet>
+<div style="width: 1280px; height: 700px; box-sizing: border-box; padding: 32px 40px; background: #ffffff; color: #1a1a1a; display: flex; flex-direction: column; gap: 18px; overflow: hidden;">
+
+  <div>
+    <h1 style="margin: 0 0 3px 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em;">初回起動</h1>
+    <p style="margin: 0; font-size: 12px; color: #5d5d5d;">読ませるチュートリアルは読まれない。3 画面すべてで、実際に手を動かしてもらう。</p>
+  </div>
+
+  <div style="flex-grow: 1; display: flex; gap: 20px; min-height: 0;">
+
+    <div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; border-radius: 10px; background: #ffffff; border: 1px solid #d6d6d6; box-shadow: 0 10px 28px rgba(0,0,0,0.10); overflow: hidden;">
+      <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 28px; gap: 16px;">
+        <svg width="72" height="72" viewBox="0 0 256 256" fill="none">
+          <rect x="56" y="26" width="144" height="42" rx="17" fill="#0067c0" opacity="0.30"/>
+          <rect x="41" y="48" width="174" height="42" rx="19" fill="#0067c0" opacity="0.55"/>
+          <rect x="25" y="72" width="206" height="158" rx="46" fill="#0067c0"/>
+          <path d="M78 152 L110 184 L178 108" stroke="#ffffff" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div style="text-align: center;">
+          <div style="font-size: 20px; font-weight: 600; letter-spacing: -0.01em;">TaskDeck へようこそ</div>
+          <div style="margin-top: 8px; font-size: 13px; color: #5d5d5d; line-height: 1.75;">設定することはありません。<br>30 秒だけ、2 つの操作を試してください。</div>
+        </div>
+      </div>
+      <div style="flex-shrink: 0; padding: 0 24px 22px 24px; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+        <button type="button" style="width: 100%; height: 36px; font-size: 14px; font-weight: 500; font-family: inherit; color: #ffffff; background: #0067c0; border: 1px solid #0058a8; border-radius: 5px; cursor: pointer;">はじめる</button>
+        <a href="#skip" style="font-size: 12px; color: #5d5d5d; text-decoration: none;">スキップして使い始める</a>
+      </div>
+      <div style="flex-shrink: 0; height: 34px; display: flex; align-items: center; justify-content: center; gap: 7px; background: #fbfbfb; border-top: 1px solid #f0f0f0;">
+        <span style="width: 18px; height: 5px; border-radius: 3px; background: #0067c0;"></span>
+        <span style="width: 5px; height: 5px; border-radius: 3px; background: #d6d6d6;"></span>
+        <span style="width: 5px; height: 5px; border-radius: 3px; background: #d6d6d6;"></span>
+      </div>
+    </div>
+
+    <div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; border-radius: 10px; background: #ffffff; border: 1px solid #d6d6d6; box-shadow: 0 10px 28px rgba(0,0,0,0.10); overflow: hidden;">
+      <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 28px; gap: 18px;">
+        <div style="text-align: center;">
+          <div style="font-size: 18px; font-weight: 600;">覚えるのは、これ 1 つだけ</div>
+          <div style="margin-top: 7px; font-size: 13px; color: #5d5d5d; line-height: 1.7;">どのアプリを使っていても、<br>この 3 キーでタスクを足せます。</div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 7px;">
+          <span style="display: inline-flex; align-items: center; justify-content: center; height: 40px; padding: 0 13px; border-radius: 7px; background: #f6f6f6; border: 1px solid #d6d6d6; border-bottom-width: 3px; font-family: Consolas, monospace; font-size: 14px;">Ctrl</span>
+          <span style="font-size: 12px; color: #a8a8a8;">+</span>
+          <span style="display: inline-flex; align-items: center; justify-content: center; height: 40px; padding: 0 13px; border-radius: 7px; background: #f6f6f6; border: 1px solid #d6d6d6; border-bottom-width: 3px; font-family: Consolas, monospace; font-size: 14px;">Shift</span>
+          <span style="font-size: 12px; color: #a8a8a8;">+</span>
+          <span style="display: inline-flex; align-items: center; justify-content: center; height: 40px; padding: 0 20px; border-radius: 7px; background: #f6f6f6; border: 1px solid #d6d6d6; border-bottom-width: 3px; font-family: Consolas, monospace; font-size: 14px;">Space</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 9px; height: 34px; padding: 0 16px; border-radius: 17px; background: #eff6fc; border: 1px solid #cfe4f7;">
+          <span style="width: 8px; height: 8px; border-radius: 50%; background: #0067c0;"></span>
+          <span style="font-size: 12px; color: #0058a8; font-weight: 500;">いま押してみてください</span>
+        </div>
+      </div>
+      <div style="flex-shrink: 0; padding: 0 24px 22px 24px; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+        <button type="button" disabled style="width: 100%; height: 36px; font-size: 14px; font-family: inherit; color: #a8a8a8; background: #f4f4f4; border: 1px solid #e5e5e5; border-radius: 5px;">押されるまで待っています</button>
+        <a href="#skip2" style="font-size: 12px; color: #5d5d5d; text-decoration: none;">キーが効かない・別のキーにしたい</a>
+      </div>
+      <div style="flex-shrink: 0; height: 34px; display: flex; align-items: center; justify-content: center; gap: 7px; background: #fbfbfb; border-top: 1px solid #f0f0f0;">
+        <span style="width: 5px; height: 5px; border-radius: 3px; background: #d6d6d6;"></span>
+        <span style="width: 18px; height: 5px; border-radius: 3px; background: #0067c0;"></span>
+        <span style="width: 5px; height: 5px; border-radius: 3px; background: #d6d6d6;"></span>
+      </div>
+    </div>
+
+    <div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; border-radius: 10px; background: #ffffff; border: 1px solid #d6d6d6; box-shadow: 0 10px 28px rgba(0,0,0,0.10); overflow: hidden;">
+      <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 26px 24px; gap: 16px;">
+        <div style="text-align: center;">
+          <div style="font-size: 18px; font-weight: 600;">日付も、そのまま書けます</div>
+          <div style="margin-top: 7px; font-size: 13px; color: #5d5d5d; line-height: 1.7;">「明日」「来週月曜」のように書くと、<br>期限として読み取ります。</div>
+        </div>
+
+        <div style="width: 100%; border-radius: 8px; background: #fbfbfb; border: 1px solid #d6d6d6; overflow: hidden;">
+          <div style="display: flex; align-items: center; gap: 9px; height: 44px; padding: 0 13px;">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#0067c0" stroke-width="1.7" stroke-linecap="round" style="flex-shrink: 0;"><path d="M8 3v10M3 8h10"/></svg>
+            <span style="flex-grow: 1; font-size: 14px; color: #1a1a1a;">ゴミを出す <span style="color: #0067c0;">明日</span><span style="display: inline-block; width: 1.5px; height: 17px; background: #1a1a1a; margin-left: 1px; vertical-align: -3px;"></span></span>
+          </div>
+          <div style="height: 1px; background: #ededed;"></div>
+          <div style="display: flex; align-items: center; gap: 7px; height: 38px; padding: 0 13px; background: #f4f4f4;">
+            <div style="display: flex; align-items: center; gap: 5px; height: 24px; padding: 0 9px; border-radius: 12px; background: #ffffff; border: 1px solid #d6d6d6;">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#5d5d5d" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M2 6.5h12M5.5 1.6v2.4M10.5 1.6v2.4"/></svg>
+              <span style="font-size: 11px;">9/23（水）</span>
+            </div>
+            <span style="font-size: 11px; color: #6e6e6e;">と読み取りました</span>
+          </div>
+        </div>
+
+        <div style="font-size: 11px; color: #6e6e6e; line-height: 1.7; text-align: center;">読み取れなくても、<strong style="font-weight: 600; color: #1a1a1a;">入力が消えることはありません</strong>。<br>そのままタイトルになります。</div>
+      </div>
+      <div style="flex-shrink: 0; padding: 0 24px 22px 24px; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+        <button type="button" style="width: 100%; height: 36px; font-size: 14px; font-weight: 500; font-family: inherit; color: #ffffff; background: #0067c0; border: 1px solid #0058a8; border-radius: 5px; cursor: pointer;">Enter で登録して、使い始める</button>
+        <span style="font-size: 12px; color: #6e6e6e;">あとで見返すときは <strong style="font-family: Consolas, monospace; font-weight: 600;">?</strong> キー</span>
+      </div>
+      <div style="flex-shrink: 0; height: 34px; display: flex; align-items: center; justify-content: center; gap: 7px; background: #fbfbfb; border-top: 1px solid #f0f0f0;">
+        <span style="width: 5px; height: 5px; border-radius: 3px; background: #d6d6d6;"></span>
+        <span style="width: 5px; height: 5px; border-radius: 3px; background: #d6d6d6;"></span>
+        <span style="width: 18px; height: 5px; border-radius: 3px; background: #0067c0;"></span>
+      </div>
+    </div>
+  </div>
+
+  <div style="flex-shrink: 0; display: flex; gap: 14px;">
+    <div style="flex-grow: 1; padding: 11px 14px; border-radius: 6px; background: #f6f6f6; border: 1px solid #ededed;">
+      <div style="font-size: 11px; font-weight: 600; margin-bottom: 4px;">アカウント登録を求めない</div>
+      <div style="font-size: 11px; color: #5d5d5d; line-height: 1.7;">同期は Phase 5 の任意機能。初回に登録を挟むと、そこで脱落する。</div>
+    </div>
+    <div style="flex-grow: 1; padding: 11px 14px; border-radius: 6px; background: #f6f6f6; border: 1px solid #ededed;">
+      <div style="font-size: 11px; font-weight: 600; margin-bottom: 4px;">サンプルタスクは 3 件だけ入れる</div>
+      <div style="font-size: 11px; color: #5d5d5d; line-height: 1.7;">空の画面は何をすべきか分からない。ただし多いと消す手間になるので 3 件。</div>
+    </div>
+    <div style="flex-grow: 1; padding: 11px 14px; border-radius: 6px; background: #f6f6f6; border: 1px solid #ededed;">
+      <div style="font-size: 11px; font-weight: 600; margin-bottom: 4px;">2 枚目は押されるまで進まない</div>
+      <div style="font-size: 11px; color: #5d5d5d; line-height: 1.7;">ホットキーは他アプリと衝突しうる。ここで実際に押させることが、動作確認を兼ねる。</div>
+    </div>
+    <div style="flex-grow: 1; padding: 11px 14px; border-radius: 6px; background: #f6f6f6; border: 1px solid #ededed;">
+      <div style="font-size: 11px; font-weight: 600; margin-bottom: 4px;">いつでも抜けられる</div>
+      <div style="font-size: 11px; color: #5d5d5d; line-height: 1.7;">全画面にスキップを置く。強制的に読ませる導線は印象を悪くするだけ。</div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":700}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

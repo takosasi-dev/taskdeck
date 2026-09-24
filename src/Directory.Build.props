@@ -1,0 +1,8 @@
+<Project>
+  <!-- src 配下のプロジェクトだけに禁止APIの検査を付ける（テストは HttpClient のモック等で使うため除外） -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" PrivateAssets="all" />
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)..\BannedSymbols.txt" />
+  </ItemGroup>
+</Project>

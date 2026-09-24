@@ -1,0 +1,94 @@
+<UserControl x:Class="TaskDeck.App.Settings.Pages.NotificationsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:settings="clr-namespace:TaskDeck.App.Settings"
+             xmlns:input="clr-namespace:TaskDeck.App.Input">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Settings/SettingsResources.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <BooleanToVisibilityConverter x:Key="BoolVisibility" />
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <StackPanel>
+        <TextBlock Style="{StaticResource SettingsTitleStyle}" Text="通知" />
+
+        <Border Style="{StaticResource SettingsNoticeStyle}" Margin="0,0,0,10"
+                Visibility="{Binding HasDevNote, Converter={StaticResource BoolVisibility}}">
+            <TextBlock Style="{StaticResource SettingsNoticeTextStyle}" Text="{Binding DevNote}" />
+        </Border>
+
+        <settings:SettingsCard Icon="{StaticResource IconBell}"
+                               Title="通知を出す"
+                               Description="リマインドの時刻に Windows の通知で知らせます。TaskDeck を前に出しているときは画面の下に出します">
+            <ui:ToggleSwitch VerticalAlignment="Center" IsChecked="{Binding Enabled}"
+                             AutomationProperties.Name="通知を出す" />
+        </settings:SettingsCard>
+
+        <settings:SettingsCard Icon="{StaticResource IconBell}"
+                               Title="通知を一時停止する"
+                               Description="{Binding PauseDescription}"
+                               IsEnabled="{Binding Enabled}">
+            <Button Style="{StaticResource SettingsButtonStyle}"
+                    Content="{Binding PauseButtonLabel}"
+                    Command="{Binding TogglePauseCommand}"
+                    AutomationProperties.AutomationId="PauseButton" />
+        </settings:SettingsCard>
+
+        <settings:SettingsCard Icon="{StaticResource IconToday}"
+                               Title="今日のまとめを出す"
+                               Description="朝に「今日の予定」をまとめて知らせます"
+                               IsEnabled="{Binding Enabled}">
+            <StackPanel Orientation="Horizontal">
+                <TextBox Style="{StaticResource InputTextBoxStyle}"
+                         Width="72" MinHeight="30"
+                         Margin="0,0,10,0"
+                         Typography.NumeralAlignment="Tabular"
+                         input:ImeGuard.IsEnabled="True"
+                         Text="{Binding DailySummaryTime, UpdateSourceTrigger=LostFocus}"
+                         AutomationProperties.Name="今日のまとめの時刻" />
+                <ui:ToggleSwitch VerticalAlignment="Center" IsChecked="{Binding DailySummaryEnabled}"
+                                 AutomationProperties.Name="今日のまとめを出す" />
+            </StackPanel>
+        </settings:SettingsCard>
+
+        <settings:SettingsCard Icon="{StaticResource IconReminder}"
+                               Title="既定のリマインド時刻"
+                               Description="日付だけの期限に通知を付けたとき、この時刻を基準にします"
+                               IsEnabled="{Binding Enabled}">
+            <TextBox Style="{StaticResource InputTextBoxStyle}"
+                     Width="72" MinHeight="30"
+                     Typography.NumeralAlignment="Tabular"
+                     input:ImeGuard.IsEnabled="True"
+                     Text="{Binding DefaultReminderTime, UpdateSourceTrigger=LostFocus}"
+                     AutomationProperties.Name="既定のリマインド時刻" />
+        </settings:SettingsCard>
+
+        <settings:SettingsCard Icon="{StaticResource IconDuration}"
+                               Title="スヌーズの間隔"
+                               Description="通知の「〇分後に再通知」を押したときに、もう一度出すまでの時間"
+                               IsEnabled="{Binding Enabled}">
+            <ComboBox Style="{StaticResource SettingsComboBoxStyle}"
+                      Width="140"
+                      ItemsSource="{Binding SnoozeChoices}"
+                      SelectedIndex="{Binding SnoozeIndex}"
+                      AutomationProperties.Name="スヌーズの間隔" />
+        </settings:SettingsCard>
+
+        <settings:SettingsCard Icon="{StaticResource IconWarning}"
+                               Title="期限切れを知らせる"
+                               Description="期限を過ぎたタスクがあるとき、1日1回まとめて知らせます"
+                               IsEnabled="{Binding Enabled}">
+            <ui:ToggleSwitch VerticalAlignment="Center" IsChecked="{Binding OverdueNoticeEnabled}"
+                             AutomationProperties.Name="期限切れを知らせる" />
+        </settings:SettingsCard>
+
+        <TextBlock Margin="4,10,0,0"
+                   Style="{StaticResource TextCaptionStyle}"
+                   Foreground="{DynamicResource StateOverdueBrush}"
+                   Text="{Binding TimeProblem}" />
+    </StackPanel>
+</UserControl>

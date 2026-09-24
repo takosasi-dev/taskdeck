@@ -1,0 +1,322 @@
+<UserControl x:Class="TaskDeck.App.Controls.Pickers.DatePickerPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:input="clr-namespace:TaskDeck.App.Input"
+             x:Name="Root">
+    <!--
+        日付ピッカー（UI 設計書 12.1、モックアップ Pickers.dc.html）。カレンダーを先頭に置かない。
+        1. クイック選択（右端に実日付を併記） 2. 月カレンダー 3. 時刻を追加／期限を消す
+        面の幅は 296（外側は影の余白の分だけ大きい。Popups.xaml）。
+    -->
+    <UserControl.Resources>
+        <Style x:Key="QuickRowStyle" TargetType="Button" BasedOn="{StaticResource ListRowButtonStyle}" />
+        <Style x:Key="QuickIconStyle" TargetType="Path" BasedOn="{StaticResource IconPathStyle}">
+            <Setter Property="Width" Value="15" />
+            <Setter Property="Height" Value="15" />
+            <Setter Property="Stretch" Value="Uniform" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Stroke" Value="{DynamicResource TextSecondaryBrush}" />
+        </Style>
+        <Style x:Key="QuickLabelStyle" TargetType="TextBlock" BasedOn="{StaticResource TextBodySmallStyle}">
+            <Setter Property="Grid.Column" Value="1" />
+            <Setter Property="Margin" Value="10,0,0,0" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="QuickDateStyle" TargetType="TextBlock" BasedOn="{StaticResource TabularCaptionStyle}">
+            <Setter Property="Grid.Column" Value="2" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <!-- 月の切替（24×24 のアイコンボタン） -->
+        <Style x:Key="MonthNavButtonStyle" TargetType="Button" BasedOn="{StaticResource IconButtonStyle}">
+            <Setter Property="Width" Value="24" />
+            <Setter Property="Height" Value="24" />
+        </Style>
+        <Style x:Key="MonthNavIconStyle" TargetType="Path" BasedOn="{StaticResource IconPathStyle}">
+            <Setter Property="Width" Value="11" />
+            <Setter Property="Height" Value="11" />
+            <Setter Property="Stretch" Value="Uniform" />
+            <Setter Property="StrokeThickness" Value="1.7" />
+        </Style>
+
+        <!-- 曜日の見出し（日曜は赤、土曜はアクセント、ほかは Text.Tertiary） -->
+        <Style x:Key="WeekdayStyle" TargetType="TextBlock" BasedOn="{StaticResource TextBaseStyle}">
+            <Setter Property="FontSize" Value="10" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="0,3" />
+            <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Day}" Value="Sunday">
+                    <Setter Property="Foreground" Value="{DynamicResource StateOverdueBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Day}" Value="Saturday">
+                    <Setter Property="Foreground" Value="{DynamicResource AccentDefaultBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!--
+            日のセル（高さ 26、7列を均等割）。選択中の日はアクセント地の丸、今日はアクセントの輪。
+            日曜・祝日は赤、土曜はアクセント、前後の月の日は Text.Disabled（数字の色は Style のトリガーで決める。
+            テンプレートのトリガーより Style のトリガーが優先されるため）。
+        -->
+        <Style x:Key="DayButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="{StaticResource CalendarCellHeight}" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
+            <Setter Property="FontSize" Value="{StaticResource TypeCaptionSize}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+            <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
+            <Setter Property="FocusVisualStyle" Value="{StaticResource AppFocusVisualStyle}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid Background="Transparent">
+                            <Ellipse x:Name="Mark" Width="24" Height="24" Fill="Transparent" StrokeThickness="1" />
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Mark" Property="Fill" Value="{DynamicResource SurfaceHoverBrush}" />
+                            </Trigger>
+                            <DataTrigger Binding="{Binding IsToday}" Value="True">
+                                <Setter TargetName="Mark" Property="Stroke" Value="{DynamicResource AccentDefaultBrush}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                <Setter TargetName="Mark" Property="Fill" Value="{DynamicResource AccentDefaultBrush}" />
+                                <Setter TargetName="Mark" Property="Stroke" Value="{DynamicResource AccentDefaultBrush}" />
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding DayOfWeek}" Value="Sunday">
+                    <Setter Property="Foreground" Value="{DynamicResource StateOverdueBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsHoliday}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource StateOverdueBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding DayOfWeek}" Value="Saturday">
+                    <Setter Property="Foreground" Value="{DynamicResource AccentDefaultBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsOtherMonth}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource TextDisabledBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsToday}" Value="True">
+                    <Setter Property="FontWeight" Value="SemiBold" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource TextOnAccentBrush}" />
+                    <Setter Property="FontWeight" Value="SemiBold" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Border Style="{StaticResource PopupShadowStyle}">
+        <Border Style="{StaticResource PopupSurfaceStyle}" Width="{StaticResource PopupWidth}">
+            <StackPanel>
+                <TextBlock Style="{StaticResource PopupHeaderStyle}" Text="期限を設定" />
+                <Border Style="{StaticResource PopupSeparatorStyle}" />
+
+                <!-- 1. クイック選択（↑↓ で移動、Enter で決定） -->
+                <StackPanel x:Name="QuickRows" Margin="0,4" KeyboardNavigation.DirectionalNavigation="Contained">
+                    <Button Style="{StaticResource QuickRowStyle}" Click="OnToday" AutomationProperties.Name="期限を今日にする">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Path Style="{StaticResource QuickIconStyle}" Data="{StaticResource IconToday}" Stroke="{DynamicResource AccentDefaultBrush}" />
+                            <TextBlock Style="{StaticResource QuickLabelStyle}" Text="今日" />
+                            <TextBlock x:Name="TodayLabel" Style="{StaticResource QuickDateStyle}" />
+                        </Grid>
+                    </Button>
+                    <Button Style="{StaticResource QuickRowStyle}" Click="OnTomorrow" AutomationProperties.Name="期限を明日にする">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Path Style="{StaticResource QuickIconStyle}" Data="{StaticResource IconArrowRight}" />
+                            <TextBlock Style="{StaticResource QuickLabelStyle}" Text="明日" />
+                            <TextBlock x:Name="TomorrowLabel" Style="{StaticResource QuickDateStyle}" />
+                        </Grid>
+                    </Button>
+                    <Button Style="{StaticResource QuickRowStyle}" Click="OnWeekend" AutomationProperties.Name="期限を今週末にする">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Path Style="{StaticResource QuickIconStyle}" Data="{StaticResource IconCalendar}" />
+                            <TextBlock Style="{StaticResource QuickLabelStyle}" Text="今週末" />
+                            <TextBlock x:Name="WeekendLabel" Style="{StaticResource QuickDateStyle}" />
+                        </Grid>
+                    </Button>
+                    <Button Style="{StaticResource QuickRowStyle}" Click="OnNextWeek" AutomationProperties.Name="期限を来週の月曜にする">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Path Style="{StaticResource QuickIconStyle}" Data="{StaticResource IconArrowRightLong}" />
+                            <TextBlock Style="{StaticResource QuickLabelStyle}" Text="来週（月）" />
+                            <TextBlock x:Name="NextWeekLabel" Style="{StaticResource QuickDateStyle}" />
+                        </Grid>
+                    </Button>
+                    <Button Style="{StaticResource QuickRowStyle}" Click="OnNextMonth" AutomationProperties.Name="期限を来月の1日にする">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Path Style="{StaticResource QuickIconStyle}" Data="{StaticResource IconCalendarDay}" />
+                            <TextBlock Style="{StaticResource QuickLabelStyle}" Text="来月" />
+                            <TextBlock x:Name="NextMonthLabel" Style="{StaticResource QuickDateStyle}" />
+                        </Grid>
+                    </Button>
+                    <Button Style="{StaticResource QuickRowStyle}" Click="OnNextBusinessDay" AutomationProperties.Name="期限を次の営業日にする">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Path Style="{StaticResource QuickIconStyle}" Data="{StaticResource IconBriefcase}" />
+                            <TextBlock Style="{StaticResource QuickLabelStyle}" Text="次の営業日" />
+                            <TextBlock x:Name="BusinessDayLabel" Style="{StaticResource QuickDateStyle}" />
+                        </Grid>
+                    </Button>
+                </StackPanel>
+
+                <Border Style="{StaticResource PopupSeparatorStyle}" />
+
+                <!-- 2. 月カレンダー（矢印で日を移動、PageUp/PageDown で月、Enter で決定） -->
+                <Grid Margin="12,8,12,2">
+                    <Button Style="{StaticResource MonthNavButtonStyle}" HorizontalAlignment="Left"
+                            Click="OnPreviousMonth" AutomationProperties.Name="前の月">
+                        <Path Style="{StaticResource MonthNavIconStyle}" Data="{StaticResource IconChevronLeft}" />
+                    </Button>
+                    <TextBlock x:Name="MonthLabel"
+                               Style="{StaticResource TextBaseStyle}"
+                               FontSize="{StaticResource TypeCaptionSize}"
+                               FontWeight="SemiBold"
+                               Typography.NumeralAlignment="Tabular"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <Button Style="{StaticResource MonthNavButtonStyle}" HorizontalAlignment="Right"
+                            Click="OnNextMonthPage" AutomationProperties.Name="次の月">
+                        <Path Style="{StaticResource MonthNavIconStyle}" Data="{StaticResource IconChevronRight}" />
+                    </Button>
+                </Grid>
+
+                <ItemsControl x:Name="WeekdayRow" Margin="12,2,12,0" Focusable="False" IsTabStop="False">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="7" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Style="{StaticResource WeekdayStyle}" Text="{Binding Name}" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- 日の並び（最大 42 個なので仮想化は要らない。Tab では選択中の日（無ければ今日・月初）に1回だけ止まり、中は矢印で動く） -->
+                <ItemsControl x:Name="DaysList"
+                              Margin="12,0,12,8"
+                              Focusable="False"
+                              IsTabStop="False"
+                              KeyboardNavigation.TabNavigation="Once"
+                              KeyboardNavigation.DirectionalNavigation="None"
+                              PreviewKeyDown="OnDaysKeyDown">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="7" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Style="{StaticResource DayButtonStyle}"
+                                    Content="{Binding Text}"
+                                    Tag="{Binding Date}"
+                                    IsTabStop="{Binding IsTabStop}"
+                                    Click="OnDayClick"
+                                    ToolTip="{Binding HolidayName}"
+                                    AutomationProperties.Name="{Binding AccessibleName}" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <Border Style="{StaticResource PopupSeparatorStyle}" />
+
+                <!-- 3. 時刻（「時刻を追加」を押して初めて出す） -->
+                <Grid x:Name="TimeRow" Margin="12,8,12,0" Visibility="Collapsed">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Style="{StaticResource TextCaptionStyle}" VerticalAlignment="Center" Text="時刻" />
+                    <TextBox x:Name="TimeBox"
+                             Grid.Column="1"
+                             Style="{StaticResource InputTextBoxStyle}"
+                             Margin="10,0,0,0"
+                             Width="76"
+                             MinHeight="28"
+                             Typography.NumeralAlignment="Tabular"
+                             input:ImeGuard.IsEnabled="True"
+                             PreviewKeyDown="OnTimeKeyDown"
+                             LostFocus="OnTimeLostFocus"
+                             AutomationProperties.Name="時刻（HH:mm）。Enter で決定" />
+                    <TextBlock x:Name="TimeHint" Grid.Column="2"
+                               Style="{StaticResource TextCaptionStyle}"
+                               Margin="8,0,0,0"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource TextTertiaryBrush}"
+                               Text="HH:mm" />
+                </Grid>
+
+                <!-- 下部の操作 -->
+                <Grid Margin="12,8,12,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Button x:Name="AddTimeButton"
+                            Style="{StaticResource StandardButtonStyle}"
+                            MinHeight="28"
+                            Padding="10,0"
+                            FontSize="{StaticResource TypeCaptionSize}"
+                            AutomationProperties.Name="{Binding Text, ElementName=AddTimeLabel}"
+                            Click="OnAddTime">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Style="{StaticResource IconPathStyle}"
+                                  Data="{StaticResource IconReminder}"
+                                  Width="13" Height="13" Stretch="Uniform"
+                                  VerticalAlignment="Center"
+                                  Stroke="{DynamicResource TextPrimaryBrush}" />
+                            <TextBlock x:Name="AddTimeLabel" Margin="6,0,0,0" VerticalAlignment="Center" Text="時刻を追加" />
+                        </StackPanel>
+                    </Button>
+                    <Button Grid.Column="2"
+                            Style="{StaticResource TextButtonStyle}"
+                            MinHeight="28"
+                            FontSize="{StaticResource TypeCaptionSize}"
+                            Foreground="{DynamicResource TextSecondaryBrush}"
+                            Click="OnClear"
+                            Content="期限を消す" />
+                </Grid>
+            </StackPanel>
+        </Border>
+    </Border>
+</UserControl>

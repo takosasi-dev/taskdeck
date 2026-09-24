@@ -1,0 +1,172 @@
+<UserControl x:Class="TaskDeck.App.Views.DataTools.ImportExportPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:TaskDeck.App.Views.DataTools"
+             mc:Ignorable="d"
+             d:DesignWidth="720">
+    <!--
+        設定画面「データ」ページのインポート／エクスポートのカード（UI 設計書 17・F-104〜F-106）。
+        カードの中に3つの操作を並べ、処理中の進み具合と結果をカードの下に出す。
+        中身の DataContext は ImportExportViewModel（DI から取る。UserControl 自身の DataContext は触らない）。
+    -->
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="VisibleWhenTrue" />
+
+        <Style x:Key="CardIconStyle" TargetType="Viewbox">
+            <Setter Property="Width" Value="20" />
+            <Setter Property="Height" Value="20" />
+            <Setter Property="Margin" Value="0,0,14,0" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="CardTitleStyle" TargetType="TextBlock" BasedOn="{StaticResource TextBodySmallStyle}">
+            <Setter Property="FontWeight" Value="Medium" />
+        </Style>
+        <Style x:Key="CardDescriptionStyle" TargetType="TextBlock" BasedOn="{StaticResource TextCaptionStyle}">
+            <Setter Property="FontSize" Value="{StaticResource TypeLabelSize}" />
+            <Setter Property="Margin" Value="0,2,0,0" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style x:Key="CardButtonStyle" TargetType="Button" BasedOn="{StaticResource StandardButtonStyle}">
+            <Setter Property="MinWidth" Value="104" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="ModeRadioStyle" TargetType="RadioButton" BasedOn="{StaticResource {x:Type RadioButton}}">
+            <Setter Property="FontSize" Value="{StaticResource TypeCaptionSize}" />
+            <Setter Property="Margin" Value="0,0,20,0" />
+            <Setter Property="MinWidth" Value="0" />
+        </Style>
+    </UserControl.Resources>
+
+    <Border x:Name="Root"
+            d:DataContext="{d:DesignInstance local:ImportExportViewModel}"
+            Background="{DynamicResource SettingsCardBrush}"
+            BorderBrush="{DynamicResource StrokeDividerBrush}"
+            BorderThickness="1"
+            CornerRadius="{StaticResource RadiusRow}">
+        <StackPanel>
+            <!-- JSON で書き出す（F-104） -->
+            <Grid Margin="16,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Viewbox Style="{StaticResource CardIconStyle}">
+                    <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconExport}" />
+                </Viewbox>
+                <StackPanel Grid.Column="1" Margin="0,0,16,0" VerticalAlignment="Center">
+                    <TextBlock Style="{StaticResource CardTitleStyle}" Text="JSON で書き出す" />
+                    <TextBlock Style="{StaticResource CardDescriptionStyle}"
+                               Text="タスク（ゴミ箱を含む）・プロジェクト・タグ・繰り返し・テンプレートを1つのファイルにします。別の PC への引っ越しにも使えます" />
+                </StackPanel>
+                <Button Grid.Column="2" Style="{StaticResource CardButtonStyle}" Content="書き出す…" AutomationProperties.Name="JSON で書き出す" IsEnabled="{Binding IsIdle}" Click="OnExportJson" />
+            </Grid>
+
+            <Border Height="1" Background="{DynamicResource StrokeDividerBrush}" />
+
+            <!-- JSON を読み込む（F-105） -->
+            <Grid Margin="16,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Viewbox Style="{StaticResource CardIconStyle}">
+                    <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconImport}" />
+                </Viewbox>
+                <StackPanel Grid.Column="1" Margin="0,0,16,0" VerticalAlignment="Center">
+                    <TextBlock Style="{StaticResource CardTitleStyle}" Text="JSON を読み込む" />
+                    <TextBlock Style="{StaticResource CardDescriptionStyle}"
+                               Text="TaskDeck で書き出したファイルを読み込みます。置換は今のデータを消して入れ替えます（直前の状態はバックアップに残します）" />
+                    <StackPanel Orientation="Horizontal" Margin="0,6,0,0" IsEnabled="{Binding IsIdle}">
+                        <RadioButton Style="{StaticResource ModeRadioStyle}" GroupName="ImportMode" Content="追加" ToolTip="今のデータの後ろに足します。同じ名前のタグ・プロジェクトは今あるものにまとめます" IsChecked="{Binding IsAppendMode}" />
+                        <RadioButton Style="{StaticResource ModeRadioStyle}" GroupName="ImportMode" Content="置換" ToolTip="今のデータをすべて消して、ファイルの中身に入れ替えます" IsChecked="{Binding IsReplaceMode}" />
+                    </StackPanel>
+                </StackPanel>
+                <Button Grid.Column="2" Style="{StaticResource CardButtonStyle}" Content="読み込む…" AutomationProperties.Name="JSON を読み込む" IsEnabled="{Binding IsIdle}" Click="OnImportJson" />
+            </Grid>
+
+            <Border Height="1" Background="{DynamicResource StrokeDividerBrush}" />
+
+            <!-- 表示中の一覧を CSV で書き出す（F-106） -->
+            <Grid Margin="16,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Viewbox Style="{StaticResource CardIconStyle}">
+                    <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource IconTable}" />
+                </Viewbox>
+                <StackPanel Grid.Column="1" Margin="0,0,16,0" VerticalAlignment="Center">
+                    <TextBlock Style="{StaticResource CardTitleStyle}" Text="表示中の一覧を CSV で書き出す" />
+                    <TextBlock Style="{StaticResource CardDescriptionStyle}"
+                               Text="メイン画面の一覧を、見えている条件と並びのまま書き出します（Excel で開けます）" />
+                </StackPanel>
+                <Button Grid.Column="2" Style="{StaticResource CardButtonStyle}" Content="書き出す…" AutomationProperties.Name="表示中の一覧を CSV で書き出す" IsEnabled="{Binding IsIdle}" Click="OnExportCsv" />
+            </Grid>
+
+            <!-- 進み具合と結果 -->
+            <Border BorderBrush="{DynamicResource StrokeDividerBrush}"
+                    BorderThickness="0,1,0,0"
+                    Padding="16,10,16,12"
+                    Visibility="{Binding ShowStatus, Converter={StaticResource VisibleWhenTrue}}">
+                <StackPanel>
+                    <Grid Visibility="{Binding IsBusy, Converter={StaticResource VisibleWhenTrue}}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Style="{StaticResource TabularCaptionStyle}" VerticalAlignment="Center" Text="{Binding ProgressText}" />
+                        <Button Grid.Column="1" Style="{StaticResource TextButtonStyle}" MinHeight="24" Padding="10,0" Content="中止" Command="{Binding CancelCommand}" />
+                        <ProgressBar Grid.Row="1"
+                                     Grid.ColumnSpan="2"
+                                     Height="4"
+                                     Margin="0,6,0,0"
+                                     Minimum="0"
+                                     Maximum="100"
+                                     Value="{Binding ProgressValue, Mode=OneWay}"
+                                     IsIndeterminate="{Binding IsProgressIndeterminate}"
+                                     AutomationProperties.Name="進み具合" />
+                    </Grid>
+                    <DockPanel Visibility="{Binding HasStatusMessage, Converter={StaticResource VisibleWhenTrue}}">
+                        <Viewbox DockPanel.Dock="Left" Width="14" Height="14" Margin="0,2,8,0" VerticalAlignment="Top">
+                            <Path>
+                                <Path.Style>
+                                    <Style TargetType="Path" BasedOn="{StaticResource IconPathStyle}">
+                                        <Setter Property="Data" Value="{StaticResource IconCheckCircle}" />
+                                        <Setter Property="Stroke" Value="{DynamicResource StateSuccessBrush}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsStatusError}" Value="True">
+                                                <Setter Property="Data" Value="{StaticResource IconWarning}" />
+                                                <Setter Property="Stroke" Value="{DynamicResource StateOverdueBrush}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Path.Style>
+                            </Path>
+                        </Viewbox>
+                        <TextBlock x:Name="StatusText" TextWrapping="Wrap" Text="{Binding StatusMessage}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource TextCaptionStyle}">
+                                    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsStatusError}" Value="True">
+                                            <Setter Property="Foreground" Value="{DynamicResource StateOverdueBrush}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </DockPanel>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </Border>
+</UserControl>

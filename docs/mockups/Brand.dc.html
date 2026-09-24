@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>TaskDeck アイコンと起動画面</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body { margin: 0; font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; background: #ffffff; }
+</style>
+</helmet>
+<div style="width: 1280px; height: 980px; box-sizing: border-box; padding: 36px 40px; background: #ffffff; color: #1a1a1a; display: flex; flex-direction: column; gap: 26px; overflow: hidden;">
+
+  <div>
+    <h1 style="margin: 0 0 3px 0; font-size: 24px; font-weight: 600; letter-spacing: -0.01em;">アイコンと起動画面</h1>
+    <p style="margin: 0; font-size: 12px; color: #5d5d5d;">起動画面は 0.5 秒しか見えない。だからこそ、要素を足さず1つの動きで見せる。</p>
+  </div>
+
+  <div style="display: flex; gap: 24px;">
+
+    <div style="flex-shrink: 0;">
+      <div style="font-size: 11px; font-weight: 600; color: #6e6e6e; letter-spacing: 0.03em; margin-bottom: 10px;">起動画面 480 × 320（実寸）</div>
+      <div style="width: 480px; height: 320px; box-sizing: border-box; border-radius: 12px; background: #14161a; position: relative; overflow: hidden; box-shadow: 0 14px 40px rgba(0,0,0,0.30);">
+
+        <div style="position: absolute; left: 0; right: 0; top: 78px; display: flex; justify-content: center;">
+          <svg width="76" height="76" viewBox="0 0 256 256" fill="none">
+            <rect x="56" y="26" width="144" height="42" rx="17" fill="#ffffff" opacity="0.14"/>
+            <rect x="41" y="48" width="174" height="42" rx="19" fill="#ffffff" opacity="0.26"/>
+            <rect x="25" y="72" width="206" height="158" rx="46" fill="#0067c0"/>
+            <rect x="25" y="72" width="206" height="158" rx="46" fill="#ffffff" opacity="0.07"/>
+            <path d="M78 152 L110 184 L178 108" stroke="#ffffff" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+        <div style="position: absolute; left: 0; right: 0; top: 186px; text-align: center; font-size: 26px; font-weight: 600; color: #ffffff; letter-spacing: -0.01em;">TaskDeck</div>
+        <div style="position: absolute; left: 0; right: 0; top: 222px; text-align: center; font-size: 12px; color: #7a8089; letter-spacing: 0.04em;">思いついた速さで、片付ける</div>
+
+        <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: #22262c;">
+          <div style="width: 34%; height: 100%; margin-left: 22%; background: #0067c0;"></div>
+        </div>
+        <div style="position: absolute; right: 14px; bottom: 12px; font-size: 10px; color: #4a4f57; font-family: Consolas, monospace;">1.0.0</div>
+      </div>
+      <div style="margin-top: 8px; font-size: 11px; color: #6e6e6e; line-height: 1.7;">背景は真っ黒（#000）にしない。<span style="font-family: Consolas, monospace;">#14161A</span> のわずかに青を含んだ黒にすると、縁が沈まず、アクセントの青も濁らない。</div>
+    </div>
+
+    <div style="flex-grow: 1; min-width: 0;">
+      <div style="font-size: 11px; font-weight: 600; color: #6e6e6e; letter-spacing: 0.03em; margin-bottom: 10px;">起動の動き — 500ms で完結、動くのは1要素ずつ</div>
+
+      <div style="border: 1px solid #e5e5e5; border-radius: 8px; padding: 16px 18px;">
+
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding-left: 116px;">
+          <span style="flex-grow: 1; font-size: 10px; color: #8a8a8a; font-family: Consolas, monospace;">0</span>
+          <span style="flex-grow: 1; font-size: 10px; color: #8a8a8a; font-family: Consolas, monospace;">150</span>
+          <span style="flex-grow: 1; font-size: 10px; color: #8a8a8a; font-family: Consolas, monospace;">300</span>
+          <span style="flex-grow: 1; font-size: 10px; color: #8a8a8a; font-family: Consolas, monospace;">450</span>
+          <span style="width: 34px; font-size: 10px; color: #8a8a8a; font-family: Consolas, monospace; text-align: right;">600ms</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px; height: 34px;">
+          <span style="width: 104px; flex-shrink: 0; font-size: 12px; text-align: right;">カードの層</span>
+          <div style="flex-grow: 1; height: 22px; border-radius: 4px; background: #f4f4f4; position: relative;">
+            <div style="position: absolute; left: 0%; width: 25%; top: 0; bottom: 0; border-radius: 4px; background: #0067c0; display: flex; align-items: center; padding-left: 8px;"><span style="font-size: 10px; color: #ffffff;">不透明度 0→1 ・ 拡大 0.94→1</span></div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px; height: 34px;">
+          <span style="width: 104px; flex-shrink: 0; font-size: 12px; text-align: right;">チェック</span>
+          <div style="flex-grow: 1; height: 22px; border-radius: 4px; background: #f4f4f4; position: relative;">
+            <div style="position: absolute; left: 17%; width: 50%; top: 0; bottom: 0; border-radius: 4px; background: #0e7c5a; display: flex; align-items: center; padding-left: 8px;"><span style="font-size: 10px; color: #ffffff;">線が描かれる（StrokeDashOffset）</span></div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px; height: 34px;">
+          <span style="width: 104px; flex-shrink: 0; font-size: 12px; text-align: right;">ロゴ</span>
+          <div style="flex-grow: 1; height: 22px; border-radius: 4px; background: #f4f4f4; position: relative;">
+            <div style="position: absolute; left: 42%; width: 25%; top: 0; bottom: 0; border-radius: 4px; background: #8764b8; display: flex; align-items: center; padding-left: 8px;"><span style="font-size: 10px; color: #ffffff;">下から 4px ＋ フェード</span></div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px; height: 34px;">
+          <span style="width: 104px; flex-shrink: 0; font-size: 12px; text-align: right;">タグライン</span>
+          <div style="flex-grow: 1; height: 22px; border-radius: 4px; background: #f4f4f4; position: relative;">
+            <div style="position: absolute; left: 58%; width: 17%; top: 0; bottom: 0; border-radius: 4px; background: #c2417a; display: flex; align-items: center; padding-left: 8px;"><span style="font-size: 10px; color: #ffffff;">フェード</span></div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px; height: 34px;">
+          <span style="width: 104px; flex-shrink: 0; font-size: 12px; text-align: right;">進捗バー</span>
+          <div style="flex-grow: 1; height: 22px; border-radius: 4px; background: #f4f4f4; position: relative;">
+            <div style="position: absolute; left: 8%; right: 12%; top: 0; bottom: 0; border-radius: 4px; background: repeating-linear-gradient(90deg, #8a6d00 0 10px, #a07f00 10px 20px); display: flex; align-items: center; padding-left: 8px;"><span style="font-size: 10px; color: #ffffff;">左右にループ（読み込み完了まで）</span></div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px; height: 34px;">
+          <span style="width: 104px; flex-shrink: 0; font-size: 12px; text-align: right;">全体を閉じる</span>
+          <div style="flex-grow: 1; height: 22px; border-radius: 4px; background: #f4f4f4; position: relative;">
+            <div style="position: absolute; right: 0; width: 17%; top: 0; bottom: 0; border-radius: 4px; background: #5d5d5d; display: flex; align-items: center; justify-content: center;"><span style="font-size: 10px; color: #ffffff;">100ms でフェード</span></div>
+          </div>
+        </div>
+
+        <div style="margin-top: 14px; padding: 10px 12px; border-radius: 5px; background: #eff6fc; border: 1px solid #cfe4f7;">
+          <div style="font-size: 11px; color: #1a1a1a; line-height: 1.8;"><strong style="font-weight: 600;">各要素が独立してフェードする設計にする理由。</strong>DB の読み込みが速く終われば、チェックが描き切る前に起動画面が消える。途中で切れても不自然に見えないよう、要素ごとに完結したアニメーションにして、連鎖させない。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 24px;">
+
+    <div style="flex-grow: 1; min-width: 0;">
+      <div style="font-size: 11px; font-weight: 600; color: #6e6e6e; letter-spacing: 0.03em; margin-bottom: 10px;">アイコンのサイズ展開</div>
+      <div style="border: 1px solid #e5e5e5; border-radius: 8px; padding: 18px; display: flex; align-items: flex-end; gap: 30px;">
+
+        <div style="text-align: center;">
+          <svg width="128" height="128" viewBox="0 0 256 256" fill="none">
+            <rect x="56" y="26" width="144" height="42" rx="17" fill="#0067c0" opacity="0.30"/>
+            <rect x="41" y="48" width="174" height="42" rx="19" fill="#0067c0" opacity="0.55"/>
+            <rect x="25" y="72" width="206" height="158" rx="46" fill="#0067c0"/>
+            <path d="M78 152 L110 184 L178 108" stroke="#ffffff" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <div style="margin-top: 8px; font-size: 11px; color: #5d5d5d; font-family: Consolas, monospace;">256 / 128</div>
+          <div style="font-size: 10px; color: #8a8a8a;">3層すべて</div>
+        </div>
+
+        <div style="text-align: center;">
+          <svg width="48" height="48" viewBox="0 0 256 256" fill="none">
+            <rect x="48" y="38" width="160" height="44" rx="18" fill="#0067c0" opacity="0.45"/>
+            <rect x="25" y="66" width="206" height="164" rx="48" fill="#0067c0"/>
+            <path d="M76 150 L110 184 L180 106" stroke="#ffffff" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <div style="margin-top: 8px; font-size: 11px; color: #5d5d5d; font-family: Consolas, monospace;">48</div>
+          <div style="font-size: 10px; color: #8a8a8a;">2層に減らす</div>
+        </div>
+
+        <div style="text-align: center;">
+          <svg width="32" height="32" viewBox="0 0 256 256" fill="none">
+            <rect x="48" y="38" width="160" height="44" rx="18" fill="#0067c0" opacity="0.45"/>
+            <rect x="25" y="66" width="206" height="164" rx="48" fill="#0067c0"/>
+            <path d="M74 150 L110 186 L182 104" stroke="#ffffff" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <div style="margin-top: 8px; font-size: 11px; color: #5d5d5d; font-family: Consolas, monospace;">32</div>
+          <div style="font-size: 10px; color: #8a8a8a;">線を太く</div>
+        </div>
+
+        <div style="text-align: center;">
+          <svg width="16" height="16" viewBox="0 0 256 256" fill="none">
+            <rect x="20" y="20" width="216" height="216" rx="54" fill="#0067c0"/>
+            <path d="M72 132 L110 172 L186 92" stroke="#ffffff" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <div style="margin-top: 8px; font-size: 11px; color: #5d5d5d; font-family: Consolas, monospace;">16</div>
+          <div style="font-size: 10px; color: #8a8a8a;">層を省く</div>
+        </div>
+
+        <div style="flex-grow: 1; padding-left: 10px; border-left: 1px solid #f0f0f0;">
+          <div style="font-size: 11px; color: #5d5d5d; line-height: 1.85;">
+            <strong style="color: #1a1a1a; font-weight: 600;">小さくするほど要素を減らす。</strong><br>
+            256pxでは3層のカードが重なって「デッキ」が読める。48pxで2層、16pxでは層を捨てて角丸四角とチェックだけにし、そのぶん線を太く、角丸を大きくする。<br><br>
+            縮小して潰れるのは、同じ絵を機械的に縮めたときだけ。サイズごとに別の絵として描く。
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 24px;">
+
+    <div style="width: 420px; flex-shrink: 0;">
+      <div style="font-size: 11px; font-weight: 600; color: #6e6e6e; letter-spacing: 0.03em; margin-bottom: 10px;">構成グリッド（256px 基準）</div>
+      <div style="border: 1px solid #e5e5e5; border-radius: 8px; padding: 16px; display: flex; gap: 18px; align-items: center;">
+        <div style="position: relative; width: 168px; height: 168px; flex-shrink: 0;">
+          <svg width="168" height="168" viewBox="0 0 256 256" fill="none" style="position: absolute; inset: 0;">
+            <rect x="0.5" y="0.5" width="255" height="255" fill="none" stroke="#e0e0e0" stroke-width="1"/>
+            <rect x="25" y="25" width="206" height="206" fill="none" stroke="#c2417a" stroke-width="1.5" stroke-dasharray="5 4"/>
+            <circle cx="128" cy="128" r="103" fill="none" stroke="#c2417a" stroke-width="1" stroke-dasharray="5 4" opacity="0.5"/>
+            <rect x="56" y="26" width="144" height="42" rx="17" fill="#0067c0" opacity="0.30"/>
+            <rect x="41" y="48" width="174" height="42" rx="19" fill="#0067c0" opacity="0.55"/>
+            <rect x="25" y="72" width="206" height="158" rx="46" fill="#0067c0"/>
+            <path d="M78 152 L110 184 L178 108" stroke="#ffffff" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div style="flex-grow: 1; font-size: 11px; color: #5d5d5d; line-height: 1.9;">
+          <div style="display: flex; gap: 8px;"><span style="width: 58px; color: #8a8a8a;">余白</span><span>四辺 25px（9.8%）</span></div>
+          <div style="display: flex; gap: 8px;"><span style="width: 58px; color: #8a8a8a;">角丸</span><span>46px（本体幅の 22%）</span></div>
+          <div style="display: flex; gap: 8px;"><span style="width: 58px; color: #8a8a8a;">層の間隔</span><span>22px・24px</span></div>
+          <div style="display: flex; gap: 8px;"><span style="width: 58px; color: #8a8a8a;">層の濃度</span><span>30% / 55% / 100%</span></div>
+          <div style="display: flex; gap: 8px;"><span style="width: 58px; color: #8a8a8a;">チェック</span><span>線幅 24px、端は丸</span></div>
+          <div style="display: flex; gap: 8px;"><span style="width: 58px; color: #8a8a8a;">配色</span><span style="font-family: Consolas, monospace;">#0067C0</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="flex-grow: 1; min-width: 0;">
+      <div style="font-size: 11px; font-weight: 600; color: #6e6e6e; letter-spacing: 0.03em; margin-bottom: 10px;">タスクトレイ — 単色シルエット、状態で色だけ変える</div>
+      <div style="border: 1px solid #e5e5e5; border-radius: 8px; padding: 16px 18px; display: flex; gap: 26px; align-items: center;">
+
+        <div style="text-align: center;">
+          <div style="width: 52px; height: 52px; border-radius: 8px; background: #2b2b2b; display: flex; align-items: center; justify-content: center;">
+            <svg width="22" height="22" viewBox="0 0 16 16" fill="none" stroke="#ffffff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.6 8.4 6 11.8 13.4 4.4"/></svg>
+          </div>
+          <div style="margin-top: 7px; font-size: 10px; color: #5d5d5d;">通常</div>
+        </div>
+
+        <div style="text-align: center;">
+          <div style="position: relative; width: 52px; height: 52px; border-radius: 8px; background: #2b2b2b; display: flex; align-items: center; justify-content: center;">
+            <svg width="22" height="22" viewBox="0 0 16 16" fill="none" stroke="#ffffff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.6 8.4 6 11.8 13.4 4.4"/></svg>
+            <span style="position: absolute; top: 6px; right: 5px; display: inline-flex; align-items: center; justify-content: center; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: #0067c0; color: #ffffff; font-size: 10px; font-weight: 700;">7</span>
+          </div>
+          <div style="margin-top: 7px; font-size: 10px; color: #5d5d5d;">未完了あり</div>
+        </div>
+
+        <div style="text-align: center;">
+          <div style="position: relative; width: 52px; height: 52px; border-radius: 8px; background: #2b2b2b; display: flex; align-items: center; justify-content: center;">
+            <svg width="22" height="22" viewBox="0 0 16 16" fill="none" stroke="#ffffff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.6 8.4 6 11.8 13.4 4.4"/></svg>
+            <span style="position: absolute; top: 6px; right: 5px; display: inline-flex; align-items: center; justify-content: center; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: #c42b1c; color: #ffffff; font-size: 10px; font-weight: 700;">2</span>
+          </div>
+          <div style="margin-top: 7px; font-size: 10px; color: #5d5d5d;">期限切れあり</div>
+        </div>
+
+        <div style="text-align: center;">
+          <div style="width: 52px; height: 52px; border-radius: 8px; background: #2b2b2b; display: flex; align-items: center; justify-content: center;">
+            <svg width="22" height="22" viewBox="0 0 16 16" fill="none" stroke="#6e6e6e" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.6 8.4 6 11.8 13.4 4.4"/><path d="M1.6 1.6 14.4 14.4" stroke="#6e6e6e"/></svg>
+          </div>
+          <div style="margin-top: 7px; font-size: 10px; color: #5d5d5d;">通知を停止中</div>
+        </div>
+
+        <div style="flex-grow: 1; padding-left: 12px; border-left: 1px solid #f0f0f0; font-size: 11px; color: #5d5d5d; line-height: 1.85;">
+          トレイではアプリアイコンをそのまま縮めない。<strong style="color: #1a1a1a; font-weight: 600;">Windows のトレイは単色シルエットが作法</strong>で、色付きアイコンは他と揃わず浮く。<br>
+          バッジの色だけで状態を伝える：青＝未完了あり、赤＝期限切れあり、0件ならバッジなし。
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":980}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
