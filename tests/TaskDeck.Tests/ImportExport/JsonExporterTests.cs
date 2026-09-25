@@ -28,7 +28,7 @@ public sealed class JsonExporterTests : IDisposable
             ["formatVersion", "exportedAt", "appVersion", "projects", "tags", "recurrenceRules", "tasks", "taskTags", "templates", "templateItems"],
             root.EnumerateObject().Select(p => p.Name));
         Assert.Equal("2026-09-22T01:00:00Z", root.GetProperty("exportedAt").GetString());
-        Assert.Equal("0.1.0", root.GetProperty("appVersion").GetString());
+        Assert.Equal(typeof(JsonExporter).Assembly.GetName().Version?.ToString(3), root.GetProperty("appVersion").GetString());   // 3桁（0.1.1 など）
         Assert.All(Timestamps(root), value => Assert.EndsWith("Z", value, StringComparison.Ordinal));
         Assert.NotEmpty(Timestamps(root));
 

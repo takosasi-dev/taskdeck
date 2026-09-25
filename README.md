@@ -10,7 +10,7 @@
 - 動作環境: Windows 10 / 11（x64）。配布版は .NET を同梱した exe 1本で、別途インストールは要りません
 - データはすべて手元の PC に保存します（アカウント登録なし・同期なし）
 - ダウンロード: [Releases](https://github.com/takosasi-dev/taskdeck/releases) の `TaskDeck.exe`。置いた場所から起動するだけです（コード署名はしていないので、初回は SmartScreen の「詳細情報」→「実行」）
-- 開発の状況: v0.1.0 はプレリリースです（実機での確認を続けています）
+- 開発の状況: プレリリースの段階です（実機での確認を続けています）
 
 ## 使い方の流れ
 
@@ -125,7 +125,7 @@ dotnet test TaskDeck.slnx
 $env:TASKDECK_DATA_DIR = "$PWD\.devdata\mine"; dotnet run --project src/TaskDeck.App
 
 # 配布用の exe 1本を dist\ に作る
-dotnet publish src/TaskDeck.App -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:DebugType=none -o dist
+dotnet publish src/TaskDeck.App -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=none -o dist
 ```
 
 開発用フォルダ（`TASKDECK_DATA_DIR`）では、自動起動を登録せず、ホットキーは `TASKDECK_DEV_HOTKEYS=1`、Windows の通知は `TASKDECK_DEV_TOASTS=1` のときだけ使います。その他の確認用の入口は `docs/INTERFACES.md` の 5.8〜5.10 にあります。
@@ -134,12 +134,12 @@ dotnet publish src/TaskDeck.App -c Release -r win-x64 --self-contained -p:Publis
 
 | 項目 | 目標（NFR） | 実測 |
 |---|---|---|
-| 起動（プロセス開始 → メイン画面の最初の描画） | 2.0 秒 | 2.2 秒（配布版。2回目以降の起動の中央値。起動画面は約 1.3 秒で出る）。exe を圧縮しない発行では 1.7 秒 |
+| 起動（プロセス開始 → メイン画面の最初の描画） | 2.0 秒 | 1.4 秒（配布版。2回目以降の起動の中央値。起動画面は約 0.4 秒で出る）。exe を圧縮した発行では 1.9 秒 |
 
 起動画面は専用のスレッドで描き、その間に DB の準備（スレッドプール）とメイン画面の組み立て（UI スレッド）を並べます（内訳はログの「起動の内訳」に毎回出ます）。
 DB は EF のコンパイル済みモデルを使い、最初のクエリの組み立てはメモリ上の空の DB で先に温めます。詳細ペイン・カレンダー・振り返りは初めて出すときに作り、
 トレイ・通知・ホットキーの登録と、DB の更新が無い起動のバックアップは画面を出してから行います。
-配布版は ReadyToRun・圧縮ありの単一 exe（約 110MB）です。圧縮しない発行（`-p:EnableCompressionInSingleFile=false`、約 285MB）は展開が無いぶん速くなります。
+配布版は ReadyToRun・圧縮なしの単一 exe（約 285MB）です。圧縮する発行（`-p:EnableCompressionInSingleFile=true`）は約 110MB になりますが、起動のたびに展開するぶん 0.5 秒ほど遅くなります（2つを交互に起動して測った値。PC が混んでいる時間帯は、どちらも 0.3〜0.4 秒遅くなります）。
 
 ## 設計の資料
 

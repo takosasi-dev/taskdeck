@@ -24,7 +24,7 @@ $env:TASKDECK_DATA_DIR = "$PWD\.devdata\mine"; dotnet run --project src/TaskDeck
 # 性能を見るときは、新しい開発用フォルダで1万件入れて初回起動する
 $env:TASKDECK_DATA_DIR = "$PWD\.devdata\10k"; $env:TASKDECK_DEV_SEED = "10000"; dotnet run --project src/TaskDeck.App
 # 配布物（dist\TaskDeck.exe 1本）。main に統合したら毎回作り直す
-dotnet publish src/TaskDeck.App -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:DebugType=none -o dist
+dotnet publish src/TaskDeck.App -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=none -o dist
 ```
 
 ---
